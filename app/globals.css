@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+@theme inline {
+  --color-navy: #123C69;
+  --color-navy-light: #1E56A0;
+  --color-blue-light: #C7D2E3;
+  --color-bg-light: #F4F7FB;
+  --color-orange: #f28e2b;
+  --color-background: var(--color-bg-light);
+  --color-foreground: #171717;
+  --font-sans: var(--font-roboto);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  background: #F4F7FB;
+  color: #0f172a;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
