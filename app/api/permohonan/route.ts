@@ -223,7 +223,20 @@ export async function POST(request: NextRequest) {
         delete textData[field];
       }
     }
-    const { id, tiket, kodeTiket } = await generateId(jenisLayanan);
+
+    let id: string, tiket: string, kodeTiket: string;
+    try {
+      const generated = await generateId(jenisLayanan);
+      id = generated.id;
+      tiket = generated.tiket;
+      kodeTiket = generated.kodeTiket;
+    } catch (genError) {
+      console.error("Generate ID error:", genError);
+      return NextResponse.json(
+        { success: false, error: "Gagal membuat ID pengajuan. Periksa koneksi ke Google Sheets." },
+        { status: 500 },
+      );
+    }
 
     const sheetName = getSheetName(jenisLayanan)!;
     const rowData = buildRowData(
@@ -234,16 +247,37 @@ export async function POST(request: NextRequest) {
       kodeTiket,
       jenisLayanan,
     );
-    await appendRow(sheetName, rowData);
 
-    const monitoringRow = buildMonitoringRow(textData, id, jenisLayanan);
-    await appendRow("Monitoring", monitoringRow);
+    try {
+      await appendRow(sheetName, rowData);
+    } catch (sheetError) {
+      console.error("Append row error:", sheetError);
+      return NextResponse.json(
+        { success: false, error: "Gagal menyimpan data ke Google Sheets. Periksa konfigurasi spreadsheet." },
+        { status: 500 },
+      );
+    }
+
+    try {
+      const monitoringRow = buildMonitoringRow(textData, id, jenisLayanan);
+      await appendRow("Monitoring", monitoringRow);
+    } catch (monError) {
+      console.error("Append monitoring error:", monError);
+      return NextResponse.json(
+        { success: false, error: "Data tersimpan sebagian. Hubungi administrator." },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ success: true, id_pengajuan: id });
   } catch (error) {
     console.error("Permohonan error:", error);
+    const message =
+      error instanceof TypeError
+        ? "Format data tidak sesuai"
+        : "Gagal mengirim permohonan";
     return NextResponse.json(
-      { success: false, error: "Gagal mengirim permohonan" },
+      { success: false, error: message },
       { status: 500 },
     );
   }

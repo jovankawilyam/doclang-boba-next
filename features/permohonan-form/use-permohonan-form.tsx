@@ -262,7 +262,15 @@ export const usePermohonanForm = () => {
 
       let fileUrlByField: Record<string, string> = {};
       if (fileEntries.length > 0) {
-        const result = await startUpload(fileEntries.map((e) => e.file));
+        let result;
+        try {
+          result = await startUpload(fileEntries.map((e) => e.file));
+        } catch (uploadError) {
+          setServerErrors(["Gagal mengunggah berkas. Periksa konfigurasi UploadThing atau koneksi internet Anda."]);
+          setUploadingFiles(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
         if (!result) {
           setServerErrors(["Gagal mengunggah berkas. Coba lagi."]);
           setUploadingFiles(false);
@@ -326,9 +334,13 @@ export const usePermohonanForm = () => {
       setUploadingFiles(false);
       setSuccessMessage("Permohonan berhasil dikirim. Notifikasi WhatsApp sedang diproses.");
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch {
+    } catch (err) {
       setUploadingFiles(false);
-      setServerErrors(["Permohonan gagal dikirim karena koneksi bermasalah. Silakan coba lagi."]);
+      const message =
+        err instanceof TypeError
+          ? "Gagal terhubung ke server. Periksa koneksi internet Anda."
+          : "Permohonan gagal dikirim. Silakan coba lagi.";
+      setServerErrors([message]);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
