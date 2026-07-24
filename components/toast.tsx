@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, XCircle, X } from "lucide-react";
 
 export type ToastData = {
@@ -12,14 +12,14 @@ export type ToastData = {
 export function useToast() {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
-  const toast = (type: ToastData["type"], message: string) => {
+  const toast = useCallback((type: ToastData["type"], message: string) => {
     const id = Math.random().toString(36).slice(2);
     setToasts((prev) => [...prev, { id, type, message }]);
-  };
+  }, []);
 
-  const dismiss = (id: string) => {
+  const dismiss = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
   return { toasts, toast, dismiss };
 }

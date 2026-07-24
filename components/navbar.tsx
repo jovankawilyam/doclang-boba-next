@@ -74,7 +74,7 @@ export default function Navbar() {
             href="/admin/login"
             className="text-base font-extrabold text-slate-500 border-2 border-[#C7D2E3] hover:border-[#123C69] hover:text-[#123C69] rounded-lg px-3 py-2 transition-all duration-300"
           >
-            Admin
+            Login
           </Link>
         </div>
 
@@ -140,7 +140,7 @@ export default function Navbar() {
             onClick={() => setOpen(false)}
             className="block rounded-xl border border-[#C7D2E3] px-4 py-3 text-base font-bold text-slate-500"
           >
-            Admin
+            Login
           </Link>
         </div>
       </div>

@@ -8,14 +8,6 @@ function getSheetFromId(id: string): { sheetName: string; idColumn: string } | n
   return null;
 }
 
-function cleanWaNumber(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.startsWith("0")) return "62" + digits.slice(1);
-  if (digits.startsWith("62")) return digits;
-  if (digits.startsWith("8")) return "62" + digits;
-  return digits;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -51,7 +43,7 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20));
 
-    let rows = await getRows("Monitoring");
+    const rows = await getRows("Monitoring");
     const headers = [
       "Tgl Permintaan",
       "Kode Lot Lelang",
@@ -85,8 +77,11 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(total / limit);
     const paginated = filtered.slice((page - 1) * limit, page * limit);
 
+    const baseForStats = layananFilter
+      ? result.filter((r) => r["Jenis Layanan"] === layananFilter)
+      : result;
     const stats = { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
-    for (const r of result) {
+    for (const r of baseForStats) {
       const s = r["Status Proses"]?.toLowerCase() ?? "";
       stats.total++;
       if (s === "proses") stats.proses++;
@@ -128,6 +123,7 @@ export async function PATCH(request: NextRequest) {
 
     const serviceUpdates: Record<string, string> = {
       "Status Permohonan": status,
+      "Status Proses": status,
     };
     const monitoringUpdates: Record<string, string> = {
       "Status Proses": status,
