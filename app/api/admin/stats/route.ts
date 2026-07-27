@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-import { getRows } from "@/lib/google/sheets";
+import { NextRequest, NextResponse } from "next/server";
+import { getRows } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 const HEADERS = [
   "Tgl Permintaan",
@@ -14,7 +15,9 @@ const HEADERS = [
 
 const LAYANAN = ["Kuitansi", "Kutipan RL", "Validasi PPh"];
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const unauth = requireAdmin(request);
+  if (unauth) return unauth;
   try {
     const rows = await getRows("Monitoring");
 

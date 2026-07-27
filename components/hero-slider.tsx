@@ -67,29 +67,20 @@ export default function HeroSlider() {
       </section>
 
       <section className="mx-auto flex w-full max-w-6xl items-center justify-center px-4 py-8 md:px-6 md:py-10">
-        <div className="flex flex-col items-center gap-6 md:flex-row md:items-center md:gap-10 select-none">
+        <div className="flex flex-col items-center gap-4 select-none">
           <img
-            className="h-[100px] w-auto object-contain md:h-[140px]"
+            className="h-[80px] w-auto object-contain md:h-[100px]"
             src="/images/NAGARA-DANA-RAKCA.png"
             alt="Nagara Dana Rakça"
           />
-          <div className="flex flex-col items-center text-center md:items-center md:text-center font-sans tracking-tight">
-            <h1 className="text-[45px] font-bold leading-[1] text-[#0f2d62] md:text-[70px] md:leading-[1.1]">
-              doclang boba
-            </h1>
-            <h2 className="mt-2 text-[20px] font-bold leading-tight md:text-[38px] md:leading-none">
-              <span className="text-[#f28e2b]">do</span>
-              <span className="text-[#0f2d62]">kumen pas</span>
-              <span className="text-[#f28e2b]">c</span>
-              <span className="text-[#0f2d62]">a le</span>
-              <span className="text-[#f28e2b]">l</span>
-              <span className="text-[#f28e2b]">ang </span>
-              <span className="text-[#f28e2b]">bo</span>
-              <span className="text-[#0f2d62]">gor </span>
-              <span className="text-[#f28e2b]">ba</span>
-              <span className="text-[#0f2d62]">geur</span>
-            </h2>
-          </div>
+          <h1 className="text-center text-4xl font-bold text-navy md:text-6xl">
+            Selamat Datang di Doclang Boba
+          </h1>
+          <p className="max-w-2xl text-center text-base leading-relaxed text-slate-500 md:text-xl">
+            Terima kasih telah mengunjungi. Silakan lihat persyaratan di bawah
+            dan klik tombol formulir untuk mengajukan permohonan dokumen pasca
+            lelang.
+          </p>
         </div>
       </section>
     </>

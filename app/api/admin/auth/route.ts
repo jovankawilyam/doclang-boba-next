@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +14,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (password === process.env.ADMIN_PASSWORD) {
-      return NextResponse.json({ success: true });
+      const token = createToken();
+      return NextResponse.json({ success: true, token });
     }
     return NextResponse.json(
       { success: false, error: "Password salah" },

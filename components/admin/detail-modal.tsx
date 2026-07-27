@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
 import { StatusUpdate } from "./status-update";
+import { getAuthHeaders } from "@/lib/admin-fetch";
 
 type DetailData = Record<string, string>;
 
@@ -16,7 +17,7 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/api/admin/permohonan?id=${encodeURIComponent(id)}`, { signal: controller.signal })
+      fetch(`/api/admin/permohonan?id=${encodeURIComponent(id)}`, { signal: controller.signal, headers: getAuthHeaders() })
       .then((r) => r.json())
       .then((json) => {
         if (!controller.signal.aborted && json.success) setData(json.data);
@@ -30,21 +31,26 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 p-4 pt-12"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-12"
+      style={{ backgroundColor: "var(--admin-overlay)" }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl rounded-xl bg-white shadow-2xl"
+        className="relative w-full max-w-2xl rounded-xl shadow-2xl"
+        style={{ backgroundColor: "var(--admin-bg-card)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#D8E0EC] px-6 py-4">
+        <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: "var(--admin-border)" }}>
           <div>
-            <h2 className="text-base font-bold text-[#123C69]">Detail Permohonan</h2>
-            <p className="text-xs text-slate-400">ID: {id}</p>
+            <h2 className="text-base font-bold" style={{ color: "var(--admin-text-primary)" }}>Detail Permohonan</h2>
+            <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>ID: {id}</p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1 transition-colors"
+            style={{ color: "var(--admin-text-secondary)" }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--admin-hover)"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
             <X className="h-5 w-5" />
           </button>
@@ -52,8 +58,8 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
 
         {!data ? (
           <div className="flex items-center justify-center p-12">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#C7D2E3] border-t-[#123C69]" />
-            <span className="ml-3 text-sm text-slate-500">Memuat detail...</span>
+            <div className="h-5 w-5 animate-spin rounded-full border-2" style={{ borderColor: "var(--admin-border-input)", borderTopColor: "var(--admin-text-primary)" }} />
+            <span className="ml-3 text-sm" style={{ color: "var(--admin-text-secondary)" }}>Memuat detail...</span>
           </div>
         ) : (
           <div className="px-6 py-4">
@@ -76,7 +82,7 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
                     typeof val === "string" && (val.startsWith("http://") || val.startsWith("https://"));
                   return (
                     <div key={key} className={key.includes("Keterangan") || key.includes("Alamat") ? "col-span-2" : ""}>
-                      <div className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                      <div className="text-[10px] font-bold tracking-wider uppercase" style={{ color: "var(--admin-text-secondary)" }}>
                         {key}
                       </div>
                       <div className="mt-0.5 text-sm">
@@ -85,13 +91,14 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
                             href={val}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 break-all text-[#1E56A0] hover:text-[#123C69] hover:underline"
+                            className="inline-flex items-center gap-1 break-all hover:underline"
+                            style={{ color: "var(--admin-text-primary)" }}
                           >
                             <ExternalLink className="h-3 w-3 shrink-0" />
                             {val.length > 50 ? val.slice(0, 50) + "..." : val}
                           </a>
                         ) : (
-                          <span className={val ? "text-slate-800" : "text-slate-300"}>{val || "-"}</span>
+                          <span style={{ color: val ? "var(--admin-text-body)" : "var(--admin-text-secondary)" }}>{val || "-"}</span>
                         )}
                       </div>
                     </div>

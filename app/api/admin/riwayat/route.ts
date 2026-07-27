@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRows } from "@/lib/google/sheets";
+import { getRows } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
+import type { SheetRow } from "@/lib/db";
+
+const LOG_HEADERS = ["Waktu", "ID Pengajuan", "Jenis Layanan", "Status Lama", "Status Baru", "Keterangan"];
 
 export async function GET(request: NextRequest) {
+  const unauth = requireAdmin(request);
+  if (unauth) return unauth;
   try {
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20));
 
-    const rows = await getRows("Monitoring");
-    const headers = [
-      "Tgl Permintaan",
-      "ID Pengajuan",
-      "Jenis Layanan",
-      "Status Proses",
-      "Tanggal Pengambilan",
-    ];
+    let rows: SheetRow[] = [];
+    try {
+      rows = await getRows("Activity Log");
+    } catch {
+      rows = [];
+    }
 
     const result = rows
       .map((r) => {
         const item: Record<string, string> = {};
-        for (const h of headers) {
+        for (const h of LOG_HEADERS) {
           item[h] = r.get(h);
         }
         return item;
       })
-      .filter((r) => r["Status Proses"])
+      .filter((r) => r["ID Pengajuan"])
       .sort((a, b) => {
-        const dateA = a["Tgl Permintaan"] || "";
-        const dateB = b["Tgl Permintaan"] || "";
+        const dateA = a["Waktu"] || "";
+        const dateB = b["Waktu"] || "";
         return dateB.localeCompare(dateA);
       });
 
@@ -37,13 +41,11 @@ export async function GET(request: NextRequest) {
 
     const data = paginated.map((r) => ({
       id: r["ID Pengajuan"] || "-",
-      waktu: r["Tgl Permintaan"] || "-",
+      waktu: r["Waktu"] || "-",
       jenis_layanan: r["Jenis Layanan"] || "-",
-      status_lama: "",
-      status_baru: r["Status Proses"] || "-",
-      keterangan: r["Tanggal Pengambilan"]
-        ? `Tanggal pengambilan: ${r["Tanggal Pengambilan"]}`
-        : "",
+      status_lama: r["Status Lama"] || "",
+      status_baru: r["Status Baru"] || "-",
+      keterangan: r["Keterangan"] || "",
     }));
 
     return NextResponse.json({ success: true, data, total, page, totalPages });

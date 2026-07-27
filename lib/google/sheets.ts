@@ -193,11 +193,21 @@ const VALIDASI_PPH_HEADERS = [
   "Document Merge Status - auto notif validasi pph",
 ];
 
+const ACTIVITY_LOG_HEADERS = [
+  "Waktu",
+  "ID Pengajuan",
+  "Jenis Layanan",
+  "Status Lama",
+  "Status Baru",
+  "Keterangan",
+];
+
 const SHEET_DEFINITIONS: Record<string, string[]> = {
   Monitoring: MONITORING_HEADERS,
   Kuitansi: KUITANSI_HEADERS,
   "Kutipan RL": KUTIPAN_RL_HEADERS,
   "Validasi PPh": VALIDASI_PPH_HEADERS,
+  "Activity Log": ACTIVITY_LOG_HEADERS,
 };
 
 function getAuth() {

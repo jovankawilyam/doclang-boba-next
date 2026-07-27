@@ -5,62 +5,23 @@ import {
   Clock,
   FileText,
   Inbox,
+  Info,
   Loader2,
   Search,
   XCircle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-type ServiceKey = "kuitansi" | "kutipan_rl" | "validasi_pph";
 
-type ServiceConfig = {
-  key: ServiceKey;
-  label: string;
-  shortLabel: string;
-  title: string;
-  description: string;
-  placeholder: string;
-  accent: string;
-  ring: string;
-};
+type ServiceLabel = "Kuitansi" | "Kutipan RL" | "Validasi PPh";
 
-const services: ServiceConfig[] = [
-  {
-    key: "kuitansi",
-    label: "Kuitansi",
-    shortLabel: "Kuitansi",
-    title: "Pelacakan Dokumen Kuitansi",
-    description: "Pantau status pengajuan kuitansi pasca lelang.",
-    placeholder: "Contoh: 123/KPHL/2026",
-    accent: "text-[#123C69]",
-    ring: "border-[#C7D2E3] bg-[#F4F7FB]",
-  },
-  {
-    key: "kutipan_rl",
-    label: "Kutipan RL",
-    shortLabel: "Kutipan RL",
-    title: "Pelacakan Kutipan RL",
-    description: "Cek progres penerbitan kutipan risalah lelang.",
-    placeholder: "Contoh: 123/K-RL/2026",
-    accent: "text-[#123C69]",
-    ring: "border-[#C7D2E3] bg-[#F4F7FB]",
-  },
-  {
-    key: "validasi_pph",
-    label: "Validasi PPh",
-    shortLabel: "Validasi PPh",
-    title: "Pelacakan Validasi PPh",
-    description: "Lihat status validasi PPh untuk dokumen lelang.",
-    placeholder: "Contoh: 123/VPPH/2026",
-    accent: "text-[#123C69]",
-    ring: "border-[#C7D2E3] bg-[#F4F7FB]",
-  },
+const SERVICES: { key: ServiceLabel; color: string; border: string; iconBg: string }[] = [
+  { key: "Kuitansi", color: "text-[#123C69]", border: "border-[#C7D2E3] bg-[#F4F7FB]", iconBg: "bg-[#EEF3FA]" },
+  { key: "Kutipan RL", color: "text-[#1E56A0]", border: "border-[#C7D2E3] bg-[#F4F7FB]", iconBg: "bg-[#EEF3FA]" },
+  { key: "Validasi PPh", color: "text-[#0F2D4E]", border: "border-[#C7D2E3] bg-[#F4F7FB]", iconBg: "bg-[#EEF3FA]" },
 ];
 
-const serviceByKey = services.reduce(
-  (acc, service) => ({ ...acc, [service.key]: service }),
-  {} as Record<ServiceKey, ServiceConfig>,
-);
+type ServiceStats = { total: number; proses: number; siap_diambil: number; tidak_valid: number; selesai: number };
 
 const getStatusStyles = (status: string) => {
   const s = status.toLowerCase();
@@ -92,17 +53,17 @@ const getStatusStyles = (status: string) => {
 function TrackingResult({
   document,
   searchedValue,
-  service,
+  jenisLayanan,
 }: {
   document: { nomor_pengajuan: string; status_proses: string; catatan: string | null } | null;
   searchedValue: string | null;
-  service: ServiceConfig;
+  jenisLayanan: string;
 }) {
   if (!searchedValue) return null;
 
   if (!document) {
     return (
-      <div className="mx-auto mt-6 max-w-5xl rounded-2xl border border-[#C7D2E3] bg-white p-6 text-center shadow-xl shadow-[#C7D2E3]/50">
+      <div className="rounded-2xl border border-[#C7D2E3] bg-white p-6 text-center shadow-xl shadow-[#C7D2E3]/50">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#EEF3FA]">
           <Search className="h-8 w-8 text-[#123C69]" />
         </div>
@@ -114,8 +75,7 @@ function TrackingResult({
           <span className="font-mono font-bold text-slate-900">
             {searchedValue}
           </span>{" "}
-          belum terdaftar pada layanan {service.label}. Periksa lagi nomor tiket
-          atau pilih jenis layanan yang sesuai.
+          belum terdaftar. Periksa kembali nomor tiket Anda.
         </p>
       </div>
     );
@@ -124,16 +84,17 @@ function TrackingResult({
   const statusStyle = getStatusStyles(document.status_proses);
 
   return (
-    <div className="mx-auto mt-6 max-w-5xl overflow-hidden rounded-2xl border border-[#C7D2E3] bg-white shadow-xl shadow-[#C7D2E3]/50">
+    <div className="overflow-hidden rounded-2xl border border-[#C7D2E3] bg-white shadow-xl shadow-[#C7D2E3]/50">
       <div className="flex flex-col gap-4 border-b border-[#D8E0EC] p-6 sm:flex-row sm:items-center">
-        <div
-          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border ${service.ring}`}
-        >
-          <FileText className={`h-7 w-7 ${service.accent}`} />
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-[#C7D2E3] bg-[#F4F7FB]">
+          <FileText className="h-7 w-7 text-[#123C69]" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-bold tracking-widest text-slate-500 uppercase">
-            Hasil Pencarian {service.label}
+            Hasil Pencarian
+          </p>
+          <p className="mt-0.5 text-xs font-semibold text-[#1E56A0]">
+            {jenisLayanan}
           </p>
           <h2 className="mt-1 font-mono text-2xl font-bold break-words text-slate-950 sm:text-3xl">
             {document.nomor_pengajuan}
@@ -183,30 +144,62 @@ function TrackingResult({
   );
 }
 
+const STAT_ITEMS: { label: string; key: keyof ServiceStats; icon: React.ElementType; className: string }[] = [
+  { label: "Proses", key: "proses", icon: Clock, className: "border-amber-200 bg-amber-50 text-amber-800" },
+  { label: "Siap Diambil", key: "siap_diambil", icon: CheckCircle2, className: "border-emerald-200 bg-emerald-50 text-emerald-800" },
+  { label: "Tidak Valid", key: "tidak_valid", icon: XCircle, className: "border-red-200 bg-red-50 text-red-800" },
+  { label: "Selesai", key: "selesai", icon: Inbox, className: "border-blue-200 bg-blue-50 text-blue-800" },
+];
+
+function ServiceStatsCard({ label, stats }: { label: string; stats: ServiceStats }) {
+  return (
+    <div className="rounded-xl border border-[#C7D2E3] bg-white p-4 shadow-sm">
+      <h3 className="mb-3 text-base font-bold text-slate-950">{label}</h3>
+      <div className="space-y-2">
+        {STAT_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.key} className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${item.className}`}>
+              <span className="font-semibold">{item.label}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-bold">{stats[item.key]}</span>
+                <Icon className="h-4 w-4" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function TrackingSection() {
   const [query, setQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [result, setResult] = useState<{
     document: { nomor_pengajuan: string; status_proses: string; catatan: string | null } | null;
     searchedValue: string;
+    jenisLayanan: string;
   } | null>(null);
-  const [activeService, setActiveService] = useState<ServiceKey>("kuitansi");
-  const [stats, setStats] = useState<Record<string, number>>({ total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 });
+  const [perLayananStats, setPerLayananStats] = useState<Record<string, ServiceStats> | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const trackingResultRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setStatsLoading(true);
-    fetch(`/api/lacak/stats?layanan=${activeService}`)
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [result]);
+
+  useEffect(() => {
+    fetch("/api/lacak/stats")
       .then((r) => r.json())
       .then((d) => {
-        if (d.success) setStats(d);
+        if (d.success && d.perLayanan) setPerLayananStats(d.perLayanan);
       })
       .catch(() => {})
       .finally(() => setStatsLoading(false));
-  }, [activeService]);
-
-  const activeConfig = serviceByKey[activeService];
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,163 +218,159 @@ export default function TrackingSection() {
             }
           : null,
         searchedValue: query,
+        jenisLayanan: d?.jenis_layanan || "",
       });
     } catch {
       setResult({
         document: null,
         searchedValue: query,
+        jenisLayanan: "",
       });
     } finally {
       setSearchLoading(false);
     }
-    setTimeout(() => {
-      trackingResultRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 100);
   };
 
   return (
     <main
       id="tracking"
-      className="mx-auto mt-10 w-full max-w-7xl scroll-mt-24 px-4 md:px-8"
+      className="mx-auto mt-10 w-full max-w-5xl scroll-mt-24 px-4 md:px-8"
     >
       <section className="rounded-3xl border border-[#C7D2E3] bg-white p-4 shadow-2xl shadow-[#C7D2E3]/50 md:p-6">
-        <div className="mb-4 rounded-2xl border border-[#D8E0EC] bg-[#F8FAFC] p-4">
-          <p className="mb-3 text-base font-bold text-slate-950">
-            1. Pilih jenis layanan
-          </p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {services.map((service) => {
-              const selected = service.key === activeService;
-              return (
-                <button
-                  key={service.key}
-                  type="button"
-                  onClick={() => {
-                    setActiveService(service.key);
-                    setResult(null);
-                  }}
-                  aria-pressed={selected}
-                  className={`rounded-xl border px-4 py-4 text-base font-bold transition sm:text-sm md:text-base ${
-                    selected
-                      ? "border-blue-700 bg-blue-700 text-white shadow-sm"
-                      : "border-[#C7D2E3] bg-white text-slate-700 hover:border-blue-700 hover:bg-blue-50"
-                  }`}
-                >
-                  {service.shortLabel}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* SEARCH */}
+        <div className="rounded-2xl border border-[#C7D2E3] bg-[#F8FAFC] p-5 md:p-6">
+  <h2 className="text-3xl font-bold text-slate-950 md:text-4xl">
+    Lacak Dokumen
+  </h2>
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_1.05fr] lg:items-stretch">
-          <div className="rounded-2xl border border-[#C7D2E3] bg-[#F8FAFC] p-5 md:p-6 lg:order-1">
-            <div className="mb-5">
-              <p className="text-base font-bold text-blue-700">
-                2. Masukkan nomor tiket
-              </p>
-              <h2 className="mt-2 text-3xl font-bold text-slate-950 md:text-4xl">
-                {activeConfig.title}
-              </h2>
-              <p className="mt-3 text-lg leading-relaxed text-slate-700">
-                {activeConfig.description}
-              </p>
+  <p className="mt-2 text-lg leading-relaxed text-slate-700">
+    Pantau status pengajuan dokumen pasca lelang.
+  </p>
+
+  {/* Informasi */}
+  <div className="mt-5 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+    <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
+
+    <div className="w-full">
+      <p className="font-semibold text-blue-900">
+        Informasi
+      </p>
+
+      <p className="mt-1 text-sm leading-relaxed text-blue-800">
+        Pastikan nomor pengajuan atau nomor tiket yang Anda masukkan
+        sesuai dengan bukti permohonan yang diterima. Kesalahan
+        penulisan nomor dapat menyebabkan status dokumen tidak
+        ditemukan.
+      </p>
+
+<div className="mt-4 rounded-lg border border-blue-100 bg-white p-3">
+  <p className="text-sm font-semibold text-slate-900">
+    Contoh format nomor:
+  </p>
+
+  <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+    <div className="rounded-lg border border-slate-200 p-3 text-center">
+      <p className="text-sm font-semibold text-slate-700">
+        Kuitansi
+      </p>
+      <code className="mt-2 inline-block rounded-md bg-slate-100 px-2 py-1 font-mono text-slate-900">
+        1/KPHL/2026
+      </code>
+    </div>
+
+    <div className="rounded-lg border border-slate-200 p-3 text-center">
+      <p className="text-sm font-semibold text-slate-700">
+        Kutipan RL
+      </p>
+      <code className="mt-2 inline-block rounded-md bg-slate-100 px-2 py-1 font-mono text-slate-900">
+        1/K-RL/2026
+      </code>
+    </div>
+
+    <div className="rounded-lg border border-slate-200 p-3 text-center">
+      <p className="text-sm font-semibold text-slate-700">
+        Validasi PPh
+      </p>
+      <code className="mt-2 inline-block rounded-md bg-slate-100 px-2 py-1 font-mono text-slate-900">
+        1/VPPH/2026
+      </code>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <form onSubmit={handleSearch} className="mt-5 flex flex-col gap-3">
+    <label
+      htmlFor="tracking-number"
+      className="text-base font-bold text-slate-800"
+    >
+      Nomor tiket / nomor pengajuan
+    </label>
+
+    <div className="relative flex-1 rounded-xl bg-white shadow-sm">
+      <Search className="absolute top-1/2 left-4 h-6 w-6 -translate-y-1/2 text-slate-400" />
+
+      <input
+  id="tracking-number"
+  type="text"
+  placeholder="Masukkan nomor tiket"
+  className="h-16 w-full rounded-xl border border-[#C7D2E3] bg-transparent pl-14 pr-4 text-lg font-semibold shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+  value={query}
+  onChange={(e) => setQuery(e.target.value.toUpperCase())}
+  required
+/>
+    </div>
+
+    <button
+      type="submit"
+      disabled={searchLoading || !query}
+      className="flex h-16 items-center justify-center gap-2 rounded-xl bg-blue-700 px-7 text-lg font-bold text-white transition hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-700/20 disabled:cursor-not-allowed disabled:opacity-70"
+    >
+      {searchLoading ? (
+        <>
+          <Loader2 className="h-5 w-5 animate-spin" />
+          Mencari...
+        </>
+      ) : (
+        "Lacak Sekarang"
+      )}
+    </button>
+  </form>
+</div>
+
+        {/* RESULT */}
+        {result && (
+          <div ref={resultRef} className="mt-5 scroll-mt-24">
+            <TrackingResult
+              document={result.document}
+              searchedValue={result.searchedValue}
+              jenisLayanan={result.jenisLayanan}
+            />
+          </div>
+        )}
+
+        {/* RINGKASAN STATUS */}
+        <div className="mt-6 rounded-2xl border border-[#C7D2E3] bg-[#F8FAFC] p-5 md:p-6">
+          <h3 className="mb-5 text-xl font-bold text-slate-950">
+            Ringkasan Status
+          </h3>
+          {statsLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#C7D2E3] border-t-[#123C69]" />
+              <span className="ml-3 text-sm text-slate-500">Memuat statistik...</span>
             </div>
-
-            <form onSubmit={handleSearch} className="flex flex-col gap-3">
-              <label
-                htmlFor="tracking-number"
-                className="text-base font-bold text-slate-800"
-              >
-                Nomor tiket / nomor pengajuan
-              </label>
-              <div className="relative flex-1 rounded-xl bg-white shadow-sm">
-                <Search className="absolute top-1/2 left-4 h-6 w-6 -translate-y-1/2 text-slate-400" />
-                <input
-                  id="tracking-number"
-                  type="text"
-                  placeholder={activeConfig.placeholder}
-                  className="h-16 w-full border border-[#C7D2E3] bg-transparent pr-4 pl-14 text-lg font-semibold rounded-xl shadow-none focus-visible:ring-2 focus-visible:ring-blue-200 focus:outline-none"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  required
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-3">
+              {SERVICES.map((svc) => (
+                <ServiceStatsCard
+                  key={svc.key}
+                  label={svc.key}
+                  stats={perLayananStats?.[svc.key] ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 }}
                 />
-              </div>
-              <button
-                type="submit"
-                disabled={searchLoading || !query}
-                className="flex h-16 items-center justify-center gap-2 rounded-xl bg-blue-700 px-7 text-lg font-bold text-white transition hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-700/20 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {searchLoading ? (
-                  <><Loader2 className="h-5 w-5 animate-spin" /> Mencari...</>
-                ) : (
-                  "Lacak Sekarang"
-                )}
-              </button>
-              <p className="text-sm leading-relaxed text-slate-600">
-                Pastikan jenis layanan di atas sudah sesuai dengan tiket Anda.
-              </p>
-            </form>
-          </div>
-
-          {result && (
-            <div
-              ref={trackingResultRef}
-              className="scroll-mt-24 lg:order-3 lg:col-span-2"
-            >
-              <TrackingResult
-                document={result.document}
-                searchedValue={result.searchedValue}
-                service={activeConfig}
-              />
+              ))}
             </div>
           )}
-
-          <div className={`rounded-2xl border p-5 md:p-6 lg:order-2 ${activeConfig.ring}`}>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-base font-bold text-slate-950">
-                  3. Lihat ringkasan status
-                </p>
-                <h2 className={`mt-1 text-3xl font-bold ${activeConfig.accent}`}>
-                  {activeConfig.label}
-                </h2>
-              </div>
-              <div className="rounded-2xl border border-[#D8E0EC] bg-white px-5 py-3 text-right shadow-sm">
-                <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">
-                  Total
-                </p>
-                <p className={`text-5xl font-bold text-slate-950 ${statsLoading ? "animate-pulse" : ""}`}>
-                  {new Intl.NumberFormat("id-ID").format(stats.total || 0)}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
-              {[
-                { label: "Proses", key: "proses", icon: Clock, className: "border-amber-200 bg-amber-50 text-amber-800" },
-                { label: "Siap Diambil", key: "siap_diambil", icon: CheckCircle2, className: "border-emerald-200 bg-emerald-50 text-emerald-800" },
-                { label: "Tidak Valid", key: "tidak_valid", icon: XCircle, className: "border-red-200 bg-red-50 text-red-800" },
-                { label: "Selesai", key: "selesai", icon: Inbox, className: "border-blue-200 bg-blue-50 text-blue-800" },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.label} className={`rounded-xl border bg-white/90 p-4 shadow-sm backdrop-blur ${item.className}`}>
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <span className="text-sm font-bold uppercase">{item.label}</span>
-                      <Icon className="h-5 w-5 shrink-0" />
-                    </div>
-                    <p className={`text-4xl font-bold ${statsLoading ? "animate-pulse" : ""}`}>
-                      {new Intl.NumberFormat("id-ID").format(stats[item.key] || 0)}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </section>
     </main>

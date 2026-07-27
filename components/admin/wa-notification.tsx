@@ -6,8 +6,8 @@ type Props = {
 
 export function WaNotification({ number, text, waLink }: Props) {
   return (
-    <div className="mt-4 rounded-lg border border-[#C7D2E3] bg-[#F4F7FB] p-3">
-      <p className="mb-2 text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+    <div className="mt-4 rounded-lg border p-3" style={{ borderColor: "var(--admin-border-input)", backgroundColor: "var(--admin-bg-muted)" }}>
+      <p className="mb-2 text-[10px] font-bold tracking-wider uppercase" style={{ color: "var(--admin-text-secondary)" }}>
         Notifikasi WhatsApp
       </p>
       {number ? (
@@ -23,9 +23,9 @@ export function WaNotification({ number, text, waLink }: Props) {
           Kirim WA ke Pemohon
         </a>
       ) : (
-        <p className="text-xs text-slate-500">Nomor WA pemohon tidak tersedia</p>
+        <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>Nomor WA pemohon tidak tersedia</p>
       )}
-      <p className="mt-2 whitespace-pre-wrap rounded bg-white p-2.5 text-xs leading-relaxed text-slate-600">
+      <p className="mt-2 whitespace-pre-wrap rounded p-2.5 text-xs leading-relaxed" style={{ backgroundColor: "var(--admin-bg-card)", color: "var(--admin-text-body)" }}>
         {text}
       </p>
     </div>

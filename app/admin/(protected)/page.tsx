@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ToastContainer, useToast } from "@/components/toast";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
 import { DetailModal } from "@/components/admin/detail-modal";
+import { getAuthHeaders } from "@/lib/admin-fetch";
 
 type Stats = { total: number; proses: number; siap_diambil: number; tidak_valid: number; selesai: number };
 type Row = Record<string, string>;
@@ -22,7 +23,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const id = ++fetchIdRef.current;
-    fetch("/api/admin/stats")
+    fetch("/api/admin/stats", { headers: getAuthHeaders() })
       .then((r) => r.json())
       .then((json) => {
         if (id !== fetchIdRef.current) return;
@@ -40,8 +41,8 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#C7D2E3] border-t-[#123C69]" />
-        <span className="ml-3 text-sm text-slate-500">Memuat data dashboard...</span>
+        <div className="h-6 w-6 animate-spin rounded-full border-2" style={{ borderColor: "var(--admin-border-input)", borderTopColor: "var(--admin-text-primary)" }} />
+        <span className="ml-3 text-sm" style={{ color: "var(--admin-text-secondary)" }}>Memuat data dashboard...</span>
       </div>
     );
   }
@@ -49,8 +50,8 @@ export default function AdminDashboard() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-[#123C69]">Dashboard</h1>
-        <p className="mt-1 text-xs text-slate-500">Pantau perkembangan seluruh permohonan dokumen pasca lelang</p>
+        <h1 className="text-xl font-bold" style={{ color: "var(--admin-text-primary)" }}>Dashboard</h1>
+        <p className="mt-1 text-xs" style={{ color: "var(--admin-text-secondary)" }}>Pantau perkembangan seluruh permohonan dokumen pasca lelang</p>
       </div>
 
       <DashboardCharts

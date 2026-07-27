@@ -13,14 +13,14 @@ export default function FormPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
       <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white px-6 py-6 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center gap-4">
+        <div className="mx-auto grid max-w-4xl grid-cols-3 items-center">
           <Link
             href="/"
-            className="rounded-full p-3 transition-colors hover:bg-gray-100"
+            className="justify-self-start rounded-full p-3 transition-colors hover:bg-gray-100"
           >
             <ChevronLeft className="h-6 w-6 text-gray-600" />
           </Link>
-          <span className="font-bold tracking-widest text-[#1E56A0] uppercase">
+          <span className="justify-self-center font-bold tracking-widest text-[#1E56A0] uppercase">
             Formulir
           </span>
         </div>
@@ -98,3 +98,4 @@ export default function FormPage() {
     </div>
   );
 }
+  

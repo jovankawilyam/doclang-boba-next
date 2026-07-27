@@ -7,6 +7,7 @@ import { PermohonanTable } from "@/components/admin/permohonan-table";
 import { Pagination } from "@/components/admin/pagination";
 import { DetailModal } from "@/components/admin/detail-modal";
 import { StatsCards } from "@/components/admin/stats-cards";
+import { getAuthHeaders } from "@/lib/admin-fetch";
 
 type MonitoringRow = Record<string, string>;
 type Stats = { total: number; proses: number; siap_diambil: number; tidak_valid: number; selesai: number };
@@ -38,7 +39,7 @@ export function ServicePage({ layanan, title, description }: Props) {
     if (statusFilter) params.set("status", statusFilter);
     if (search) params.set("search", search);
     params.set("page", String(page));
-    fetch(`/api/admin/permohonan?${params.toString()}`)
+    fetch(`/api/admin/permohonan?${params.toString()}`, { headers: getAuthHeaders() })
       .then((r) => r.json())
       .then((json) => {
         if (id !== fetchIdRef.current) return;
@@ -96,8 +97,8 @@ export function ServicePage({ layanan, title, description }: Props) {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-[#123C69]">{title}</h1>
-        <p className="mt-1 text-xs text-slate-500">{description}</p>
+        <h1 className="text-xl font-bold" style={{ color: "var(--admin-text-primary)" }}>{title}</h1>
+        <p className="mt-1 text-xs" style={{ color: "var(--admin-text-secondary)" }}>{description}</p>
       </div>
 
       <StatsCards stats={stats} />
@@ -116,7 +117,7 @@ export function ServicePage({ layanan, title, description }: Props) {
           />
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-[#D8E0EC] bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border shadow-sm" style={{ borderColor: "var(--admin-border)", backgroundColor: "var(--admin-bg-card)" }}>
           <PermohonanTable rows={rows} loading={loading} onOpenDetail={setDetailId} />
           <Pagination page={page} totalPages={totalPages} total={total} onPageChange={handlePageChange} />
         </div>

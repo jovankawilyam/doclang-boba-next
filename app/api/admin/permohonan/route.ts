@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRows, updateRow } from "@/lib/google/sheets";
+import { getRows, updateRow, appendRow } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 function getSheetFromId(id: string): { sheetName: string; idColumn: string } | null {
   if (id.includes("/KPHL/")) return { sheetName: "Kuitansi", idColumn: "ID KPHL" };
@@ -9,6 +10,8 @@ function getSheetFromId(id: string): { sheetName: string; idColumn: string } | n
 }
 
 export async function GET(request: NextRequest) {
+  const unauth = requireAdmin(request);
+  if (unauth) return unauth;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -101,12 +104,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const unauth = requireAdmin(request);
+  if (unauth) return unauth;
   try {
     const body = await request.json();
     const { id, reason, tglPengambilan } = body;
-    const status = body.status?.toLowerCase();
+    const newStatus = body.status?.toLowerCase();
 
-    if (!id || !status) {
+    if (!id || !newStatus) {
       return NextResponse.json(
         { success: false, error: "ID dan status harus diisi" },
         { status: 400 },
@@ -121,16 +126,22 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    const rows = await getRows(sheetInfo.sheetName);
+    const currentRow = rows.find((r) => r.get(sheetInfo.idColumn) === id);
+    const oldStatus = currentRow?.get("Status Proses") ?? "";
+
     const serviceUpdates: Record<string, string> = {
-      "Status Permohonan": status,
-      "Status Proses": status,
+      "Status Permohonan": newStatus,
+      "Status Proses": newStatus,
     };
     const monitoringUpdates: Record<string, string> = {
-      "Status Proses": status,
+      "Status Proses": newStatus,
     };
 
-    if (reason) {
-      serviceUpdates["Keterangan Ditolak"] = reason;
+    if (newStatus === "tidak valid") {
+      serviceUpdates["Keterangan Ditolak"] = reason || "";
+    } else {
+      serviceUpdates["Keterangan Ditolak"] = "";
     }
     if (tglPengambilan) {
       serviceUpdates["Tanggal Pengambilan"] = tglPengambilan;
@@ -140,11 +151,22 @@ export async function PATCH(request: NextRequest) {
     await updateRow(sheetInfo.sheetName, sheetInfo.idColumn, id, serviceUpdates);
     await updateRow("Monitoring", "ID Pengajuan", id, monitoringUpdates);
 
+    const monitoringRows = await getRows("Monitoring");
+    const monRow = monitoringRows.find((r) => r.get("ID Pengajuan") === id);
+    const layanan = monRow?.get("Jenis Layanan") ?? "";
+
+    await appendRow("Activity Log", {
+      Waktu: new Date().toISOString(),
+      "ID Pengajuan": id,
+      "Jenis Layanan": layanan,
+      "Status Lama": oldStatus,
+      "Status Baru": newStatus,
+      Keterangan: reason || (tglPengambilan ? `Tanggal pengambilan: ${tglPengambilan}` : ""),
+    });
+
     return NextResponse.json({
       success: true,
       message: "Status berhasil diperbarui",
-      waNumber: null,
-      waText: "",
     });
   } catch (error) {
     console.error("Admin PATCH error:", error);

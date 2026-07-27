@@ -260,12 +260,12 @@ export const usePermohonanForm = () => {
         addFile("bukti_pelunasan_file", "bukti_pelunasan", values.bukti_pelunasan_file);
       }
 
-      let fileUrlByField: Record<string, string> = {};
+      const fileUrlByField: Record<string, string> = {};
       if (fileEntries.length > 0) {
         let result;
         try {
           result = await startUpload(fileEntries.map((e) => e.file));
-        } catch (uploadError) {
+        } catch {
           setServerErrors(["Gagal mengunggah berkas. Periksa konfigurasi UploadThing atau koneksi internet Anda."]);
           setUploadingFiles(false);
           window.scrollTo({ top: 0, behavior: "smooth" });

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { WaNotification } from "./wa-notification";
+import { getAuthHeaders } from "@/lib/admin-fetch";
 
 function cleanWaNumber(raw: string): string {
   const d = raw.replace(/\D/g, "");
@@ -41,7 +42,7 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
       if (status === "Selesai") body.tglPengambilan = date;
       const res = await fetch("/api/admin/permohonan", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const json = await res.json();
@@ -75,8 +76,8 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
   ];
 
   return (
-    <div className="border-t border-[#D8E0EC] pt-4">
-      <p className="mb-3 text-xs font-bold tracking-wider text-[#123C69] uppercase">Update Status</p>
+    <div className="border-t pt-4" style={{ borderColor: "var(--admin-border)" }}>
+      <p className="mb-3 text-xs font-bold tracking-wider uppercase" style={{ color: "var(--admin-text-primary)" }}>Update Status</p>
 
       <div className="flex flex-wrap gap-2">
         {BUTTONS.map((s) => (
@@ -105,7 +106,8 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
             placeholder="Alasan penolakan..."
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="min-w-[240px] flex-1 rounded-lg border border-[#C7D2E3] px-3 py-2 text-xs"
+            className="min-w-[240px] flex-1 rounded-lg border px-3 py-2 text-xs"
+            style={{ borderColor: "var(--admin-border-input)", backgroundColor: "var(--admin-bg-card)", color: "var(--admin-text-body)" }}
             autoFocus
           />
           <button
@@ -124,7 +126,8 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-[#C7D2E3] px-3 py-2 text-xs"
+            className="rounded-lg border px-3 py-2 text-xs"
+            style={{ borderColor: "var(--admin-border-input)", backgroundColor: "var(--admin-bg-card)", color: "var(--admin-text-body)" }}
             autoFocus
           />
           <button

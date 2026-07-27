@@ -1,4 +1,14 @@
-const WHATSAPP_URL = "https://wa.me/6282323040445";
+const MESSAGE = `Terima kasih telah menghubungi layanan WhatsApp KPKNL Bogor.
+
+Untuk memulai percakapan ini, silakan mengisi data di bawah ini terlebih dahulu:
+
+Nama:
+NIK:
+Alamat Email:
+Asal Unit Kerja/Perorangan:
+Pertanyaan/Keperluan:`;
+
+const WHATSAPP_URL = `https://wa.me/6282323040445?text=${encodeURIComponent(MESSAGE)}`;
 
 export default function FloatingWhatsApp() {
   return (
@@ -12,6 +22,7 @@ export default function FloatingWhatsApp() {
       <span className="pointer-events-none absolute right-full mr-3 hidden rounded-md bg-slate-950 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 sm:block">
         Chat WhatsApp
       </span>
+
       <i className="fa-brands fa-whatsapp text-3xl transition-transform duration-300 group-hover:scale-110 sm:text-4xl" />
     </a>
   );

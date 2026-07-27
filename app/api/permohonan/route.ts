@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendRow } from "@/lib/google/sheets";
+import { appendRow } from "@/lib/db";
 import { generateId } from "@/lib/generate-id";
 type Peran = "pemenang" | "kuasa";
 

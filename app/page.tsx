@@ -1,5 +1,6 @@
 import Footer from "@/components/footer";
 import HeroSlider from "@/components/hero-slider";
+import HomePersyaratan from "@/components/home-persyaratan";
 import Navbar from "@/components/navbar";
 import TrackingSection from "@/components/tracking-section";
 import FloatingWhatsApp from "@/components/whatsapp-button";
@@ -9,6 +10,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#F4F7FB] font-sans text-slate-900">
       <Navbar />
       <HeroSlider />
+      <HomePersyaratan />
       <TrackingSection />
       <section className="mt-20">
         <Footer />

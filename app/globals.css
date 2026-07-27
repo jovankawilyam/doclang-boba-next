@@ -13,10 +13,43 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+:root {
+  --admin-bg: #F4F7FB;
+  --admin-bg-card: #ffffff;
+  --admin-bg-sidebar: #ffffff;
+  --admin-bg-muted: #F8FAFC;
+  --admin-text-primary: #123C69;
+  --admin-text-body: #0f172a;
+  --admin-text-secondary: #64748b;
+  --admin-border: #D8E0EC;
+  --admin-border-input: #C7D2E3;
+  --admin-overlay: rgba(0, 0, 0, 0.3);
+  --admin-hover: #F4F7FB;
+}
+
+.dark {
+  --admin-bg: #0f172a;
+  --admin-bg-card: #1e293b;
+  --admin-bg-sidebar: #1e293b;
+  --admin-bg-muted: #334155;
+  --admin-text-primary: #60a5fa;
+  --admin-text-body: #f1f5f9;
+  --admin-text-secondary: #94a3b8;
+  --admin-border: #334155;
+  --admin-border-input: #475569;
+  --admin-overlay: rgba(0, 0, 0, 0.6);
+  --admin-hover: #334155;
+}
+
 body {
   background: #F4F7FB;
   color: #0f172a;
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+.dark body {
+  background: #0f172a;
+  color: #f1f5f9;
 }
 
 html {
