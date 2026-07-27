@@ -28,13 +28,13 @@ export default function HeroSlider() {
 
   return (
     <section className="w-full overflow-hidden">
-      <div className="relative w-full aspect-video max-h-[590px] overflow-hidden">
+      <div className="relative w-full min-h-[460px] overflow-hidden md:aspect-video md:min-h-0 md:max-h-[590px]">
         <img
           src={images[current]}
           alt="slider"
           className="h-full w-full object-cover object-center transition-all duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
         <button
           type="button"
           onClick={prevSlide}
@@ -56,18 +56,17 @@ export default function HeroSlider() {
             alt="Nagara Dana Rakça"
           />
           <h1
-            className="mt-4 animate-fade-slide-up max-w-2xl text-4xl font-bold text-white opacity-0 md:text-6xl"
+            className="mt-3 animate-fade-slide-up max-w-2xl text-2xl font-bold text-white opacity-0 md:mt-4 md:text-6xl"
             style={{ textShadow: "0 4px 12px rgba(0,0,0,0.6)", animationDelay: "200ms" }}
           >
             Selamat Datang di Doclang Boba
           </h1>
           <p
-            className="mt-2 animate-fade-slide-up max-w-xl text-base leading-relaxed text-white/90 opacity-0 md:text-xl"
+            className="mt-1 animate-fade-slide-up max-w-xl text-sm leading-relaxed text-white/90 opacity-0 md:mt-2 md:text-xl"
             style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)", animationDelay: "400ms" }}
           >
-            Terima kasih telah mengunjungi. Silakan lihat persyaratan di bawah
-            dan klik tombol formulir untuk mengajukan permohonan dokumen pasca
-            lelang.
+            Ajukan permohonan dokumen pasca lelang secara online. Cek status dan
+            ambil dokumen di KPKNL Bogor.
           </p>
           <a
             href="#persyaratan"

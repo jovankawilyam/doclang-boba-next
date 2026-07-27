@@ -74,9 +74,8 @@ export default function HomePersyaratan() {
   return (
     <section id="persyaratan" className="relative overflow-hidden bg-bg-light px-4 py-16 md:px-6 md:py-20">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-100/60 blur-3xl" />
-
-        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-100/40 blur-3xl" />
+        <div className="absolute -left-40 -top-40 hidden h-96 w-96 rounded-full bg-blue-100/60 blur-3xl md:block" />
+        <div className="absolute left-1/2 top-1/2 hidden h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-100/40 blur-3xl md:block" />
       </div>
 
       <div className="relative mx-auto max-w-6xl">
@@ -103,8 +102,8 @@ export default function HomePersyaratan() {
               key={idx}
               className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_4px_16px_0_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_32px_0_rgba(18,60,105,0.12)]"
             >
-              <div className="flex items-start gap-4 border-b border-slate-200 px-6 py-5">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm">
+              <div className="flex items-start gap-3 border-b border-slate-200 px-4 py-4 md:gap-4 md:px-6 md:py-5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm md:h-14 md:w-14">
                   {section.icon}
                 </div>
                 <h3 className="pt-1 text-lg font-bold leading-snug text-navy">
@@ -112,14 +111,14 @@ export default function HomePersyaratan() {
                 </h3>
               </div>
 
-              <div className="flex flex-1 flex-col px-6 py-5">
+              <div className="flex flex-1 flex-col px-4 py-4 md:px-6 md:py-5">
                 <div className="flex flex-1 flex-col gap-2">
                   {section.items.map((item, i) => (
                     <CheckItem key={i} text={item} />
                   ))}
                 </div>
 
-                <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
+                <div className="mt-4 space-y-3 border-t border-slate-200 pt-4 md:mt-5 md:pt-5">
                   {section.note && (
                     <p className="text-sm leading-relaxed text-slate-400">
                       {section.note}
@@ -134,9 +133,9 @@ export default function HomePersyaratan() {
                     </div>
                   )}
                   {section.warning && (
-                    <div className="flex items-start gap-2.5 rounded-xl border border-amber-900 bg-amber-50/90 px-4 py-3">
-                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-900" />
-                      <p className="text-sm leading-relaxed text-amber-900">
+                    <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                      <p className="text-sm leading-relaxed text-amber-800">
                         {section.warning}
                       </p>
                     </div>
@@ -150,9 +149,9 @@ export default function HomePersyaratan() {
         <div className="mt-12 text-center">
           <a
             href="/form"
-            className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-navy to-navy-light px-8 py-4 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-navy to-navy-light px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl md:px-8 md:py-4 md:text-base"
           >
-            Formulir
+            Ajukan Permohonan
             <ArrowRight className="h-4 w-4" />
           </a>
         </div>
