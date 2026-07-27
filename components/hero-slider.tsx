@@ -32,7 +32,7 @@ export default function HeroSlider() {
         <img
           src={images[current]}
           alt="slider"
-          className="h-full w-full object-cover object-top transition-all duration-700"
+          className="h-full w-full object-cover object-top transition-all duration-700 md:object-cover max-md:object-contain"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
         <button
