@@ -38,18 +38,18 @@ export default function AdminLoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#E8EDF5] via-[#F4F7FB] to-[#E8EDF5] font-sans">
-      <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-[#123C69]/5 blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#1E56A0]/5 blur-3xl" />
-      <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-[#123C69]/5 blur-3xl" />
+      <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-[#005FAC]/5 blur-3xl" />
+      <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#3388CC]/5 blur-3xl" />
+      <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-[#005FAC]/5 blur-3xl" />
 
-      <div className="flex w-full max-w-5xl rounded-2xl bg-white shadow-2xl shadow-[#123C69]/15 overflow-hidden">
-        <div className="hidden lg:flex w-[42%] relative flex-col bg-[#123C69]">
+      <div className="flex w-full max-w-5xl rounded-2xl bg-white shadow-2xl shadow-[#005FAC]/15 overflow-hidden">
+        <div className="hidden lg:flex w-[42%] relative flex-col bg-[#005FAC]">
           <img
             src="/profile/profile4.jpeg"
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#123C69]/90 via-[#123C69]/75 to-[#0F2D4E]/95" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#005FAC]/90 via-[#005FAC]/75 to-[#004A8A]/95" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
           <div className="relative z-10 flex flex-col justify-between min-h-full">
             <div className="p-10 pb-0">
@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
                 <div className="h-14 w-px bg-[#D8E0EC]" />
                 <img src="/images/kpknl-bogor.png" alt="KPKNL Bogor" className="h-14 w-auto object-contain" />
               </div>
-              <h1 className="text-[1.35rem] font-bold text-[#123C69] tracking-tight">LOGIN ADMIN</h1>
+              <h1 className="text-[1.35rem] font-bold text-[#005FAC] tracking-tight">LOGIN ADMIN</h1>
               <p className="mt-1.5 text-sm text-slate-400">Masukkan password untuk melanjutkan</p>
             </div>
 
@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 pr-11 text-sm placeholder:text-slate-400 focus:border-[#1E56A0] focus:outline-none focus:ring-2 focus:ring-[#1E56A0]/10 transition-all duration-200"
+                    className="block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 pr-11 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200"
                     placeholder="Masukkan password"
                     autoFocus
                     required
@@ -121,7 +121,7 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading || !password}
-                className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#123C69] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#123C69]/20 hover:bg-[#1E56A0] hover:shadow-xl hover:shadow-[#123C69]/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#005FAC] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#005FAC]/20 hover:bg-[#3388CC] hover:shadow-xl hover:shadow-[#005FAC]/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
               >
                 {loading ? (
                   <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -138,7 +138,7 @@ export default function AdminLoginPage() {
             <div className="mt-8 pt-6 border-t border-[#D8E0EC]/40 text-center">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-[#1E56A0] transition-colors duration-200"
+                className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-[#3388CC] transition-colors duration-200"
               >
                 <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 12H5m7-7l-7 7 7 7" />

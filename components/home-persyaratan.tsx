@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -5,9 +8,10 @@ import {
   FileCheck,
   Info,
   ShieldCheck,
+  X,
 } from "lucide-react";
 
-const data = [
+const layanan = [
   {
     title: "Pemberian Kuitansi Pembayaran Harga Lelang",
     icon: <ClipboardList className="h-8 w-8 text-navy-light" />,
@@ -51,98 +55,43 @@ const data = [
   },
 ];
 
-function CheckItem({ text }: { text: string }) {
-  return (
-    <div className="group flex items-start gap-3 rounded-xl bg-white px-4 py-3 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] transition-all hover:shadow-[0_4px_12px_0_rgba(18,60,105,0.08)]">
-      <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-        <svg
-          className="h-3 w-3 text-emerald-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={3}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <span className="text-base leading-relaxed text-slate-700">{text}</span>
-    </div>
-  );
-}
-
 export default function HomePersyaratan() {
+  const [selected, setSelected] = useState<number | null>(null);
+
   return (
     <section id="persyaratan" className="relative overflow-hidden bg-bg-light px-4 py-16 md:px-6 md:py-20">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 hidden h-96 w-96 rounded-full bg-blue-100/60 blur-3xl md:block" />
         <div className="absolute left-1/2 top-1/2 hidden h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-100/40 blur-3xl md:block" />
       </div>
-
+      <br /><br /><br /><br />
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-4 py-1.5 text-sm font-medium text-navy-light">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Persyaratan
-          </div>
           <h2 className="text-3xl font-bold text-navy md:text-5xl">
             Siapkan Berkas Anda
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-500 md:text-lg">
-            Lengkapi dokumen persyaratan sesuai layanan yang dipilih agar proses
-            permohonan berjalan lancar.
+            Pilih jenis layanan untuk melihat persyaratan dokumen yang diperlukan.
           </p>
           <div className="mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-navy to-orange" />
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {data.map((section, idx) => (
-            <div
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {layanan.map((item, idx) => (
+            <button
               key={idx}
-              className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_4px_16px_0_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_32px_0_rgba(18,60,105,0.12)]"
+              onClick={() => setSelected(idx)}
+              className="group flex cursor-pointer flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center shadow-[0_4px_16px_0_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_32px_0_rgba(18,60,105,0.12)]"
             >
-              <div className="flex items-start gap-3 border-b border-slate-200 px-4 py-4 md:gap-4 md:px-6 md:py-5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm md:h-14 md:w-14">
-                  {section.icon}
-                </div>
-                <h3 className="pt-1 text-lg font-bold leading-snug text-navy">
-                  {section.title}
-                </h3>
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm transition-transform group-hover:scale-110">
+                {item.icon}
               </div>
-
-              <div className="flex flex-1 flex-col px-4 py-4 md:px-6 md:py-5">
-                <div className="flex flex-1 flex-col gap-2">
-                  {section.items.map((item, i) => (
-                    <CheckItem key={i} text={item} />
-                  ))}
-                </div>
-
-                <div className="mt-4 space-y-3 border-t border-slate-200 pt-4 md:mt-5 md:pt-5">
-                  {section.note && (
-                    <p className="text-sm leading-relaxed text-slate-400">
-                      {section.note}
-                    </p>
-                  )}
-                  {section.info && (
-                    <div className="flex items-start gap-2.5 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3">
-                      <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
-                      <p className="text-sm leading-relaxed text-blue-800">
-                        {section.info}
-                      </p>
-                    </div>
-                  )}
-                  {section.warning && (
-                    <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3">
-                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                      <p className="text-sm leading-relaxed text-amber-800">
-                        {section.warning}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+              <h3 className="text-lg font-bold text-navy">{item.title}</h3>
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-orange">
+                Lihat Persyaratan
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </button>
           ))}
         </div>
 
@@ -156,6 +105,83 @@ export default function HomePersyaratan() {
           </a>
         </div>
       </div>
+
+      {selected !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm">
+                  {layanan[selected].icon}
+                </div>
+                <h3 className="text-lg font-bold leading-snug text-navy">
+                  {layanan[selected].title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto px-6 py-5">
+              <div className="flex flex-col gap-2">
+                {layanan[selected].items.map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-xl bg-white px-4 py-3 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] transition-all hover:shadow-[0_4px_12px_0_rgba(18,60,105,0.08)]"
+                  >
+                    <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                      <svg
+                        className="h-3 w-3 text-emerald-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-base leading-relaxed text-slate-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
+                {layanan[selected].note && (
+                  <p className="text-sm leading-relaxed text-slate-400">
+                    {layanan[selected].note}
+                  </p>
+                )}
+                {layanan[selected].info && (
+                  <div className="flex items-start gap-2.5 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                    <p className="text-sm leading-relaxed text-blue-800">
+                      {layanan[selected].info}
+                    </p>
+                  </div>
+                )}
+                {layanan[selected].warning && (
+                  <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                    <p className="text-sm leading-relaxed text-amber-800">
+                      {layanan[selected].warning}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

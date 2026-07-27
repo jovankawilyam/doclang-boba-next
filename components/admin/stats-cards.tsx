@@ -10,10 +10,10 @@ type Stats = {
 
 const CARD_CONFIG = [
   { label: "Total", key: "total" as const, color: "var(--admin-text-primary)", bg: "var(--admin-bg)", border: "var(--admin-border)", icon: FileText },
-  { label: "Proses", key: "proses" as const, color: "#92400e", bg: "#fffbeb", border: "#fde68a", icon: Clock },
-  { label: "Siap Diambil", key: "siap_diambil" as const, color: "#065f46", bg: "#ecfdf5", border: "#a7f3d0", icon: CheckCircle },
-  { label: "Tidak Valid", key: "tidak_valid" as const, color: "#991b1b", bg: "#fef2f2", border: "#fecaca", icon: XCircle },
-  { label: "Selesai", key: "selesai" as const, color: "#1e40af", bg: "#eff6ff", border: "#bfdbfe", icon: Inbox },
+  { label: "Proses", key: "proses" as const, color: "#FAB715", bg: "#FEF3C7", border: "#FDE68A", icon: Clock },
+  { label: "Siap Diambil", key: "siap_diambil" as const, color: "#005FAC", bg: "#E6F0FA", border: "#B3D4F0", icon: CheckCircle },
+  { label: "Tidak Valid", key: "tidak_valid" as const, color: "#DC2626", bg: "#FEE2E2", border: "#FECACA", icon: XCircle },
+  { label: "Selesai", key: "selesai" as const, color: "#02A54F", bg: "#E8F8F0", border: "#A8E6C0", icon: Inbox },
 ];
 
 export function StatsCards({ stats }: { stats: Stats }) {

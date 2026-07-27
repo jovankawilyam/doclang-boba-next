@@ -8,7 +8,7 @@ import { StatsCards } from "./stats-cards";
 import { StatusBadge } from "./status-badge";
 import { ExternalLink, Inbox } from "lucide-react";
 
-const COLORS = { Kuitansi: "#1E56A0", "Kutipan RL": "#f28e2b", "Validasi PPh": "#10B981" };
+const COLORS = { Kuitansi: "#005FAC", "Kutipan RL": "#FAB715", "Validasi PPh": "#02A54F" };
 
 type Stats = { total: number; proses: number; siap_diambil: number; tidak_valid: number; selesai: number };
 type Row = Record<string, string>;

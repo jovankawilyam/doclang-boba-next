@@ -20,7 +20,7 @@ export default function FormPage() {
           >
             <ChevronLeft className="h-6 w-6 text-gray-600" />
           </Link>
-          <span className="justify-self-center font-bold tracking-widest text-[#1E56A0] uppercase">
+          <span className="justify-self-center font-bold tracking-widest text-[#3388CC] uppercase">
             Formulir
           </span>
         </div>

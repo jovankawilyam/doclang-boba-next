@@ -50,11 +50,18 @@ export default function HeroSlider() {
           ›
         </button>
         <div className="absolute inset-0 z-10 flex select-none flex-col items-start justify-center px-6 pt-8 md:px-16 md:pt-16">
-          <img
+          <div className="flex items-center gap-4">
+            <img
             className="h-[80px] w-auto animate-fade-slide-down object-contain drop-shadow-lg md:h-[100px]"
             src="/images/NAGARA-DANA-RAKCA.png"
             alt="Nagara Dana Rakça"
-          />
+            />
+            <img
+            className="h-[80px] w-auto animate-fade-slide-down object-contain drop-shadow-lg md:h-[100px]"
+            src="/images/kpknl-bogor.png"
+            alt=""
+            />
+          </div>
           <h1
             className="mt-3 animate-fade-slide-up max-w-2xl text-2xl font-bold text-white opacity-0 md:mt-4 md:text-6xl"
             style={{ textShadow: "0 4px 12px rgba(0,0,0,0.6)", animationDelay: "200ms" }}
@@ -65,12 +72,12 @@ export default function HeroSlider() {
             className="mt-1 animate-fade-slide-up max-w-xl text-sm leading-relaxed text-white/90 opacity-0 md:mt-2 md:text-xl"
             style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)", animationDelay: "400ms" }}
           >
-            Ajukan permohonan dokumen pasca lelang secara online. Cek status dan
-            ambil dokumen di KPKNL Bogor.
+            Ajukan permohonan dokumen pasca lelang secara online. <br />
+            Cek status dan ambil dokumen di KPKNL Bogor.
           </p>
           <a
             href="#persyaratan"
-            className="mt-6 animate-fade-slide-up inline-flex items-center gap-2 rounded-lg bg-orange px-6 py-3 text-sm font-semibold text-white opacity-0 shadow-lg transition hover:bg-amber-600 md:text-base"
+            className="mt-6 animate-fade-slide-up inline-flex items-center gap-2 rounded-lg bg-orange px-6 py-3 text-sm font-semibold text-white opacity-0 shadow-lg transition hover:bg-[#E0A312] md:text-base"
             style={{ animationDelay: "600ms" }}
           >
             Lihat Persyaratan

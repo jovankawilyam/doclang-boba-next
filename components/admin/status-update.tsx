@@ -70,9 +70,9 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
   }
 
   const BUTTONS = [
-    { label: "Siap Diambil", value: "Siap Diambil", active: "bg-emerald-600 text-white", inactive: "border border-emerald-300 text-emerald-700 hover:bg-emerald-50" },
-    { label: "Tidak Valid", value: "Tidak Valid", active: "bg-red-600 text-white", inactive: "border border-red-300 text-red-700 hover:bg-red-50" },
-    { label: "Selesai", value: "Selesai", active: "bg-blue-600 text-white", inactive: "border border-blue-300 text-blue-700 hover:bg-blue-50" },
+    { label: "Siap Diambil", value: "Siap Diambil", color: "#005FAC" },
+    { label: "Tidak Valid", value: "Tidak Valid", color: "#DC2626" },
+    { label: "Selesai", value: "Selesai", color: "#02A54F" },
   ];
 
   return (
@@ -80,23 +80,31 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
       <p className="mb-3 text-xs font-bold tracking-wider uppercase" style={{ color: "var(--admin-text-primary)" }}>Update Status</p>
 
       <div className="flex flex-wrap gap-2">
-        {BUTTONS.map((s) => (
-          <button
-            key={s.label}
-            onClick={() => {
-              setActionType(actionType === s.value ? "" : s.value);
-              setReason("");
-              setDate("");
-              setWaResult(null);
-            }}
-            disabled={loading}
-            className={`rounded-lg px-4 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
-              actionType === s.value ? s.active : s.inactive
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
+        {BUTTONS.map((s) => {
+          const isActive = actionType === s.value;
+          return (
+            <button
+              key={s.label}
+              onClick={() => {
+                setActionType(isActive ? "" : s.value);
+                setReason("");
+                setDate("");
+                setWaResult(null);
+              }}
+              disabled={loading}
+              className="rounded-lg px-4 py-2 text-xs font-bold transition-colors disabled:opacity-50"
+              style={{
+                backgroundColor: isActive ? s.color : "transparent",
+                color: isActive ? "#fff" : s.color,
+                border: `1px solid ${isActive ? s.color : s.color}40`,
+              }}
+              onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = `${s.color}10`; }}
+              onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = "transparent"; }}
+            >
+              {s.label}
+            </button>
+          );
+        })}
       </div>
 
       {actionType === "Tidak Valid" && (
@@ -113,7 +121,10 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
           <button
             onClick={() => setConfirm("Tidak Valid")}
             disabled={loading || !reason.trim()}
-            className="rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+            style={{ backgroundColor: "#DC2626" }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#B91C1C"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#DC2626"}
           >
             {loading ? "..." : "Konfirmasi Tolak"}
           </button>
@@ -133,7 +144,10 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
           <button
             onClick={() => setConfirm("Selesai")}
             disabled={loading || !date}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+            style={{ backgroundColor: "#02A54F" }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#028840"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#02A54F"}
           >
             {loading ? "..." : "Konfirmasi Selesai"}
           </button>
@@ -145,7 +159,10 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
           <button
             onClick={() => setConfirm("Siap Diambil")}
             disabled={loading}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+            style={{ backgroundColor: "#005FAC" }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#004A8A"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#005FAC"}
           >
             {loading ? "..." : "Konfirmasi Siap Diambil"}
           </button>
@@ -161,10 +178,10 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
         confirmLabel={confirm ?? ""}
         confirmClass={
           confirm === "Siap Diambil"
-            ? "bg-emerald-600 hover:bg-emerald-700"
+            ? "bg-[#005FAC] hover:bg-[#004A8A]"
             : confirm === "Tidak Valid"
-              ? "bg-red-600 hover:bg-red-700"
-              : "bg-blue-600 hover:bg-blue-700"
+              ? "bg-[#DC2626] hover:bg-[#B91C1C]"
+              : "bg-[#02A54F] hover:bg-[#028840]"
         }
         loading={loading}
         onConfirm={() => confirm && handleAction(confirm)}

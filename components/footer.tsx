@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full bg-blue-800 py-16 text-white">
+    <footer className="w-full bg-[#005FAC] py-16 text-white">
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2 md:px-8">
         <div className="flex flex-col gap-8">
           <div className="flex items-center gap-6">
@@ -23,13 +23,13 @@ export default function Footer() {
               Jalan Veteran No. 45, Panaragan, Kecamatan Bogor Tengah, Kota
               Bogor, Jawa Barat 16125
             </p>
-            <p className="text-center text-xs text-blue-800">
+            <p className="text-center text-xs text-white/60">
               Build by{" "}
               <a
                 href="https://www.instagram.com/jovankawilyamm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-blue transition-colors duration-200"
+                className="hover:text-white transition-colors duration-200"
               >
                 @jovankawilyamm
               </a>
@@ -39,7 +39,7 @@ export default function Footer() {
 
         <div className="flex flex-col items-start gap-8 md:items-end">
           <div className="flex flex-col items-start md:items-end">
-            <p className="mb-2 text-lg font-bold tracking-widest text-blue-100 uppercase">
+            <p className="mb-2 text-lg font-bold tracking-widest text-white/80 uppercase">
               Ikuti Kami
             </p>
             <div className="h-1.5 w-16 rounded-full bg-white" />
@@ -75,9 +75,9 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <p className="text-left text-xs leading-loose font-bold tracking-widest text-blue-100 uppercase md:text-right md:text-sm">
+          <p className="text-left text-xs leading-loose font-bold tracking-widest text-white/80 uppercase md:text-right md:text-sm">
             Kantor Pelayanan Kekayaan Negara dan Lelang Bogor <br />
-            <span className="text-blue-100">@kpknlbogor</span>
+            <span className="text-white/80">@kpknlbogor</span>
           </p>
         </div>
       </div>

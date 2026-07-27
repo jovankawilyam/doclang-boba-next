@@ -2,11 +2,11 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 
 @theme inline {
-  --color-navy: #123C69;
-  --color-navy-light: #1E56A0;
+  --color-navy: #005FAC;
+  --color-navy-light: #3388CC;
   --color-blue-light: #C7D2E3;
-  --color-bg-light: #F4F7FB;
-  --color-orange: #f28e2b;
+  --color-bg-light: #F8FAFC;
+  --color-orange: #FAB715;
   --color-background: var(--color-bg-light);
   --color-foreground: #171717;
   --font-sans: var(--font-roboto);
@@ -28,11 +28,11 @@
 
 
 :root {
-  --admin-bg: #F4F7FB;
+  --admin-bg: #F8FAFC;
   --admin-bg-card: #ffffff;
   --admin-bg-sidebar: #ffffff;
   --admin-bg-muted: #F8FAFC;
-  --admin-text-primary: #123C69;
+  --admin-text-primary: #005FAC;
   --admin-text-body: #0f172a;
   --admin-text-secondary: #64748b;
   --admin-border: #D8E0EC;
@@ -56,7 +56,7 @@
 }
 
 body {
-  background: #F4F7FB;
+  background: #F8FAFC;
   color: #0f172a;
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }

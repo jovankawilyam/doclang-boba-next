@@ -38,19 +38,19 @@ export default function Navbar() {
         <div className="hidden items-center gap-8 md:flex">
           <Link
             href="/#tracking"
-            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#123C69] hover:text-[#123C69] rounded-lg py-2 transition-all duration-300"
+            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Lacak Dokumen
           </Link>
           <a
             href="/form"
-            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#123C69] hover:text-[#123C69] rounded-lg py-2 transition-all duration-300"
+            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Formulir
           </a>
           <a
             href="/persyaratan"
-            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#123C69] hover:text-[#123C69] rounded-lg py-2 transition-all duration-300"
+            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Persyaratan
           </a>
@@ -58,7 +58,7 @@ export default function Navbar() {
             href="https://sites.google.com/view/kpknlbogor-standarpelayanan?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#123C69] hover:text-[#123C69] rounded-lg py-2 transition-all duration-300"
+            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Standar Pelayanan
           </a>
@@ -66,13 +66,13 @@ export default function Navbar() {
             href="https://sites.google.com/view/kpknlbogor-tariflayanan?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#123C69] hover:text-[#123C69] rounded-lg py-2 transition-all duration-300"
+            className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Tarif Layanan
           </a>
           <Link
             href="/admin/login"
-            className="text-base font-extrabold text-slate-500 border-2 border-[#C7D2E3] hover:border-[#123C69] hover:text-[#123C69] rounded-lg px-3 py-2 transition-all duration-300"
+            className="text-base font-extrabold text-slate-500 border-2 border-[#C7D2E3] hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg px-3 py-2 transition-all duration-300"
           >
             Login
           </Link>

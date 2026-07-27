@@ -66,7 +66,7 @@ export default function PersyaratanPage() {
           >
             <ChevronLeft className="h-6 w-6 text-gray-600" />
           </Link>
-          <span className="justify-self-center font-bold tracking-widest text-[#1E56A0] uppercase">
+          <span className="justify-self-center font-bold tracking-widest text-[#3388CC] uppercase">
             Persyaratan
           </span>
         </div>
@@ -85,7 +85,7 @@ export default function PersyaratanPage() {
             <a
               href="/pdf/syarat_layanan_lelang.pdf"
               download
-              className="inline-flex items-center gap-2 rounded-lg border border-admin-border bg-white px-4 py-2.5 text-sm font-medium text-admin-text-secondary shadow-sm transition-all hover:border-navy-light hover:text-navy-light"
+              className="inline-flex items-center gap-2 rounded-lg border border-admin-border bg-white px-4 py-2.5 text-sm font-medium text-admin-text-secondary shadow-sm transition-all hover:border-[#3388CC] hover:text-[#3388CC]"
             >
               <FileDown className="h-4 w-4" />
               Unduh Dokumen PDF Resmi
@@ -162,7 +162,7 @@ export default function PersyaratanPage() {
             </div>
             <a
               href="/form"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-navy-light px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-navy"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#3388CC] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#005FAC]"
             >
               Isi Form Pengajuan
               <ArrowRight className="h-4 w-4" />
