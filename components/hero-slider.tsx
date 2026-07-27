@@ -32,7 +32,7 @@ export default function HeroSlider() {
         <img
           src={images[current]}
           alt="slider"
-          className="h-full w-full object-cover object-center transition-all duration-700"
+          className="h-full w-full object-cover object-top transition-all duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
         <button
@@ -76,12 +76,12 @@ export default function HeroSlider() {
             Cek status dan ambil dokumen di KPKNL Bogor.
           </p>
           <a
-            href="#persyaratan"
-            className="mt-6 animate-fade-slide-up inline-flex items-center gap-2 rounded-lg bg-orange px-6 py-3 text-sm font-semibold text-white opacity-0 shadow-lg transition hover:bg-[#E0A312] md:text-base"
-            style={{ animationDelay: "600ms" }}
-          >
-            Lihat Persyaratan
-          </a>
+  href="#persyaratan"
+  className="mt-6 inline-flex animate-fade-slide-up items-center gap-2 rounded-xl border-2 border-white px-6 py-3 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-white hover:text-[#123C69] hover:shadow-lg md:text-base"
+  style={{ animationDelay: "600ms" }}
+>
+  Lihat Persyaratan
+</a>
         </div>
       </div>
       <div className="mt-4 flex justify-center gap-2">
