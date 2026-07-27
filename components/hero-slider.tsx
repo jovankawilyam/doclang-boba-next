@@ -27,62 +27,70 @@ export default function HeroSlider() {
   const nextSlide = () => setCurrent((v) => (v + 1) % images.length);
 
   return (
-    <>
-      <section className="w-full overflow-hidden">
-        <div className="relative w-full aspect-video max-h-[590px] overflow-hidden">
+    <section className="w-full overflow-hidden">
+      <div className="relative w-full aspect-video max-h-[590px] overflow-hidden">
+        <img
+          src={images[current]}
+          alt="slider"
+          className="h-full w-full object-cover object-center transition-all duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+        <button
+          type="button"
+          onClick={prevSlide}
+          className="absolute top-1/2 left-4 z-20 -translate-y-1/2 rounded-full bg-white/20 px-3 py-2 text-white backdrop-blur-sm transition hover:bg-white/40"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          onClick={nextSlide}
+          className="absolute top-1/2 right-4 z-20 -translate-y-1/2 rounded-full bg-white/20 px-3 py-2 text-white backdrop-blur-sm transition hover:bg-white/40"
+        >
+          ›
+        </button>
+        <div className="absolute inset-0 z-10 flex select-none flex-col items-start justify-center px-6 pt-8 md:px-16 md:pt-16">
           <img
-            src={images[current]}
-            alt="slider"
-            className="h-full w-full object-cover object-center transition-all duration-700"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-          <button
-            type="button"
-            onClick={prevSlide}
-            className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-white/20 backdrop-blur-sm px-3 py-2 text-white transition hover:bg-white/40"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={nextSlide}
-            className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-white/20 backdrop-blur-sm px-3 py-2 text-white transition hover:bg-white/40"
-          >
-            ›
-          </button>
-        </div>
-        <div className="mt-4 flex justify-center gap-2">
-          {images.map((image, index) => (
-            <button
-              key={image}
-              type="button"
-              aria-label={`Slide ${index + 1}`}
-              onClick={() => setCurrent(index)}
-              className={`h-3 w-3 rounded-full transition ${
-                current === index ? "bg-blue-700" : "bg-slate-300"
-              }`}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto flex w-full max-w-6xl items-center justify-center px-4 py-8 md:px-6 md:py-10">
-        <div className="flex flex-col items-center gap-4 select-none">
-          <img
-            className="h-[80px] w-auto object-contain md:h-[100px]"
+            className="h-[80px] w-auto animate-fade-slide-down object-contain drop-shadow-lg md:h-[100px]"
             src="/images/NAGARA-DANA-RAKCA.png"
             alt="Nagara Dana Rakça"
           />
-          <h1 className="text-center text-4xl font-bold text-navy md:text-6xl">
+          <h1
+            className="mt-4 animate-fade-slide-up max-w-2xl text-4xl font-bold text-white opacity-0 md:text-6xl"
+            style={{ textShadow: "0 4px 12px rgba(0,0,0,0.6)", animationDelay: "200ms" }}
+          >
             Selamat Datang di Doclang Boba
           </h1>
-          <p className="max-w-2xl text-center text-base leading-relaxed text-slate-500 md:text-xl">
+          <p
+            className="mt-2 animate-fade-slide-up max-w-xl text-base leading-relaxed text-white/90 opacity-0 md:text-xl"
+            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)", animationDelay: "400ms" }}
+          >
             Terima kasih telah mengunjungi. Silakan lihat persyaratan di bawah
             dan klik tombol formulir untuk mengajukan permohonan dokumen pasca
             lelang.
           </p>
+          <a
+            href="#persyaratan"
+            className="mt-6 animate-fade-slide-up inline-flex items-center gap-2 rounded-lg bg-orange px-6 py-3 text-sm font-semibold text-white opacity-0 shadow-lg transition hover:bg-amber-600 md:text-base"
+            style={{ animationDelay: "600ms" }}
+          >
+            Lihat Persyaratan
+          </a>
         </div>
-      </section>
-    </>
+      </div>
+      <div className="mt-4 flex justify-center gap-2">
+        {images.map((image, index) => (
+          <button
+            key={image}
+            type="button"
+            aria-label={`Slide ${index + 1}`}
+            onClick={() => setCurrent(index)}
+            className={`h-3 w-3 rounded-full transition ${
+              current === index ? "bg-blue-700" : "bg-slate-300"
+            }`}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
