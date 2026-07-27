@@ -23,17 +23,15 @@ export default function Footer() {
               Jalan Veteran No. 45, Panaragan, Kecamatan Bogor Tengah, Kota
               Bogor, Jawa Barat 16125
             </p>
-            <p className="text-center text-xs text-white/60">
-              Build by{" "}
-              <a
-                href="https://www.instagram.com/jovankawilyamm"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors duration-200"
-              >
-                @jovankawilyamm
-              </a>
-            </p>
+            
+            <a
+              href="https://www.instagram.com/jovankawilyamm"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[#005FAC] transition-colors duration-300 font-semibold text-[16px]"
+            >
+              build by : @jovankawilyamm
+            </a>
           </div>
         </div>
 

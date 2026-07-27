@@ -321,7 +321,7 @@ export default function TrackingSection() {
     <button
       type="submit"
       disabled={searchLoading || !query}
-      className="flex h-16 items-center justify-center gap-2 rounded-xl bg-[#005FAC] px-7 text-lg font-bold text-white transition hover:bg-[#004A8A] hover:shadow-lg hover:shadow-[#005FAC]/20 disabled:cursor-not-allowed disabled:opacity-70"
+      className="flex h-16 items-center justify-center gap-2 rounded-xl bg-[#005FAC] px-7 text-lg font-bold text-white transition hover:bg-[#004A8A] hover:shadow-lg hover:shadow-[#005FAC]/20 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {searchLoading ? (
         <>
