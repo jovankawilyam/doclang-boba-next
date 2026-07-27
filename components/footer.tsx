@@ -28,7 +28,7 @@ export default function Footer() {
               href="https://www.instagram.com/jovankawilyamm"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[#005FAC] transition-colors duration-300 font-semibold text-[16px]"
+              className="text-[#005FAC] transition-colors duration-300 font-semibold text-[px]"
             >
               build by : @jovankawilyamm
             </a>

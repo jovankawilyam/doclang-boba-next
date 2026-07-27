@@ -28,13 +28,13 @@ export default function HeroSlider() {
 
   return (
     <section className="w-full overflow-hidden">
-      <div className="relative w-full min-h-[460px] overflow-hidden md:aspect-video md:min-h-0 md:max-h-[590px]">
+      <div className="relative w-full aspect-video overflow-hidden md:max-h-[590px]">
         <img
           src={images[current]}
           alt="slider"
-          className="h-full w-full object-cover object-top transition-all duration-700 md:object-cover max-md:object-contain"
+          className="h-full w-full object-cover object-center transition-all duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
         <button
           type="button"
           onClick={prevSlide}
@@ -49,7 +49,7 @@ export default function HeroSlider() {
         >
           ›
         </button>
-        <div className="absolute inset-0 z-10 flex select-none flex-col items-start justify-center px-6 pt-8 md:px-16 md:pt-16">
+        <div className="absolute inset-0 z-10 hidden select-none flex-col items-start justify-center md:flex md:px-16 md:pt-16">
           <div className="flex items-center gap-4">
             <img
             className="h-[80px] w-auto animate-fade-slide-down object-contain drop-shadow-lg md:h-[100px]"
@@ -92,10 +92,36 @@ export default function HeroSlider() {
             aria-label={`Slide ${index + 1}`}
             onClick={() => setCurrent(index)}
             className={`h-3 w-3 rounded-full transition ${
-              current === index ? "bg-blue-700" : "bg-slate-300"
+              current === index ? "bg-[#005FAC]" : "bg-slate-300"
             }`}
           />
         ))}
+      </div>
+      <div className="flex flex-col items-center text-center md:hidden bg-white border-b border-slate-200 px-6 py-8">
+        <div className="flex items-center gap-3">
+          <img
+            className="h-14 w-auto object-contain"
+            src="/images/NAGARA-DANA-RAKCA.png"
+            alt="Nagara Dana Rakça"
+          />
+          <img
+            className="h-14 w-auto object-contain"
+            src="/images/kpknl-bogor.png"
+            alt="KPKNL Bogor"
+          />
+        </div>
+        <h1 className="mt-4 text-2xl font-bold text-[#005FAC] max-w-xs leading-tight">
+          Selamat Datang di Doclang Boba
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-slate-600 max-w-sm">
+          Ajukan permohonan dokumen pasca lelang secara online. Cek status dan ambil dokumen di KPKNL Bogor.
+        </p>
+        <a
+          href="#persyaratan"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#005FAC] px-6 py-3 text-sm font-semibold text-white shadow-md active:scale-95 transition-all hover:bg-[#004A8C]"
+        >
+          Lihat Persyaratan
+        </a>
       </div>
     </section>
   );
