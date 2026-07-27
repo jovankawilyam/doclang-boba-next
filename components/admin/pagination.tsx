@@ -25,6 +25,14 @@ export function Pagination({ page, totalPages, total, onPageChange }: Props) {
   const [jump, setJump] = useState("");
   const [focused, setFocused] = useState(false);
 
+  const handleJump = useCallback(() => {
+    const num = parseInt(jump, 10);
+    if (!isNaN(num) && num >= 1 && num <= totalPages) {
+      onPageChange(num);
+      setJump("");
+    }
+  }, [jump, totalPages, onPageChange]);
+
   if (totalPages <= 1) return null;
 
   const pages: number[] = [];
@@ -34,14 +42,6 @@ export function Pagination({ page, totalPages, total, onPageChange }: Props) {
   if (page - range < 1) end = Math.min(totalPages, end + (range - page + 1));
   if (page + range > totalPages) start = Math.max(1, start - (page + range - totalPages));
   for (let i = start; i <= end; i++) pages.push(i);
-
-  const handleJump = useCallback(() => {
-    const num = parseInt(jump, 10);
-    if (!isNaN(num) && num >= 1 && num <= totalPages) {
-      onPageChange(num);
-      setJump("");
-    }
-  }, [jump, totalPages, onPageChange]);
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 border-t px-4 py-3"
