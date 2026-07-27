@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRows, updateRow, appendRow } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 function getSheetFromId(id: string): { sheetName: string; idColumn: string } | null {
   if (id.includes("/KPHL/")) return { sheetName: "Kuitansi", idColumn: "ID KPHL" };
   if (id.includes("/K-RL/")) return { sheetName: "Kutipan RL", idColumn: "ID K-RL" };
