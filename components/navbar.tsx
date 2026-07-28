@@ -54,22 +54,18 @@ export default function Navbar() {
           >
             Persyaratan
           </a>
-          <a
-            href="https://sites.google.com/view/kpknlbogor-standarpelayanan?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/standar-pelayanan"
             className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Standar Pelayanan
-          </a>
-          <a
-            href="https://sites.google.com/view/kpknlbogor-tariflayanan?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
+          </Link>
+          <Link
+            href="/tarif-layanan"
             className="text-base font-extrabold text-slate-600 border-2 border-transparent hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg py-2 transition-all duration-300"
           >
             Tarif Layanan
-          </a>
+          </Link>
           <Link
             href="/admin/login"
             className="text-base font-extrabold text-slate-500 border-2 border-[#C7D2E3] hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg px-3 py-2 transition-all duration-300"
@@ -117,24 +113,20 @@ export default function Navbar() {
           >
             Formulir
           </a>
-          <a
-            href="https://sites.google.com/view/kpknlbogor-standarpelayanan?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/standar-pelayanan"
             onClick={() => setOpen(false)}
             className="block rounded-xl bg-[#F4F7FB] px-4 py-3 text-base font-bold text-slate-700"
           >
             Standar Pelayanan
-          </a>
-          <a
-            href="https://sites.google.com/view/kpknlbogor-tariflayanan?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
+          </Link>
+          <Link
+            href="/tarif-layanan"
             onClick={() => setOpen(false)}
             className="block rounded-xl bg-[#F4F7FB] px-4 py-3 text-base font-bold text-slate-700"
           >
             Tarif Layanan
-          </a>
+          </Link>
           <Link
             href="/admin/login"
             onClick={() => setOpen(false)}
