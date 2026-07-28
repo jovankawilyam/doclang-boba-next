@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
     const searchQuery = searchParams.get("search")?.toLowerCase();
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20));
+    const all = searchParams.get("all") === "true";
 
     const rows = await getRows("Monitoring");
     const headers = [
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     const total = filtered.length;
     const totalPages = Math.ceil(total / limit);
-    const paginated = filtered.slice((page - 1) * limit, page * limit);
+    const paginated = all ? filtered : filtered.slice((page - 1) * limit, page * limit);
 
     const baseForStats = layananFilter
       ? result.filter((r) => r["Jenis Layanan"] === layananFilter)

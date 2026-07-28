@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, FileText, BookOpen, FileCheck, History, Settings, LogOut, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/admin/theme-toggle";
 
 const NAV_ITEMS = [
@@ -19,12 +19,14 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("admin_sidebar_collapsed") === "true";
-    }
-    return false;
-  });
+  const [collapsed, setCollapsed] = useState(false);
+  const hydrated = useRef(false);
+
+  useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+    setCollapsed(localStorage.getItem("admin_sidebar_collapsed") === "true");
+  }, []);
 
   function handleLogout() {
     sessionStorage.removeItem("admin_token");

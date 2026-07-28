@@ -1,20 +1,43 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { getAuthHeaders } from "@/lib/admin-fetch";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const checked = useRef(false);
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (checked.current) return;
-    checked.current = true;
-    const ok = !!sessionStorage.getItem("admin_token");
-    if (!ok) router.replace("/admin/login");
+    const token = sessionStorage.getItem("admin_token");
+    if (!token) {
+      router.replace("/admin/login");
+      return;
+    }
+
+    fetch("/api/admin/auth", { headers: getAuthHeaders() })
+      .then((res) => {
+        if (!res.ok) {
+          sessionStorage.removeItem("admin_token");
+          router.replace("/admin/login");
+        } else {
+          setAuthorized(true);
+        }
+      })
+      .catch(() => {
+        setAuthorized(true); // Allow optimistically on network error
+      });
   }, [router]);
+
+  if (authorized === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--admin-bg)" }}>
+        <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: "var(--admin-border-input)", borderTopColor: "var(--admin-text-primary)" }} />
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider>

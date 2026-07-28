@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { WaNotification } from "./wa-notification";

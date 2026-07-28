@@ -65,6 +65,10 @@ export function ServicePage({ layanan, title, description }: Props) {
     setLoading(true);
   }
 
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current);
+  }, []);
+
   function onSearchChange(val: string) {
     setSearchInput(val);
     clearTimeout(debounceRef.current);
@@ -76,22 +80,37 @@ export function ServicePage({ layanan, title, description }: Props) {
   }
 
   function handleExport() {
-    const headers = ["Tgl Permintaan", "ID Pengajuan", "Jenis Layanan", "Kode Lot Lelang", "Status Proses"];
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((r) =>
-        headers.map((h) => `"${(r[h] || "").replace(/"/g, '""')}"`).join(",")
-      ),
-    ].join("\n");
+    const params = new URLSearchParams();
+    params.set("layanan", layanan);
+    if (statusFilter) params.set("status", statusFilter);
+    if (search) params.set("search", search);
+    params.set("all", "true");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${layanan.toLowerCase().replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast("success", "Data berhasil di-export");
+    toast("success", "Memulai export...");
+
+    fetch(`/api/admin/permohonan?${params.toString()}`, { headers: getAuthHeaders() })
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.success) throw new Error(json.error);
+        const exportRows: MonitoringRow[] = json.data;
+        const headers = ["Tgl Permintaan", "ID Pengajuan", "Jenis Layanan", "Kode Lot Lelang", "Status Proses"];
+        const csvContent = [
+          headers.join(","),
+          ...exportRows.map((r) =>
+            headers.map((h) => `"${(r[h] || "").replace(/"/g, '""')}"`).join(",")
+          ),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${layanan.toLowerCase().replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast("success", "Export selesai");
+      })
+      .catch(() => toast("error", "Gagal export data"));
   }
 
   return (

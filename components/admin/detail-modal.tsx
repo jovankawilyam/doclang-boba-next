@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
 import { StatusUpdate } from "./status-update";

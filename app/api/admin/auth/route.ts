@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createToken } from "@/lib/auth";
+import { createToken, requireAdmin } from "@/lib/auth";
+
+export async function GET(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth) {
+    return auth;
+  }
+  return NextResponse.json({ success: true });
+}
 
 export async function POST(request: NextRequest) {
   try {

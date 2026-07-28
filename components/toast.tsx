@@ -34,19 +34,27 @@ export function ToastContainer({
   return (
     <div className="fixed right-4 top-4 z-[100] flex flex-col gap-2">
       {toasts.map((t) => (
-        <ToastItem key={t.id} toast={t} onDismiss={() => dismiss(t.id)} />
+        <ToastItemWrapper key={t.id} toast={t} dismiss={dismiss} />
       ))}
     </div>
   );
+}
+
+function ToastItemWrapper({ toast, dismiss }: { toast: ToastData; dismiss: (id: string) => void }) {
+  const onDismiss = useCallback(() => dismiss(toast.id), [dismiss, toast.id]);
+  return <ToastItem toast={toast} onDismiss={onDismiss} />;
 }
 
 function ToastItem({ toast, onDismiss }: { toast: ToastData; onDismiss: () => void }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
+    const raf = requestAnimationFrame(() => setVisible(true));
     const timer = setTimeout(onDismiss, 4000);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
   }, [onDismiss]);
 
   return (

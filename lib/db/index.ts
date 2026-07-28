@@ -11,6 +11,7 @@ type RowData = Record<string, string>
 const LAYANAN_MAP: Record<string, string> = {
   "Pemberian Kuitansi Pembayaran Harga Lelang": "Kuitansi",
   "Pemberian Kutipan Risalah Lelang": "Kutipan RL",
+  "Validasi PPh (1 Bidang)": "Validasi PPh",
   "Validasi PPh (1 bidang)": "Validasi PPh",
 }
 
@@ -19,6 +20,10 @@ const STATUS_MAP: Record<string, string> = {
   "Valid Total": "Selesai",
   "Ditolak": "Tidak Valid",
   "Dalam Proses": "Proses",
+  "Selesai": "Selesai",
+  "Siap Diambil": "Siap Diambil",
+  "Tidak Valid": "Tidak Valid",
+  "Proses": "Proses",
 }
 
 export interface SheetRow {

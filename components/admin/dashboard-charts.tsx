@@ -36,25 +36,29 @@ function cardCls(): string {
 }
 
 export function DashboardCharts({ stats, perLayanan, monthlyTrend, recent, onOpenDetail }: Props) {
+  const kuitansi = perLayanan?.Kuitansi ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
+  const kutipanRL = perLayanan?.["Kutipan RL"] ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
+  const validasiPPh = perLayanan?.["Validasi PPh"] ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
+
   const barData = [
-    { name: "Proses", Kuitansi: perLayanan.Kuitansi.proses, "Kutipan RL": perLayanan["Kutipan RL"].proses, "Validasi PPh": perLayanan["Validasi PPh"].proses },
-    { name: "Siap Diambil", Kuitansi: perLayanan.Kuitansi.siap_diambil, "Kutipan RL": perLayanan["Kutipan RL"].siap_diambil, "Validasi PPh": perLayanan["Validasi PPh"].siap_diambil },
-    { name: "Tidak Valid", Kuitansi: perLayanan.Kuitansi.tidak_valid, "Kutipan RL": perLayanan["Kutipan RL"].tidak_valid, "Validasi PPh": perLayanan["Validasi PPh"].tidak_valid },
-    { name: "Selesai", Kuitansi: perLayanan.Kuitansi.selesai, "Kutipan RL": perLayanan["Kutipan RL"].selesai, "Validasi PPh": perLayanan["Validasi PPh"].selesai },
+    { name: "Proses", Kuitansi: kuitansi.proses, "Kutipan RL": kutipanRL.proses, "Validasi PPh": validasiPPh.proses },
+    { name: "Siap Diambil", Kuitansi: kuitansi.siap_diambil, "Kutipan RL": kutipanRL.siap_diambil, "Validasi PPh": validasiPPh.siap_diambil },
+    { name: "Tidak Valid", Kuitansi: kuitansi.tidak_valid, "Kutipan RL": kutipanRL.tidak_valid, "Validasi PPh": validasiPPh.tidak_valid },
+    { name: "Selesai", Kuitansi: kuitansi.selesai, "Kutipan RL": kutipanRL.selesai, "Validasi PPh": validasiPPh.selesai },
   ];
 
   const pieData = [
-    { name: "Kuitansi", value: perLayanan.Kuitansi.total },
-    { name: "Kutipan RL", value: perLayanan["Kutipan RL"].total },
-    { name: "Validasi PPh", value: perLayanan["Validasi PPh"].total },
+    { name: "Kuitansi", value: kuitansi.total },
+    { name: "Kutipan RL", value: kutipanRL.total },
+    { name: "Validasi PPh", value: validasiPPh.total },
   ];
 
-  const lineData = monthlyTrend.map((m) => ({
+  const lineData = monthlyTrend?.map((m) => ({
     bulan: m.bulan.slice(5),
     Kuitansi: m.Kuitansi,
     "Kutipan RL": m["Kutipan RL"],
     "Validasi PPh": m["Validasi PPh"],
-  }));
+  })) ?? [];
 
   return (
     <div className="space-y-6">
@@ -131,7 +135,7 @@ export function DashboardCharts({ stats, perLayanan, monthlyTrend, recent, onOpe
             <div className="border-b px-5 py-3" style={{ borderColor: "var(--admin-border)" }}>
               <h3 className="text-sm font-bold" style={{ color: "var(--admin-text-primary)" }}>{layanan}</h3>
             </div>
-            {recent[layanan].length === 0 ? (
+            {!(recent?.[layanan]?.length > 0) ? (
               <div className="flex flex-col items-center justify-center p-10" style={{ color: "var(--admin-text-secondary)" }}>
                 <Inbox className="mb-2 h-8 w-8" />
                 <p className="text-sm">Belum ada data</p>

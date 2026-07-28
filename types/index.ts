@@ -3,7 +3,7 @@ export type JenisLayanan = "kuitansi" | "kutipan_rl" | "validasi_pph";
 export const JENIS_LAYANAN_LABEL: Record<JenisLayanan, string> = {
   kuitansi: "Pemberian Kuitansi Pembayaran Harga Lelang",
   kutipan_rl: "Pemberian Kutipan Risalah Lelang",
-  validasi_pph: "Validasi PPh (1 bidang)",
+  validasi_pph: "Validasi PPh (1 Bidang)",
 };
 
 export const JENIS_LAYANAN_PREFIX: Record<JenisLayanan, string> = {
