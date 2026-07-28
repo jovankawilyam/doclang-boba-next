@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, Upload } from "lucide-react";
-import type { ChangeEvent, HTMLAttributes } from "react";
+import type { ChangeEvent, ChangeEventHandler, HTMLAttributes } from "react";
 import type { FieldPath } from "react-hook-form";
 
 import {
@@ -27,6 +27,7 @@ export const TextField = ({
   note,
   inputMode,
   pattern,
+  onChange,
 }: {
   form: FieldHelpers;
   name: FieldPath<DoclangFormValues>;
@@ -36,24 +37,33 @@ export const TextField = ({
   note?: string;
   inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
   pattern?: string;
-}) => (
-  <div className="space-y-2">
-    <label htmlFor={name} className={labelClassName}>
-      {label} *
-    </label>
-    <input
-      id={name}
-      type={type}
-      placeholder={placeholder}
-      inputMode={inputMode}
-      pattern={pattern}
-      className={inputClassName}
-      {...form.register(name)}
-    />
-    {note && <p className={helperClassName}>{note}</p>}
-    {form.renderError(name)}
-  </div>
-);
+  onChange?: ChangeEventHandler<HTMLInputElement>;
+}) => {
+  const { onChange: registerOnChange } = form.register(name);
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    onChange?.(e);
+    registerOnChange(e);
+  };
+  return (
+    <div className="space-y-2">
+      <label htmlFor={name} className={labelClassName}>
+        {label} *
+      </label>
+      <input
+        id={name}
+        type={type}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        pattern={pattern}
+        className={inputClassName}
+        {...form.register(name)}
+        onChange={handleChange}
+      />
+      {note && <p className={helperClassName}>{note}</p>}
+      {form.renderError(name)}
+    </div>
+  );
+};
 
 export const TextAreaField = ({
   form,

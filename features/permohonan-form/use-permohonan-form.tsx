@@ -90,7 +90,7 @@ const formSchema = z
     nomor_wa_pemberi_kuasa: z.string(),
     dokumen_identitas_pemberi_kuasa: z.unknown().optional(),
     surat_kuasa: z.unknown().optional(),
-    kode_lot_lelang: requiredString("Code Lot Lelang wajib diisi.").regex(/^[0-9]{6}$/, "Code Lot Lelang harus berisi 6 digit angka."),
+    kode_lot_lelang: requiredString("Kode Lot Lelang wajib diisi.").regex(/^[A-Z0-9]{1,6}$/, "Code Lot Lelang maksimal 6 karakter (huruf kapital A-Z dan angka 0-9)."),
     jenis_layanan: z.preprocess(emptyToUndefined, z.enum(serviceOptions).optional()),
     tanggal_pelunasan: requiredString("Tanggal Pelunasan Pembayaran wajib diisi."),
     bukti_pelunasan_file: z.unknown().optional(),
@@ -207,6 +207,9 @@ export const usePermohonanForm = () => {
   const [uploadedFiles, setUploadedFiles] = useState<
     Partial<Record<FieldPath<DoclangFormValues>, UploadedFileInfo>>
   >({});
+  const [showVerification, setShowVerification] = useState(false);
+  const [pendingValues, setPendingValues] =
+    useState<DoclangFormValues | null>(null);
   const { startUpload } = useUploadThing("dokumenLelang");
 
   const {
@@ -237,9 +240,7 @@ export const usePermohonanForm = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<DoclangFormValues> = async (values) => {
-    setServerErrors([]);
-    setSuccessMessage("");
+  const executeSubmit: SubmitHandler<DoclangFormValues> = async (values) => {
     setUploadingFiles(true);
     try {
       type FileEntry = { apiKey: string; file: File };
@@ -345,6 +346,25 @@ export const usePermohonanForm = () => {
     }
   };
 
+  const onSubmit: SubmitHandler<DoclangFormValues> = (values) => {
+    setServerErrors([]);
+    setSuccessMessage("");
+    setPendingValues(values);
+    setShowVerification(true);
+  };
+
+  const confirmSubmit = async (): Promise<void> => {
+    if (!pendingValues) return;
+    setShowVerification(false);
+    await executeSubmit(pendingValues);
+    setPendingValues(null);
+  };
+
+  const cancelSubmit = (): void => {
+    setShowVerification(false);
+    setPendingValues(null);
+  };
+
   const renderError = (name: FieldPath<DoclangFormValues>) => {
     const message = fieldErrorMessage(errors, name);
     if (!message) return null;
@@ -353,6 +373,8 @@ export const usePermohonanForm = () => {
 
   return {
     applicantRole,
+    cancelSubmit,
+    confirmSubmit,
     errors,
     fileInputHelpers: { errors, register, setUploadedFiles, uploadedFiles },
     fieldHelpers: { register, renderError },
@@ -360,13 +382,16 @@ export const usePermohonanForm = () => {
     handleSubmit,
     isSubmitting: isSubmitting || uploadingFiles,
     onSubmit,
+    pendingValues,
     register,
     selectedRlObject,
     selectedService,
     serverErrors,
     setStep,
+    showVerification,
     step,
     successMessage,
+    uploadedFiles,
     uploadingFiles,
   };
 };

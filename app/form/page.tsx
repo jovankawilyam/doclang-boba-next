@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, ChevronLeft } from "lucide-react";
 
 import { BasicInfoSection } from "@/features/permohonan-form/components/basic-info-section";
 import { DetailSection } from "@/features/permohonan-form/components/detail-section";
+import { VerificationDialog } from "@/features/permohonan-form/components/verification-dialog";
 import { usePermohonanForm } from "@/features/permohonan-form/use-permohonan-form";
 
 export default function FormPage() {
@@ -95,6 +96,15 @@ export default function FormPage() {
           </div>
         </form>
       </main>
+
+      <VerificationDialog
+        open={form.showVerification}
+        values={form.pendingValues}
+        uploadedFiles={form.uploadedFiles}
+        onConfirm={form.confirmSubmit}
+        onCancel={form.cancelSubmit}
+        isSubmitting={form.isSubmitting}
+      />
     </div>
   );
 }

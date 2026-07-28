@@ -1,5 +1,6 @@
 "use client";
 
+import type { ChangeEvent } from "react";
 import { FileText, Loader2, Send } from "lucide-react";
 
 import {
@@ -133,13 +134,15 @@ export const DetailSection = ({
       )}
 
       <div className={sectionClassName}>
-        <h3 className="font-bold text-slate-950">Inputan Bersama</h3>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <TextField
             form={fieldHelpers}
             name="kode_lot_lelang"
-            label="Code Lot Lelang"
-            note="diisi dengan 6 digit kode lot lelang yang telah diikuti pada situs www.lelang.go.id"
+            label="Kode Lot Lelang"
+            note="diisi dengan maksimal 6 karakter (huruf dan angka)"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+            }}
           />
           <div className="space-y-2">
             <label htmlFor="jenis_layanan" className={labelClassName}>
