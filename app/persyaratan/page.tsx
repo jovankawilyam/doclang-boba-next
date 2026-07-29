@@ -6,7 +6,6 @@ import {
   AlertCircle,
   Info,
   FileDown,
-  MapPin,
   ChevronLeft,
   ArrowRight,
 } from "lucide-react";

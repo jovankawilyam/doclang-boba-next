@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 export default function HeroSlider() {
@@ -29,10 +30,13 @@ export default function HeroSlider() {
   return (
     <section className="w-full overflow-hidden">
       <div className="relative w-full aspect-video overflow-hidden md:max-h-[590px]">
-        <img
+        <Image
           src={images[current]}
           alt="slider"
-          className="h-full w-full object-cover object-center transition-all duration-700"
+          fill
+          className="object-cover object-center transition-all duration-700"
+          sizes="100vw"
+          priority
         />
         <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
         <button
@@ -51,15 +55,19 @@ export default function HeroSlider() {
         </button>
         <div className="absolute inset-0 z-10 hidden select-none flex-col items-start justify-center md:flex md:px-16 md:pt-16">
           <div className="flex items-center gap-4">
-            <img
-            className="h-[80px] w-auto animate-fade-slide-down object-contain drop-shadow-lg md:h-[100px]"
-            src="/images/NAGARA-DANA-RAKCA.png"
-            alt="Nagara Dana Rakça"
+            <Image
+              className="h-[80px] w-auto object-contain drop-shadow-lg md:h-[100px]"
+              src="/images/NAGARA-DANA-RAKCA.png"
+              alt="Nagara Dana Rakça"
+              width={1072}
+              height={1020}
             />
-            <img
-            className="h-[80px] w-auto animate-fade-slide-down object-contain drop-shadow-lg md:h-[100px]"
-            src="/images/kpknl-bogor.png"
-            alt=""
+            <Image
+              className="h-[80px] w-auto object-contain drop-shadow-lg md:h-[100px]"
+              src="/images/kpknl-bogor.png"
+              alt=""
+              width={354}
+              height={335}
             />
           </div>
           <h1
@@ -99,15 +107,19 @@ export default function HeroSlider() {
       </div>
       <div className="flex flex-col items-center text-center md:hidden bg-white border-b border-slate-200 px-6 py-8">
         <div className="flex items-center gap-3">
-          <img
+          <Image
             className="h-14 w-auto object-contain"
             src="/images/NAGARA-DANA-RAKCA.png"
             alt="Nagara Dana Rakça"
+            width={1072}
+            height={1020}
           />
-          <img
+          <Image
             className="h-14 w-auto object-contain"
             src="/images/kpknl-bogor.png"
             alt="KPKNL Bogor"
+            width={354}
+            height={335}
           />
         </div>
         <h1 className="mt-4 text-2xl font-bold text-[#005FAC] max-w-xs leading-tight">

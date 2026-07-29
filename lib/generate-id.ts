@@ -1,8 +1,10 @@
 import { prisma } from "./db/prisma"
 
+type ServiceInfo = { model: "kuitansi" | "kutipanRL" | "validasiPPh"; idField: string; prefix: string }
+
 function getServiceInfo(
   jenisLayanan: string,
-): { model: string; idField: string; prefix: string } | null {
+): ServiceInfo | null {
   switch (jenisLayanan) {
     case "Pemberian Kuitansi Pembayaran Harga Lelang":
       return { model: "kuitansi", idField: "idKPHL", prefix: "KPHL" }
@@ -15,11 +17,16 @@ function getServiceInfo(
   }
 }
 
-async function getLatestCounter(model: string, idField: string, prefix: string, year: number): Promise<number> {
-  const prismaModel = (prisma as any)[model]
-  const rows = await prismaModel.findMany({
-    select: { [idField]: true },
-  })
+async function getLatestCounter(model: ServiceInfo["model"], idField: string, prefix: string, year: number): Promise<number> {
+  const select = { [idField]: true } as Record<string, boolean>
+  let rows: Record<string, string>[]
+  if (model === "kuitansi") {
+    rows = await prisma.kuitansi.findMany({ select }) as unknown as Record<string, string>[]
+  } else if (model === "kutipanRL") {
+    rows = await prisma.kutipanRL.findMany({ select }) as unknown as Record<string, string>[]
+  } else {
+    rows = await prisma.validasiPPh.findMany({ select }) as unknown as Record<string, string>[]
+  }
   let maxCounter = 0
   for (const row of rows) {
     const id: string = row[idField] ?? ""

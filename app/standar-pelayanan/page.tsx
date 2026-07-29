@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, FileDown } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 const standarData = [
   { num: "1.", title: "Penetapan Status Penggunaan BMN", img: "/download/1.png" },

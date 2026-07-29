@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -44,10 +45,13 @@ export default function AdminLoginPage() {
 
       <div className="flex w-full max-w-5xl rounded-2xl bg-white shadow-2xl shadow-black/10 overflow-hidden">
         <div className="hidden lg:flex w-[42%] relative flex-col bg-[#005FAC]">
-          <img
+          <Image
             src="/profile/profile4.jpeg"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="42vw"
+            priority
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/100" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -77,9 +81,9 @@ export default function AdminLoginPage() {
           <div className="w-full max-w-sm">
             <div className="mb-8 text-center">
               <div className="mx-auto mb-6 inline-flex items-center justify-center gap-6 rounded-xl bg-[#F4F7FB] px-6 py-4 ring-1 ring-[#D8E0EC]/40">
-                <img src="/images/image.png" alt="Kemenkeu" className="h-14 w-auto object-contain" />
+                <Image src="/images/image.png" alt="Kemenkeu" width={1920} height={483} className="h-14 w-auto object-contain" />
                 <div className="h-14 w-px bg-[#D8E0EC]" />
-                <img src="/images/kpknl-bogor.png" alt="KPKNL Bogor" className="h-14 w-auto object-contain" />
+                <Image src="/images/kpknl-bogor.png" alt="KPKNL Bogor" width={354} height={335} className="h-14 w-auto object-contain" />
               </div>
               <h1 className="text-[1.35rem] font-bold text-[#005FAC] tracking-tight">LOGIN ADMIN</h1>
               <p className="mt-1.5 text-sm text-slate-400">Masukkan password untuk melanjutkan</p>

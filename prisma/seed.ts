@@ -3,7 +3,6 @@ import { PrismaNeon } from '@prisma/adapter-neon'
 import * as fs from 'fs'
 import * as path from 'path'
 import {
-  MONITORING_MAPPING,
   KUITANSI_MAPPING,
   KUTIPAN_RL_MAPPING,
   VALIDASI_PPH_MAPPING,
@@ -73,7 +72,6 @@ function buildRecords(
   rows: string[][],
   headerRow: string[],
   mapping: FieldMapping[],
-  columnOffset: number = 0,
 ): Record<string, string>[] {
   const result: Record<string, string>[] = []
 
@@ -148,8 +146,8 @@ async function seedMonitoring(csvDir: string) {
     record.jenisLayanan = (row[4] ?? '').trim()
     record.nomorDokumen = (row[5] ?? '').trim()
 
-    let col6 = (row[6] ?? '').trim()
-    let col7 = (row[7] ?? '').trim()
+    const col6 = (row[6] ?? '').trim()
+    const col7 = (row[7] ?? '').trim()
 
     if (col7) {
       record.statusProses = col7

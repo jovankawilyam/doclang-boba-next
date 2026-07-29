@@ -193,7 +193,7 @@ export default function TrackingSection() {
       .then((d) => {
         if (d.success && d.perLayanan) setPerLayananStats(d.perLayanan);
       })
-      .catch(() => {})
+      .catch(() => setPerLayananStats(null))
       .finally(() => setStatsLoading(false));
   }, []);
 

@@ -1,8 +1,8 @@
+import { Prisma } from "@prisma/client"
 import { prisma } from "./prisma"
 import {
   SHEET_MAPPINGS,
   SHEET_ID_COLUMNS,
-  MONITORING_MAPPING,
 } from "./mapping"
 import type { FieldMapping } from "./mapping"
 
@@ -70,7 +70,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) {
-          let val = String((r as any)[m.field] ?? "")
+          let val = String((r as unknown as Record<string, string>)[m.field] ?? "")
           if (m.field === "jenisLayanan" && LAYANAN_MAP[val]) {
             val = LAYANAN_MAP[val]
           }
@@ -87,7 +87,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       const result = await prisma.kuitansi.findMany({ orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
         return row
       })
       break
@@ -96,7 +96,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       const result = await prisma.kutipanRL.findMany({ orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
         return row
       })
       break
@@ -105,7 +105,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       const result = await prisma.validasiPPh.findMany({ orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
         return row
       })
       break
@@ -114,7 +114,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       const result = await prisma.activityLog.findMany({ orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
         return row
       })
       break
@@ -138,19 +138,19 @@ export async function appendRow(
 
   switch (sheetName) {
     case "Monitoring":
-      await prisma.monitoring.create({ data: record as any })
+      await prisma.monitoring.create({ data: record as Prisma.MonitoringCreateInput })
       break
     case "Kuitansi":
-      await prisma.kuitansi.create({ data: record as any })
+      await prisma.kuitansi.create({ data: record as Prisma.KuitansiCreateInput })
       break
     case "Kutipan RL":
-      await prisma.kutipanRL.create({ data: record as any })
+      await prisma.kutipanRL.create({ data: record as Prisma.KutipanRLCreateInput })
       break
     case "Validasi PPh":
-      await prisma.validasiPPh.create({ data: record as any })
+      await prisma.validasiPPh.create({ data: record as Prisma.ValidasiPPhCreateInput })
       break
     case "Activity Log":
-      await prisma.activityLog.create({ data: record as any })
+      await prisma.activityLog.create({ data: record as Prisma.ActivityLogCreateInput })
       break
   }
 }
@@ -172,7 +172,7 @@ export async function findRowInSheet(
       const r = await prisma.kuitansi.findFirst({ where: { [field]: value } })
       if (r) {
         row = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
       }
       break
     }
@@ -180,7 +180,7 @@ export async function findRowInSheet(
       const r = await prisma.kutipanRL.findFirst({ where: { [field]: value } })
       if (r) {
         row = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
       }
       break
     }
@@ -188,7 +188,7 @@ export async function findRowInSheet(
       const r = await prisma.validasiPPh.findFirst({ where: { [field]: value } })
       if (r) {
         row = {}
-        for (const m of mapping) row[m.field] = String((r as any)[m.field] ?? "")
+        for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
       }
       break
     }
@@ -224,31 +224,30 @@ export async function updateRow(
 
   switch (sheetName) {
     case "Monitoring":
-      await prisma.monitoring.updateMany({ where: where as any, data: data as any })
+      await prisma.monitoring.updateMany({ where: where as Prisma.MonitoringWhereInput, data: data as Prisma.MonitoringUpdateManyMutationInput })
       break
     case "Kuitansi":
-      await prisma.kuitansi.updateMany({ where: where as any, data: data as any })
+      await prisma.kuitansi.updateMany({ where: where as Prisma.KuitansiWhereInput, data: data as Prisma.KuitansiUpdateManyMutationInput })
       break
     case "Kutipan RL":
-      await prisma.kutipanRL.updateMany({ where: where as any, data: data as any })
+      await prisma.kutipanRL.updateMany({ where: where as Prisma.KutipanRLWhereInput, data: data as Prisma.KutipanRLUpdateManyMutationInput })
       break
     case "Validasi PPh":
-      await prisma.validasiPPh.updateMany({ where: where as any, data: data as any })
+      await prisma.validasiPPh.updateMany({ where: where as Prisma.ValidasiPPhWhereInput, data: data as Prisma.ValidasiPPhUpdateManyMutationInput })
       break
     case "Activity Log":
-      await prisma.activityLog.updateMany({ where: where as any, data: data as any })
+      await prisma.activityLog.updateMany({ where: where as Prisma.ActivityLogWhereInput, data: data as Prisma.ActivityLogUpdateManyMutationInput })
       break
   }
 }
 
 export async function getStats() {
-  const mapping = MONITORING_MAPPING
   const rows = await prisma.monitoring.findMany()
   const total = rows.length
   let proses = 0, siapDiambil = 0, tidakValid = 0, selesai = 0
   for (const r of rows) {
     const raw = STATUS_MAP[r.statusProses] ?? r.statusProses
-    const s = raw.toLowerCase() ?? ""
+    const s = raw.toLowerCase()
     if (s === "proses") proses++
     else if (s === "siap diambil") siapDiambil++
     else if (s === "tidak valid") tidakValid++

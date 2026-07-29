@@ -1,17 +1,23 @@
+import Image from "next/image";
+
 export default function Footer() {
   return (
     <footer className="w-full bg-[#005FAC] py-16 text-white">
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2 md:px-8">
         <div className="flex flex-col gap-8">
           <div className="flex items-center gap-6">
-            <img
+            <Image
               src="/images/NAGARA-DANA-RAKCA.png"
               alt="Logo Nagara Dana Rakca"
+              width={1072}
+              height={1020}
               className="h-20 w-20 object-contain"
             />
-            <img
+            <Image
               src="/images/kpknl-bogor.png"
               alt="Logo KPKNL Bogor"
+              width={354}
+              height={335}
               className="h-20 w-20 object-contain"
             />
           </div>
@@ -28,7 +34,7 @@ export default function Footer() {
               href="https://www.instagram.com/jovankawilyamm"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#005FAC] transition-colors duration-300 font-semibold text-[px]"
+              className="text-[#005FAC] transition-colors duration-300 font-normal text-[px]"
             >
               build by : @jovankawilyamm
             </a>

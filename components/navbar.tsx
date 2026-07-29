@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
@@ -28,9 +29,11 @@ export default function Navbar() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-8">
         <Link href="/" className="cursor-pointer">
-          <img
+          <Image
             src="/images/image.png"
             alt="Logo"
+            width={1920}
+            height={483}
             className="h-14 w-auto object-contain"
           />
         </Link>

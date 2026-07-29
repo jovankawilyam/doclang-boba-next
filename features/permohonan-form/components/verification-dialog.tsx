@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, FileText, Loader2, Send, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Send, XCircle } from "lucide-react";
 
 import type { DoclangFormValues, UploadedFileInfo } from "../types";
 import type { FieldPath } from "react-hook-form";

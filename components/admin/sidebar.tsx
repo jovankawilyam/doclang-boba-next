@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, FileText, BookOpen, FileCheck, History, Settings, LogOut, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -60,9 +61,9 @@ export function AdminSidebar() {
         <div className="flex items-center justify-between border-b px-3 py-4" style={{ borderColor: "var(--admin-border)" }}>
           <Link href="/admin" className="flex items-center justify-center gap-3">
             {collapsed ? (
-              <img src="/images/image.png" alt="Logo" className="h-8 w-auto object-contain" />
+              <Image src="/images/image.png" alt="Logo" width={1920} height={483} className="h-8 w-auto object-contain" />
             ) : (
-              <img src="/images/image.png" alt="Logo" className="h-10 w-auto object-contain" />
+              <Image src="/images/image.png" alt="Logo" width={1920} height={483} className="h-10 w-auto object-contain" />
             )}
           </Link>
           <div className="flex items-center gap-1">
