@@ -4,7 +4,6 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, FileText, BookOpen, FileCheck, History, Settings, LogOut, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ThemeToggle } from "@/components/admin/theme-toggle";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -141,7 +140,6 @@ export function AdminSidebar() {
               </div>
             )}
           </div>
-          {!collapsed && <ThemeToggle />}
           <button
             onClick={handleLogout}
             className={`mt-2 flex w-full items-center gap-3 rounded-lg text-sm font-semibold text-white transition-colors bg-red-500 hover:bg-red-700 hover:text-white ${

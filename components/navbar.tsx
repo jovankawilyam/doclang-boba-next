@@ -66,12 +66,7 @@ export default function Navbar() {
           >
             Tarif Layanan
           </Link>
-          <Link
-            href="/admin/login"
-            className="text-base font-extrabold text-slate-500 border-2 border-[#C7D2E3] hover:border-[#005FAC] hover:text-[#005FAC] rounded-lg px-3 py-2 transition-all duration-300"
-          >
-            Login
-          </Link>
+
         </div>
 
         <button
@@ -127,13 +122,7 @@ export default function Navbar() {
           >
             Tarif Layanan
           </Link>
-          <Link
-            href="/admin/login"
-            onClick={() => setOpen(false)}
-            className="block rounded-xl border border-[#C7D2E3] px-4 py-3 text-base font-bold text-slate-500"
-          >
-            Login
-          </Link>
+
         </div>
       </div>
     </nav>

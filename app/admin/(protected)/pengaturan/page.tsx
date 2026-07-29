@@ -1,7 +1,8 @@
 "use client";
 
 import { ToastContainer, useToast } from "@/components/toast";
-import { Shield, Info } from "lucide-react";
+import { ThemeToggle } from "@/components/admin/theme-toggle";
+import { Shield, Info, Palette } from "lucide-react";
 
 export default function PengaturanPage() {
   const { toasts, dismiss } = useToast();
@@ -46,6 +47,16 @@ export default function PengaturanPage() {
 
         <div className="rounded-xl border shadow-sm" style={{ borderColor: "var(--admin-border)", backgroundColor: "var(--admin-bg-card)" }}>
           <div className="flex items-center gap-3 border-b px-6 py-4" style={{ borderColor: "var(--admin-border)" }}>
+            <Palette className="h-5 w-5" style={{ color: "var(--admin-text-primary)" }} />
+            <h2 className="text-sm font-bold" style={{ color: "var(--admin-text-primary)" }}>Tampilan</h2>
+          </div>
+          <div className="p-6">
+            <ThemeToggle />
+          </div>
+        </div>
+
+        <div className="rounded-xl border shadow-sm" style={{ borderColor: "var(--admin-border)", backgroundColor: "var(--admin-bg-card)" }}>
+          <div className="flex items-center gap-3 border-b px-6 py-4" style={{ borderColor: "var(--admin-border)" }}>
             <Info className="h-5 w-5" style={{ color: "var(--admin-text-primary)" }} />
             <h2 className="text-sm font-bold" style={{ color: "var(--admin-text-primary)" }}>Informasi Sistem</h2>
           </div>
@@ -60,7 +71,7 @@ export default function PengaturanPage() {
             </div>
             <div className="flex justify-between text-xs">
               <span style={{ color: "var(--admin-text-secondary)" }}>Database</span>
-              <span className="font-semibold" style={{ color: "var(--admin-text-body)" }}>Google Sheets</span>
+              <span className="font-semibold" style={{ color: "var(--admin-text-body)" }}>PostgreSQL</span>
             </div>
             <div className="flex justify-between text-xs">
               <span style={{ color: "var(--admin-text-secondary)" }}>Status</span>

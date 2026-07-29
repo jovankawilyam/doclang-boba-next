@@ -79,7 +79,7 @@ export const BasicInfoSection = ({
         <UploadZone
           form={fileInputHelpers}
           name="dokumen_identitas_pemohon"
-          label="Document Identitas Pemohon"
+          label="Dokumen Identitas Pemohon"
           note="Unggah PDF/JPG/JPEG/PNG maksimal 10MB"
         />
       </div>

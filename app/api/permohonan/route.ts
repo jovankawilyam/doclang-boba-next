@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
     } catch (genError) {
       console.error("Generate ID error:", genError);
       return NextResponse.json(
-        { success: false, error: "Gagal membuat ID pengajuan. Periksa koneksi ke Google Sheets." },
+        { success: false, error: "Gagal membuat ID pengajuan. Periksa koneksi database." },
         { status: 500 },
       );
     }
@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
     } catch (sheetError) {
       console.error("Append row error:", sheetError);
       return NextResponse.json(
-        { success: false, error: "Gagal menyimpan data ke Google Sheets. Periksa konfigurasi spreadsheet." },
+        { success: false, error: "Gagal menyimpan data. Periksa koneksi database." },
         { status: 500 },
       );
     }
