@@ -3,21 +3,22 @@ import Image from "next/image";
 export default function Footer() {
   return (
     <footer className="w-full bg-[#005FAC] py-16 text-white mt-20">
-      <div className="mx-auto max-w-7xl px-6 md:px-8">
+      <div className="mx-auto mb-16 max-w-7xl px-6 md:mb-20 md:px-8">
         <a
-            href="https://maps.google.com/?q=KPKNL+Bogor+Jalan+Veteran+No+45+Bogor+Jawa+Barat"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group mx-auto flex w-fit flex-col items-center gap-2 transition-all duration-300 hover:opacity-80"
-          >
-            <p className="text-sm font-bold tracking-widest text-white/80 uppercase">
-              PETA KAMI
-            </p>
-            <div className="h-0.5 w-full rounded-full bg-white/20" />
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all duration-300 hover:bg-[#34A853] hover:-translate-y-1 hover:shadow-lg active:scale-90">
-              <i className="fa-solid fa-map-location-dot text-lg transition-transform group-hover:scale-110" />
-            </div>
-          </a>
+          href="https://maps.google.com/?q=KPKNL+Bogor+Jalan+Veteran+No+45+Bogor+Jawa+Barat"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Lihat lokasi KPKNL Bogor di Google Maps"
+          className="group mx-auto flex w-fit flex-col items-center gap-3 transition-all duration-300 hover:opacity-90"
+        >
+          <p className="text-sm font-bold tracking-widest text-white/80 uppercase">
+            PETA KAMI
+          </p>
+          <div className="h-0.5 w-full rounded-full bg-white/20 transition-colors duration-300 group-hover:bg-[#34A853]" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/30 bg-white/20 text-white shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-[#34A853] group-hover:shadow-xl active:scale-90">
+            <i className="fa-solid fa-map-location-dot text-xl transition-transform duration-300 group-hover:scale-110" />
+          </div>
+        </a>
       </div>
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2 md:px-8">
         <div className="flex flex-col gap-8">
