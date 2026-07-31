@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Loader2, Send, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Send } from "lucide-react";
 
 import type { DoclangFormValues, UploadedFileInfo } from "../types";
 import type { FieldPath } from "react-hook-form";
@@ -42,8 +42,8 @@ const fileLabels: Record<string, string> = {
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[1fr_auto] gap-2 text-sm">
-      <span className="font-semibold text-slate-600">{label}</span>
-      <span className="text-right font-bold text-slate-900">{value}</span>
+      <span className="text-slate-600">{label}</span>
+      <span className="text-right font-medium text-slate-900">{value}</span>
     </div>
   );
 }
@@ -56,10 +56,8 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <p className="text-xs font-bold tracking-widest text-blue-700 uppercase">
-        {title}
-      </p>
+    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4">
+      <p className="text-xs font-semibold text-navy">{title}</p>
       <div className="space-y-1.5">{children}</div>
     </div>
   );
@@ -131,28 +129,22 @@ export function VerificationDialog({
   const service = values.jenis_layanan;
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
-      onClick={onCancel}
-    >
       <div
-        className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-xl bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[60] flex items-end justify-center bg-black/30 p-0 md:items-center md:p-6"
+        onClick={onCancel}
       >
-        <div className="shrink-0 space-y-1 border-b border-slate-200 px-6 pt-6 pb-4">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <div>
-              <p className="text-lg font-bold text-slate-900">
-                Verifikasi Data
-              </p>
-              <p className="text-xs text-slate-500">
-                Periksa kembali seluruh data yang telah Anda isi. Pastikan semua informasi sudah benar dan lengkap sebelum mengirim permohonan.
-              </p>
-            </div>
+        <div
+          className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-xl border border-slate-200 bg-white md:max-w-2xl md:rounded-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="shrink-0 border-b border-slate-200 px-5 pt-5 pb-4 md:px-8 md:pt-7">
+            <p className="text-base font-bold text-slate-900 md:text-lg">Verifikasi Data</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Periksa kembali data Anda sebelum dikirim.
+            </p>
           </div>
-        </div>
 
-        <div className="space-y-4 overflow-y-auto px-6 py-4">
+          <div className="space-y-4 overflow-y-auto px-5 py-4 md:px-8">
           <SectionCard title="Data Pemohon">
             {pemohonFields.map((field) => {
               const v = values[field];
@@ -209,7 +201,7 @@ export function VerificationDialog({
             </SectionCard>
           )}
 
-          <SectionCard title="Dokumen Terunggah">
+          <SectionCard title="Dokumen">
             {fileFields
               .filter((field) => uploadedFiles[field])
               .map((field) => {
@@ -220,7 +212,7 @@ export function VerificationDialog({
                     className="flex items-center gap-2 text-sm"
                   >
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                    <span className="font-semibold text-slate-600">
+                    <span className="text-slate-600">
                       {fileLabels[field] ?? field}
                     </span>
                     <span className="ml-auto text-xs text-slate-400">
@@ -235,19 +227,18 @@ export function VerificationDialog({
           </SectionCard>
         </div>
 
-        <div className="flex shrink-0 justify-end gap-3 border-t border-slate-200 px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-slate-200 px-5 py-4 md:px-8">
           <button
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+            className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 md:flex-initial"
           >
-            <XCircle className="h-4 w-4" />
             Kembali
           </button>
           <button
             onClick={onConfirm}
             disabled={isSubmitting}
-            className="flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-navy/90 disabled:cursor-not-allowed disabled:bg-slate-400 md:flex-initial"
           >
             {isSubmitting ? (
               <>

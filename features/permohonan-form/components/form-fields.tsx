@@ -45,9 +45,9 @@ export const TextField = ({
     registerOnChange(e);
   };
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <label htmlFor={name} className={labelClassName}>
-        {label} *
+        {label} <span className="text-red-500">*</span>
       </label>
       <input
         id={name}
@@ -74,9 +74,9 @@ export const TextAreaField = ({
   name: FieldPath<DoclangFormValues>;
   label: string;
 }) => (
-  <div className="space-y-2">
+  <div className="space-y-1.5">
     <label htmlFor={name} className={labelClassName}>
-      {label} *
+      {label} <span className="text-red-500">*</span>
     </label>
     <textarea
       id={name}
@@ -103,9 +103,6 @@ export const UploadZone = ({
   const message = fieldErrorMessage(errors, name);
   const selectedFile = uploadedFiles[name];
   const fileRegistration = register(name);
-  const uploadBoxClassName = selectedFile
-    ? "block cursor-pointer rounded-lg border-2 border-solid border-emerald-300 bg-emerald-50 p-5 text-center transition hover:border-emerald-500 hover:bg-emerald-100"
-    : "block cursor-pointer rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-blue-500 hover:bg-blue-50";
 
   const handleFileChange = async (
     event: ChangeEvent<HTMLInputElement>,
@@ -131,22 +128,47 @@ export const UploadZone = ({
   };
 
   return (
-    <div className="space-y-2">
-      <span className={labelClassName}>{label} *</span>
-      <label className={uploadBoxClassName}>
-        {selectedFile ? (
-          <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-700" />
-        ) : (
-          <Upload className="mx-auto mb-2 h-6 w-6 text-blue-700" />
-        )}
-        <span className="block text-sm font-bold text-slate-700">
-          {selectedFile ? "Dokumen berhasil dipilih" : note}
-        </span>
-        {selectedFile && (
-          <span className="mt-1 block text-xs font-semibold break-words text-emerald-800">
-            {`${selectedFile.name} (${formatUploadedFileSize(selectedFile.size)})`}
-          </span>
-        )}
+    <div className="space-y-1.5">
+      <span className={labelClassName}>
+        {label} <span className="text-red-500">*</span>
+      </span>
+      <label
+        className={`flex cursor-pointer items-center gap-4 rounded-lg border-2 px-5 py-4 transition ${
+          selectedFile
+            ? "border-emerald-300 bg-emerald-50 hover:border-emerald-400"
+            : "border-slate-200 bg-white hover:border-navy/30 hover:bg-navy/[0.02]"
+        }`}
+      >
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+            selectedFile ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+          }`}
+        >
+          {selectedFile ? (
+            <CheckCircle2 className="h-5 w-5" />
+          ) : (
+            <Upload className="h-5 w-5" />
+          )}
+        </div>
+        <div className="flex-1 text-left">
+          {selectedFile ? (
+            <>
+              <p className="text-sm font-medium text-emerald-800">
+                {selectedFile.name}
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-600">
+                {formatUploadedFileSize(selectedFile.size)}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-slate-700">
+                Klik untuk unggah dokumen
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">{note}</p>
+            </>
+          )}
+        </div>
         <input
           type="file"
           accept={FILE_ACCEPT_ATTRIBUTE}
@@ -156,9 +178,9 @@ export const UploadZone = ({
         />
       </label>
       {selectedFile && (
-        <p className="flex items-start gap-2 text-xs leading-5 font-bold text-emerald-700">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{selectedFile.name} sudah diunggah.</span>
+        <p className="text-xs text-emerald-600">
+          <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />
+          Dokumen siap dikirim
         </p>
       )}
       {message && <p className={errorClassName}>{message}</p>}

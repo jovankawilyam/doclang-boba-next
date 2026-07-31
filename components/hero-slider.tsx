@@ -92,15 +92,15 @@ export default function HeroSlider() {
 </a>
         </div>
       </div>
-      <div className="mt-4 flex justify-center gap-2">
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex justify-center gap-2 pb-4">
         {images.map((image, index) => (
           <button
             key={image}
             type="button"
             aria-label={`Slide ${index + 1}`}
             onClick={() => setCurrent(index)}
-            className={`h-3 w-3 rounded-full transition ${
-              current === index ? "bg-[#005FAC]" : "bg-slate-300"
+            className={`h-1 rounded-full transition-all duration-300 ${
+              current === index ? "w-10 bg-white" : "w-6 bg-white/50"
             }`}
           />
         ))}

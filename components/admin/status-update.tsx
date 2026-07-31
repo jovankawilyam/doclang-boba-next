@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { WaNotification } from "./wa-notification";
 import { getAuthHeaders } from "@/lib/admin-fetch";
 
 function cleanWaNumber(raw: string): string {
@@ -32,11 +31,9 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState<string | null>(null);
-  const [waResult, setWaResult] = useState<{ number: string; text: string } | null>(null);
 
   async function handleAction(status: string) {
     setLoading(true);
-    setWaResult(null);
     setConfirm(null);
     try {
       const body: Record<string, string> = { id, status };
@@ -49,17 +46,21 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
       });
       const json = await res.json();
       if (json.success) {
-        const waNumber = data?.["Nomor Whatsapp Pemohon"] ?? "";
-        const nama = data?.["Nama Pemohon"] ?? "";
-        let waText = "";
-        if (status === "Siap Diambil")
-          waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) telah DIVALIDASI. Silakan ambil dokumen di KPKNL Bogor.\n\nTerima kasih.`;
-        else if (status === "Tidak Valid")
-          waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) DITOLAK.\nAlasan: ${reason || "-"}\n\nSilakan lengkapi persyaratan dan ajukan ulang.\n\nTerima kasih.`;
-        else if (status === "Selesai")
-          waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) telah SELESAI. Dokumen dapat diambil pada ${date || "-"} di KPKNL Bogor.\n\nTerima kasih.`;
-        setWaResult({ number: waNumber, text: waText });
         toast("success", `Status berhasil diubah menjadi ${status}`);
+
+        if (status === "Siap Diambil" || status === "Tidak Valid") {
+          const waNumber = data?.["Nomor Whatsapp Pemohon"] ?? "";
+          const nama = data?.["Nama Pemohon"] ?? "";
+          let waText = "";
+          if (status === "Siap Diambil")
+            waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) telah DIVALIDASI. Silakan ambil dokumen di KPKNL Bogor.\n\nTerima kasih.`;
+          else if (status === "Tidak Valid")
+            waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) DITOLAK.\nAlasan: ${reason || "-"}\n\nSilakan lengkapi persyaratan dan ajukan ulang.\n\nTerima kasih.`;
+          if (waNumber) {
+            window.open(waLink(waNumber, waText), "_blank");
+          }
+        }
+
         onUpdated();
       } else {
         toast("error", json.error || "Gagal mengubah status");
@@ -91,7 +92,6 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
                 setActionType(isActive ? "" : s.value);
                 setReason("");
                 setDate("");
-                setWaResult(null);
               }}
               disabled={loading}
               className="rounded-lg px-4 py-2 text-xs font-bold transition-colors disabled:opacity-50"
@@ -171,12 +171,10 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
         </div>
       )}
 
-      {waResult && <WaNotification number={waResult.number} text={waResult.text} waLink={waLink(waResult.number, waResult.text)} />}
-
       <ConfirmDialog
         open={confirm !== null}
         title={confirm ? `Ubah status ke "${confirm}"?` : ""}
-        message="Tindakan ini akan mengubah status permohonan dan mengirim notifikasi WhatsApp ke pemohon."
+        message="Tindakan ini akan mengubah status permohonan dan membuka WhatsApp dengan template pesan."
         confirmLabel={confirm ?? ""}
         confirmClass={
           confirm === "Siap Diambil"

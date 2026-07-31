@@ -12,7 +12,7 @@ export default function Home() {
       <HeroSlider />
       <HomePersyaratan />
       <TrackingSection />
-      <section className="mt-20">
+      <section>
         <Footer />
       </section>
       <FloatingWhatsApp />

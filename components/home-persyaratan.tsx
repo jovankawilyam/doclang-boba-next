@@ -76,6 +76,8 @@ export default function HomePersyaratan() {
           <div className="mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-navy to-orange" />
         </div>
 
+
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {layanan.map((item, idx) => (
             <button
@@ -95,14 +97,30 @@ export default function HomePersyaratan() {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <a
-            href="/form"
-            className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-navy to-navy-light px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl md:px-8 md:py-4 md:text-base"
-          >
-            Ajukan Permohonan
-            <ArrowRight className="h-4 w-4" />
-          </a>
+        <div className="group relative mt-12 overflow-hidden rounded-2xl bg-gradient-to-br from-navy to-navy-light px-6 py-10 text-center shadow-xl md:px-12 md:py-14">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_60%)]" />
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/5 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/5 blur-2xl" />
+          <div className="relative z-10 flex flex-col items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm transition-transform group-hover:scale-110">
+              <ClipboardList className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white md:text-2xl">
+                Sudah Siap?
+              </h3>
+              <p className="mt-1 text-sm text-white/80 md:text-base">
+                Ajukan permohonan dokumen pasca lelang Anda sekarang
+              </p>
+            </div>
+            <a
+              href="/form"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-navy shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl md:px-8 md:py-4 md:text-base"
+            >
+              Ajukan Permohonan
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
 
