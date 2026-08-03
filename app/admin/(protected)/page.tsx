@@ -51,7 +51,7 @@ export default function AdminDashboard() {
     <>
       <div className="mb-6">
         <h1 className="text-xl font-bold" style={{ color: "var(--admin-text-primary)" }}>Dashboard</h1>
-        <p className="mt-1 text-xs" style={{ color: "var(--admin-text-secondary)" }}>Pantau perkembangan seluruh permohonan dokumen pasca lelang</p>
+        <p className="mt-1 text-xs" style={{ color: "var(--admin-text-secondary)" }}>Gambaran umum sebaran permohonan berdasarkan jenis layanan.</p>
       </div>
 
       <DashboardCharts

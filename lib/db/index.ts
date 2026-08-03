@@ -130,12 +130,20 @@ export async function appendRow(
   sheetName: string,
   data: Record<string, string>,
 ) {
+  const record = toRecord(sheetName, data)
+  await insertRow(sheetName, record)
+}
+
+function toRecord(sheetName: string, data: Record<string, string>): Record<string, string> {
   const mapping = mappingFor(sheetName)
   const record: Record<string, string> = {}
   for (const m of mapping) {
     record[m.field] = data[m.column] ?? ""
   }
+  return record
+}
 
+async function insertRow(sheetName: string, record: Record<string, string>) {
   switch (sheetName) {
     case "Monitoring":
       await prisma.monitoring.create({ data: record as Prisma.MonitoringCreateInput })
@@ -151,6 +159,42 @@ export async function appendRow(
       break
     case "Activity Log":
       await prisma.activityLog.create({ data: record as Prisma.ActivityLogCreateInput })
+      break
+  }
+}
+
+export async function appendPermohonanRows(
+  sheetName: string,
+  serviceData: Record<string, string>,
+  monitoringData: Record<string, string>,
+) {
+  const serviceRecord = toRecord(sheetName, serviceData)
+  const monitoringRecord = toRecord("Monitoring", monitoringData)
+
+  switch (sheetName) {
+    case "Monitoring":
+      await prisma.$transaction([
+        prisma.monitoring.create({ data: serviceRecord as Prisma.MonitoringCreateInput }),
+        prisma.monitoring.create({ data: monitoringRecord as Prisma.MonitoringCreateInput }),
+      ])
+      break
+    case "Kuitansi":
+      await prisma.$transaction([
+        prisma.kuitansi.create({ data: serviceRecord as Prisma.KuitansiCreateInput }),
+        prisma.monitoring.create({ data: monitoringRecord as Prisma.MonitoringCreateInput }),
+      ])
+      break
+    case "Kutipan RL":
+      await prisma.$transaction([
+        prisma.kutipanRL.create({ data: serviceRecord as Prisma.KutipanRLCreateInput }),
+        prisma.monitoring.create({ data: monitoringRecord as Prisma.MonitoringCreateInput }),
+      ])
+      break
+    case "Validasi PPh":
+      await prisma.$transaction([
+        prisma.validasiPPh.create({ data: serviceRecord as Prisma.ValidasiPPhCreateInput }),
+        prisma.monitoring.create({ data: monitoringRecord as Prisma.MonitoringCreateInput }),
+      ])
       break
   }
 }

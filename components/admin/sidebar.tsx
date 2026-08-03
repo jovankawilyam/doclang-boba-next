@@ -29,8 +29,11 @@ export function AdminSidebar() {
   }, []);
 
   function handleLogout() {
-    sessionStorage.removeItem("admin_token");
-    router.push("/admin/login");
+    fetch("/api/admin/auth", { method: "DELETE" })
+      .finally(() => {
+        sessionStorage.removeItem("admin_token");
+        router.push("/admin/login");
+      });
   }
 
   return (

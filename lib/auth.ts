@@ -31,12 +31,29 @@ export function verifyToken(token: string): boolean {
 }
 
 export function requireAdmin(request: Request): Response | null {
-  const auth = request.headers.get("Authorization");
-  if (!auth || !auth.startsWith("Bearer ")) {
+  const authHeader = request.headers.get("Authorization");
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const token = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : cookieHeader
+        .split(";")
+        .map((part) => part.trim())
+        .find((part) => part.startsWith("admin_token="))
+        ?.slice("admin_token=".length);
+
+  if (!token) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
-  if (!verifyToken(auth.slice(7))) {
+  if (!verifyToken(token)) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   return null;
+}
+
+export function hasAdminCookie(request: Request): boolean {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  return cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .some((part) => part.startsWith("admin_token="));
 }

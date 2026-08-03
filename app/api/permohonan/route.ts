@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendRow } from "@/lib/db";
+import { appendPermohonanRows } from "@/lib/db";
 import { generateId } from "@/lib/generate-id";
+import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 type Peran = "pemenang" | "kuasa";
 
 const PERAN_MAP: Record<Peran, string> = {
@@ -18,6 +19,23 @@ const FILE_FIELD_TO_SHEET_COLUMN: Record<string, string> = {
   dokumen_identitas_pemberi_kuasa: "Dokumen Identitas Pemberi Kuasa",
   surat_kuasa: "Surat Kuasa",
 };
+
+const MAX_REQUEST_BODY_BYTES = 1_500_000;
+
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((v) => typeof v === "string")
+  );
+}
+
+function withRateLimitHeaders(response: NextResponse, remaining: number, resetAt: number): NextResponse {
+  response.headers.set("X-RateLimit-Remaining", String(remaining));
+  response.headers.set("X-RateLimit-Reset", String(Math.ceil(resetAt / 1000)));
+  return response;
+}
 
 function getPeranLabel(peran: string): string {
   return PERAN_MAP[peran as Peran] ?? peran;
@@ -203,15 +221,52 @@ function buildMonitoringRow(
 
 export async function POST(request: NextRequest) {
   try {
-    const body: Record<string, string> = await request.json();
+    const limit = consumeRateLimit(getRateLimitKey("permohonan", request), {
+      limit: 10,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (!limit.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: "Terlalu banyak permintaan. Coba lagi nanti." },
+          { status: 429 },
+        ),
+        limit.remaining,
+        limit.resetAt,
+      );
+    }
+
+    const contentLength = Number(request.headers.get("content-length") ?? "0");
+    if (contentLength > MAX_REQUEST_BODY_BYTES) {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: "Ukuran permohonan terlalu besar." },
+          { status: 413 },
+        ),
+        limit.remaining,
+        limit.resetAt,
+      );
+    }
+
+    const body: unknown = await request.json();
+    if (!isStringRecord(body)) {
+      return NextResponse.json(
+        { success: false, error: "Format data tidak sesuai" },
+        { status: 400 },
+      );
+    }
     const textData: Record<string, string> = { ...body };
 
     const jenisLayanan = textData["jenis_layanan"];
 
     if (!jenisLayanan || !getSheetName(jenisLayanan)) {
-      return NextResponse.json(
-        { success: false, error: "Jenis layanan tidak valid" },
-        { status: 400 },
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: "Jenis layanan tidak valid" },
+          { status: 400 },
+        ),
+        limit.remaining,
+        limit.resetAt,
       );
     }
 
@@ -232,9 +287,13 @@ export async function POST(request: NextRequest) {
       kodeTiket = generated.kodeTiket;
     } catch (genError) {
       console.error("Generate ID error:", genError);
-      return NextResponse.json(
-        { success: false, error: "Gagal membuat ID pengajuan. Periksa koneksi database." },
-        { status: 500 },
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: "Gagal membuat ID pengajuan. Periksa koneksi database." },
+          { status: 500 },
+        ),
+        limit.remaining,
+        limit.resetAt,
       );
     }
 
@@ -249,27 +308,24 @@ export async function POST(request: NextRequest) {
     );
 
     try {
-      await appendRow(sheetName, rowData);
+      await appendPermohonanRows(sheetName, rowData, buildMonitoringRow(textData, id, jenisLayanan));
     } catch (sheetError) {
       console.error("Append row error:", sheetError);
-      return NextResponse.json(
-        { success: false, error: "Gagal menyimpan data. Periksa koneksi database." },
-        { status: 500 },
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: "Gagal menyimpan data. Periksa koneksi database." },
+          { status: 500 },
+        ),
+        limit.remaining,
+        limit.resetAt,
       );
     }
 
-    try {
-      const monitoringRow = buildMonitoringRow(textData, id, jenisLayanan);
-      await appendRow("Monitoring", monitoringRow);
-    } catch (monError) {
-      console.error("Append monitoring error:", monError);
-      return NextResponse.json(
-        { success: false, error: "Data tersimpan sebagian. Hubungi administrator." },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({ success: true, id_pengajuan: id });
+    return withRateLimitHeaders(
+      NextResponse.json({ success: true, id_pengajuan: id }),
+      limit.remaining,
+      limit.resetAt,
+    );
   } catch (error) {
     console.error("Permohonan error:", error);
     const message =

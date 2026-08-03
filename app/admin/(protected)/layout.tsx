@@ -11,23 +11,16 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("admin_token");
-    if (!token) {
-      router.replace("/admin/login");
-      return;
-    }
-
     fetch("/api/admin/auth", { headers: getAuthHeaders() })
       .then((res) => {
         if (!res.ok) {
-          sessionStorage.removeItem("admin_token");
           router.replace("/admin/login");
         } else {
           setAuthorized(true);
         }
       })
       .catch(() => {
-        setAuthorized(true); // Allow optimistically on network error
+        router.replace("/admin/login");
       });
   }, [router]);
 

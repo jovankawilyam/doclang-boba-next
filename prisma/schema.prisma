@@ -218,3 +218,10 @@ model ActivityLog {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model SiteSettings {
+  key       String   @id
+  value     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -24,8 +24,10 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
       });
       const json = await res.json();
-      if (json.success && json.token) {
-        sessionStorage.setItem("admin_token", json.token);
+      if (json.success) {
+        if (json.token) {
+          sessionStorage.setItem("admin_token", json.token);
+        }
         router.push("/admin");
       } else {
         setError(json.error || "Password salah");
