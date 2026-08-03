@@ -40,26 +40,27 @@ export default function FormPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
-      <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white px-6 py-6 shadow-sm">
-        <div className="mx-auto grid max-w-5xl grid-cols-3 items-center">
-            <Link
+      <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white px-4 py-4 shadow-sm sm:px-6 sm:py-5">
+        <div className="mx-auto grid max-w-5xl grid-cols-[auto_1fr_auto] items-center gap-3">
+          <Link
             href="/"
-            className="justify-self-start rounded-full p-3 transition-colors hover:bg-gray-100"
+            className="justify-self-start rounded-full p-2.5 transition-colors hover:bg-gray-100 sm:p-3"
           >
-            <ChevronLeft className="h-6 w-6 text-gray-600" />
+            <ChevronLeft className="h-5 w-5 text-gray-600 sm:h-6 sm:w-6" />
           </Link>
-          <span className="justify-self-center font-bold tracking-widest text-[#3388CC] uppercase">
+          <span className="justify-self-center text-center text-xs font-bold tracking-[0.22em] text-[#3388CC] uppercase sm:text-sm sm:tracking-widest">
             Formulir Permohonan
           </span>
+          <div aria-hidden="true" />
         </div>
       </nav>
-      <main className="mx-auto mt-6 max-w-4xl px-4 md:mt-10 md:px-6">
-        <div className="mb-6 md:mb-10">
+      <main className="mx-auto mt-5 max-w-4xl px-4 md:mt-10 md:px-6">
+        <div className="mb-5 md:mb-10">
           <Stepper step={form.step} />
         </div>
 
         {form.successMessage && (
-          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-800">
+          <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-800 sm:px-5">
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
               <p className="text-sm font-semibold">{form.successMessage}</p>
@@ -68,7 +69,7 @@ export default function FormPage() {
         )}
 
         {form.serverErrors.length > 0 && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-red-700">
+          <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-4 text-red-700 sm:px-5">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
               <AlertCircle className="h-5 w-5" />
               <span>Periksa kembali data Anda:</span>
@@ -85,16 +86,16 @@ export default function FormPage() {
           onSubmit={form.handleSubmit(form.onSubmit)}
           className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
         >
-          <div className="border-b border-slate-200 bg-slate-900 px-5 py-5 text-white md:px-8 md:py-6">
+          <div className="border-b border-slate-200 bg-slate-900 px-4 py-4 text-white sm:px-5 md:px-8 md:py-6">
             <p className="text-xs font-bold tracking-widest text-blue-200 uppercase">
               KPKNL Bogor
             </p>
-            <h1 className="mt-1 text-lg font-bold md:text-xl">
+            <h1 className="mt-1 text-base font-bold leading-snug sm:text-lg md:text-xl">
               Dokumen Pasca Lelang Bogor Bageur
             </h1>
           </div>
 
-          <div className="px-5 py-6 md:px-8 md:py-8">
+          <div className="px-4 py-5 sm:px-5 md:px-8 md:py-8">
             {form.step === 1 && (
               <BasicInfoSection
                 fieldHelpers={form.fieldHelpers}

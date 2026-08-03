@@ -1,105 +1,132 @@
 import Image from "next/image";
+import { getFooterSettings } from "@/lib/site-settings";
 
-export default function Footer() {
+function toEmbedUrl(mapsUrl: string): string {
+  try {
+    const url = new URL(mapsUrl);
+    const q = url.searchParams.get("q");
+    if (q) {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+    }
+    return `${url.origin}${url.pathname}?output=embed`;
+  } catch {
+    return "";
+  }
+}
+
+export default async function Footer() {
+  const footer = await getFooterSettings();
+  const operationalLines = footer.operatingHours.split("\n").filter(Boolean);
+  const embedUrl = toEmbedUrl(footer.mapsUrl);
+
   return (
-    <footer className="w-full bg-[#005FAC] py-16 text-white mt-20">
-      <div className="mx-auto mb-16 max-w-7xl px-6 md:mb-20 md:px-8">
-        <a
-          href="https://maps.google.com/?q=KPKNL+Bogor+Jalan+Veteran+No+45+Bogor+Jawa+Barat"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Lihat lokasi KPKNL Bogor di Google Maps"
-          className="group mx-auto flex w-fit flex-col items-center gap-3 transition-all duration-300 hover:opacity-90"
-        >
-          <p className="text-sm font-bold tracking-widest text-white/80 uppercase">
-            PETA KAMI
-          </p>
-          <div className="h-0.5 w-full rounded-full bg-white/20 transition-colors duration-300 group-hover:bg-[#34A853]" />
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/30 bg-white/20 text-white shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-[#34A853] group-hover:shadow-xl active:scale-90">
-            <i className="fa-solid fa-map-location-dot text-xl transition-transform duration-300 group-hover:scale-110" />
+    <footer className="w-full bg-[#082B52] text-white mt-10">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:px-8 md:py-16">
+        <div className="grid gap-10 md:grid-cols-[1.2fr_1fr_0.8fr] md:items-start">
+          <div className="space-y-4 md:pr-6">
+            <div className="flex items-center gap-4">
+              <Image
+                src="/images/NAGARA-DANA-RAKCA.png"
+                alt="Logo Nagara Dana Rakca"
+                width={1072}
+                height={1020}
+                className="h-12 w-12 object-contain sm:h-14 sm:w-14"
+              />
+              <Image
+                src="/images/kpknl-bogor.png"
+                alt="Logo KPKNL Bogor"
+                width={354}
+                height={335}
+                className="h-12 w-12 object-contain sm:h-14 sm:w-14"
+              />
+            </div>
+            <div className="space-y-2 text-sm leading-relaxed text-white/80">
+              <p className="text-lg font-semibold whitespace-pre-line text-white">{footer.officeName}</p>
+              <p className="whitespace-pre-line">{footer.address}</p>
+            </div>
+            <p className="whitespace-pre-line text-sm text-white/60">{footer.copyright}</p>
           </div>
-        </a>
-      </div>
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2 md:px-8">
-        <div className="flex flex-col gap-8">
-          <div className="flex items-center gap-6">
-            <Image
-              src="/images/NAGARA-DANA-RAKCA.png"
-              alt="Logo Nagara Dana Rakca"
-              width={1072}
-              height={1020}
-              className="h-20 w-20 object-contain"
-            />
-            <Image
-              src="/images/kpknl-bogor.png"
-              alt="Logo KPKNL Bogor"
-              width={354}
-              height={335}
-              className="h-20 w-20 object-contain"
-            />
+
+          <div className="space-y-4 md:px-10 md:border-x md:border-white/10">
+            <p className="text-xs font-bold tracking-[0.35em] text-white/55 uppercase">
+              Jam Operasional
+            </p>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-relaxed text-white/80">
+              {operationalLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
           </div>
-          <div className="space-y-4 text-base leading-relaxed font-semibold md:text-lg">
-            <p className="text-xl font-bold md:text-2xl">
-              &copy; 2026 KPKNL Bogor
+
+          <div className="space-y-4 md:pl-6 md:justify-self-end md:text-right">
+            <p className="text-xs font-bold tracking-[0.35em] text-white/55 uppercase">
+              Ikuti Kami
             </p>
-            <p className="opacity-90">
-              Jalan Veteran No. 45, Panaragan, Kecamatan Bogor Tengah, Kota
-              Bogor, Jawa Barat 16125
-            </p>
-            
-            <a
-              href="https://www.instagram.com/jovankawilyamm"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#005FAC] transition-colors duration-300 font-normal text-[px]"
-            >
-              build by : @jovankawilyamm
-            </a>
+            <div className="flex flex-wrap gap-3 md:justify-end">
+              <a
+                href={footer.socialLinks.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube KPKNL Bogor"
+                className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                <i className="fa-brands fa-youtube text-xl" />
+              </a>
+              <a
+                href={footer.socialLinks.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram KPKNL Bogor"
+                className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                <i className="fa-brands fa-instagram text-xl" />
+              </a>
+              <a
+                href={footer.socialLinks.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok KPKNL Bogor"
+                className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                <i className="fa-brands fa-tiktok text-xl" />
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-start gap-8 md:items-end">
-          <div className="flex flex-col items-start md:items-end">
-            <p className="mb-2 text-lg font-bold tracking-widest text-white/80 uppercase">
-              Ikuti Kami
-            </p>
-            <div className="h-1.5 w-16 rounded-full bg-white" />
-          </div>
-          <div className="flex gap-5">
-            {[
-              {
-                name: "youtube",
-                url: "https://www.youtube.com/@kpknlbogor",
-                color: "hover:bg-[#FF0000]",
-              },
-              {
-                name: "instagram",
-                url: "https://www.instagram.com/kpknl.bogor",
-                color: "hover:bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]",
-              },
-              {
-                name: "tiktok",
-                url: "https://www.tiktok.com/@kpknl.bogor",
-                color: "hover:bg-black",
-              },
-            ].map((item) => (
-              <a
-                key={item.name}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group flex h-14 w-14 items-center justify-center rounded-2xl border border-white/30 bg-white/20 text-white backdrop-blur-sm transition-all duration-300 ${item.color} hover:-translate-y-2 hover:shadow-2xl active:scale-90`}
-              >
-                <i
-                  className={`fa-brands fa-${item.name} text-2xl transition-transform group-hover:scale-110`}
-                />
-              </a>
-            ))}
-          </div>
-          <p className="text-left text-xs leading-loose font-bold tracking-widest text-white/80 uppercase md:text-right md:text-sm">
-            Kantor Pelayanan Kekayaan Negara dan Lelang Bogor <br />
-            <span className="text-white/80">@kpknlbogor</span>
+        <div className="mt-10 border-t border-white/10 pt-8 sm:mt-12 sm:pt-10">
+          <p className="text-xs font-bold tracking-[0.35em] text-white/55 uppercase">
+            Lokasi
           </p>
+          <a
+            href={footer.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Buka lokasi di Google Maps"
+            className="group relative mt-4 block overflow-hidden rounded-2xl border border-white/10 transition hover:border-white/25"
+          >
+            {embedUrl ? (
+              <iframe
+                src={embedUrl}
+                title="Lokasi KPKNL Bogor di peta"
+                className="h-56 w-full border-0 sm:h-64"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            ) : (
+              <div className="flex h-56 items-center justify-center bg-white/5 text-sm text-white/60 sm:h-64">
+                {footer.address}
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-end justify-between bg-gradient-to-t from-black/50 via-transparent to-transparent p-4">
+              <span className="max-w-[70%] text-xs font-semibold text-white/90">{footer.address}</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition group-hover:bg-white/25">
+                <i className="fa-solid fa-map-location-dot text-[10px]" />
+                Buka di Google Maps
+              </span>
+            </div>
+          </a>
         </div>
       </div>
     </footer>

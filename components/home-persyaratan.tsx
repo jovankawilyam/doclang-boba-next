@@ -14,7 +14,7 @@ import {
 const layanan = [
   {
     title: "Pemberian Kuitansi Pembayaran Harga Lelang",
-    icon: <ClipboardList className="h-8 w-8 text-navy-light" />,
+    icon: <ClipboardList className="h-8 w-8 text-[#0B3D73]" />,
     items: [
       "KTP Pemohon / Pemenang",
       "Surat Kuasa asli (jika dikuasakan)",
@@ -25,7 +25,7 @@ const layanan = [
   },
   {
     title: "Pemberian Kutipan Risalah Lelang",
-    icon: <FileCheck className="h-8 w-8 text-navy-light" />,
+    icon: <FileCheck className="h-8 w-8 text-[#0B3D73]" />,
     items: [
       "KTP Pemohon / Pemenang",
       "Surat Kuasa asli (jika dikuasakan)",
@@ -39,7 +39,7 @@ const layanan = [
   },
   {
     title: "Validasi PPh (1 Bidang)",
-    icon: <ShieldCheck className="h-8 w-8 text-navy-light" />,
+    icon: <ShieldCheck className="h-8 w-8 text-[#0B3D73]" />,
     items: [
       "KTP Pemohon / Pemenang",
       "Surat Kuasa asli (jika dikuasakan)",
@@ -59,37 +59,42 @@ export default function HomePersyaratan() {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <section id="persyaratan" className="relative overflow-hidden bg-bg-light px-4 py-16 md:px-6 md:py-20">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 hidden h-96 w-96 rounded-full bg-blue-100/60 blur-3xl md:block" />
-        <div className="absolute left-1/2 top-1/2 hidden h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-100/40 blur-3xl md:block" />
-      </div>
-      <br /><br /><br /><br />
-      <div className="relative mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold text-navy md:text-5xl">
-            Siapkan Berkas Anda
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-500 md:text-lg">
-            Pilih jenis layanan untuk melihat persyaratan dokumen yang diperlukan.
-          </p>
-          <div className="mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-navy to-orange" />
+    <section id="persyaratan" className="bg-[#F8FAFC] px-4 py-12 sm:px-5 md:px-6 md:py-20">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 grid gap-5 border-b border-[#D8E0EC] pb-7 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div>
+            <p className="text-xs font-bold tracking-[0.35em] text-[#0B3D73] uppercase">
+              Persyaratan Layanan
+            </p>
+            <h2 className="mt-3 text-2xl font-bold leading-tight text-slate-950 sm:text-3xl md:text-5xl">
+              DOKUMEN YANG PERLU DI SIAPKAN
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base md:mt-4 md:text-lg">
+              Pilih layanan untuk melihat dokumen yang dibutuhkan sebelum
+              mengajukan permohonan.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-[#D8E0EC] bg-white px-4 py-4 shadow-sm sm:px-5">
+            <p className="text-sm font-semibold text-slate-950">Catatan singkat</p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">
+              Gunakan dokumen yang masih berlaku, terbaca jelas, dan sesuai
+              dengan identitas pemohon.
+            </p>
+          </div>
         </div>
 
-
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
           {layanan.map((item, idx) => (
             <button
               key={idx}
               onClick={() => setSelected(idx)}
-              className="group flex cursor-pointer flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center shadow-[0_4px_16px_0_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_32px_0_rgba(18,60,105,0.12)]"
+              className="group flex cursor-pointer flex-col items-start gap-4 rounded-2xl border border-[#D8E0EC] bg-white px-5 py-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#3388CC] hover:shadow-md sm:px-6 sm:py-8"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm transition-transform group-hover:scale-110">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#EEF3FA] shadow-sm transition-transform group-hover:scale-105">
                 {item.icon}
               </div>
-              <h3 className="text-lg font-bold text-navy">{item.title}</h3>
-              <span className="inline-flex items-center gap-1 text-sm font-medium text-orange">
+              <h3 className="text-lg font-semibold text-slate-950">{item.title}</h3>
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-[#0B3D73]">
                 Lihat Persyaratan
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
@@ -97,25 +102,25 @@ export default function HomePersyaratan() {
           ))}
         </div>
 
-        <div className="group relative mt-12 overflow-hidden rounded-2xl bg-gradient-to-br from-navy to-navy-light px-6 py-10 text-center shadow-xl md:px-12 md:py-14">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_60%)]" />
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/5 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/5 blur-2xl" />
-          <div className="relative z-10 flex flex-col items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm transition-transform group-hover:scale-110">
-              <ClipboardList className="h-7 w-7 text-white" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white md:text-2xl">
-                Sudah Siap?
-              </h3>
-              <p className="mt-1 text-sm text-white/80 md:text-base">
-                Ajukan permohonan dokumen pasca lelang Anda sekarang
-              </p>
+        <div className="mt-10 rounded-3xl border border-[#D8E0EC] bg-white px-5 py-7 shadow-sm sm:px-6 md:px-8 md:py-10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#0B3D73] text-white">
+                <ClipboardList className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-950 sm:text-xl md:text-2xl">
+                  Sudah siap mengajukan?
+                </h3>
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+                  Setelah berkas lengkap, silakan lanjut ke formulir permohonan
+                  agar data dapat diproses lebih cepat.
+                </p>
+              </div>
             </div>
             <a
               href="/form"
-              className="inline-flex items-center gap-2.5 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-navy shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl md:px-8 md:py-4 md:text-base"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0B3D73] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#082B52]"
             >
               Ajukan Permohonan
               <ArrowRight className="h-4 w-4" />
@@ -126,19 +131,19 @@ export default function HomePersyaratan() {
 
       {selected !== null && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
           onClick={() => setSelected(null)}
         >
           <div
-            className="relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl"
+            className="relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl border border-[#D8E0EC] bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+            <div className="flex items-start justify-between gap-4 border-b border-[#D8E0EC] px-5 py-4 sm:px-6 sm:py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#EEF3FA] shadow-sm">
                   {layanan[selected].icon}
                 </div>
-                <h3 className="text-lg font-bold leading-snug text-navy">
+                <h3 className="text-base font-semibold leading-snug text-slate-950 sm:text-lg">
                   {layanan[selected].title}
                 </h3>
               </div>
@@ -150,12 +155,12 @@ export default function HomePersyaratan() {
               </button>
             </div>
 
-            <div className="overflow-y-auto px-6 py-5">
+            <div className="overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
               <div className="flex flex-col gap-2">
                 {layanan[selected].items.map((item, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-3 rounded-xl bg-white px-4 py-3 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] transition-all hover:shadow-[0_4px_12px_0_rgba(18,60,105,0.08)]"
+                    className="flex items-start gap-3 rounded-xl border border-[#EEF3FA] bg-[#F8FAFC] px-4 py-3 transition-shadow hover:shadow-sm"
                   >
                     <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100">
                       <svg
@@ -168,14 +173,14 @@ export default function HomePersyaratan() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="text-base leading-relaxed text-slate-700">{item}</span>
+                    <span className="text-sm leading-relaxed text-slate-700 sm:text-base">{item}</span>
                   </div>
                 ))}
               </div>
 
               <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
                 {layanan[selected].note && (
-                  <p className="text-sm leading-relaxed text-slate-400">
+                  <p className="text-sm leading-relaxed text-slate-500">
                     {layanan[selected].note}
                   </p>
                 )}
