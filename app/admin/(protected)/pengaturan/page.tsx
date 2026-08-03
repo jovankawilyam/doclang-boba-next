@@ -93,10 +93,10 @@ export default function PengaturanPage() {
           <div className="p-6">
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <p className="text-xs font-semibold text-amber-800">
-                Password admin dikelola melalui environment variable <code className="rounded bg-amber-100 px-1">ADMIN_PASSWORD</code>.
+                Login admin sekarang dikelola melalui akun database dan role.
               </p>
               <p className="mt-1 text-xs text-amber-700">
-                Hubungi administrator server untuk mengubah password.
+                Gunakan menu Admin Akun untuk menambah atau mengelola akun.
               </p>
             </div>
             <div className="mt-4 space-y-3">

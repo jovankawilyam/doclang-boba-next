@@ -16,7 +16,7 @@ const HEADERS = [
 const LAYANAN = ["Kuitansi", "Kutipan RL", "Validasi PPh"];
 
 export async function GET(request: NextRequest) {
-  const unauth = requireAdmin(request);
+  const unauth = await requireAdmin(request);
   if (unauth) return unauth;
   try {
     const rows = await getRows("Monitoring");

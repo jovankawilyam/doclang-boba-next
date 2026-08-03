@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRows, updateRow, appendRow } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requireAdminRole } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ function getSheetFromId(id: string): { sheetName: string; idColumn: string } | n
 }
 
 export async function GET(request: NextRequest) {
-  const unauth = requireAdmin(request);
+  const unauth = await requireAdmin(request);
   if (unauth) return unauth;
   try {
     const { searchParams } = new URL(request.url);
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const unauth = requireAdmin(request);
+  const unauth = await requireAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"]);
   if (unauth) return unauth;
   try {
     const body = await request.json();

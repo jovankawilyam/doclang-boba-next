@@ -7,6 +7,7 @@ import Image from "next/image";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -21,16 +22,13 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username, password }),
       });
       const json = await res.json();
       if (json.success) {
-        if (json.token) {
-          sessionStorage.setItem("admin_token", json.token);
-        }
         router.push("/admin");
       } else {
-        setError(json.error || "Password salah");
+        setError(json.error || "Username atau password salah");
       }
     } catch {
       setError("Gagal terhubung ke server");
@@ -88,10 +86,28 @@ export default function AdminLoginPage() {
                 <Image src="/images/kpknl-bogor.png" alt="KPKNL Bogor" width={354} height={335} className="h-14 w-auto object-contain" />
               </div>
               <h1 className="text-[1.35rem] font-bold text-[#005FAC] tracking-tight">LOGIN ADMIN</h1>
-              <p className="mt-1.5 text-sm text-slate-400">Masukkan password untuk melanjutkan</p>
+              <p className="mt-1.5 text-sm text-slate-400">Masukkan username dan password untuk melanjutkan</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-slate-600">
+                  Username
+                </label>
+                <div className="relative mt-1.5">
+                  <input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200"
+                    placeholder="Masukkan username"
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-slate-600">
                   Password
@@ -105,6 +121,7 @@ export default function AdminLoginPage() {
                     className="block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 pr-11 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200"
                     placeholder="Masukkan password"
                     autoFocus
+                    autoComplete="current-password"
                     required
                   />
                   <button

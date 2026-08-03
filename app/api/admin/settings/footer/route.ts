@@ -18,7 +18,7 @@ const DEFAULT_FOOTER = {
 type FooterSettings = typeof DEFAULT_FOOTER;
 
 export async function GET(request: NextRequest) {
-  const unauth = requireAdmin(request);
+  const unauth = await requireAdmin(request);
   if (unauth) return unauth;
 
   const settings = await getFooterSettings();
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const unauth = requireAdmin(request);
+  const unauth = await requireAdmin(request);
   if (unauth) return unauth;
 
   try {

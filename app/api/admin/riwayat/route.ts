@@ -6,7 +6,7 @@ import type { SheetRow } from "@/lib/db";
 const LOG_HEADERS = ["Waktu", "ID Pengajuan", "Jenis Layanan", "Status Lama", "Status Baru", "Keterangan"];
 
 export async function GET(request: NextRequest) {
-  const unauth = requireAdmin(request);
+  const unauth = await requireAdmin(request);
   if (unauth) return unauth;
   try {
     const { searchParams } = new URL(request.url);

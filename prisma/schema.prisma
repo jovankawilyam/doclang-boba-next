@@ -6,6 +6,13 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AdminRole {
+  superadmin
+  kepala_kantor
+  kepala_bagian
+  karyawan
+}
+
 model Monitoring {
   id                Int      @id @default(autoincrement())
   tglPermintaan     String   @default("")
@@ -224,4 +231,26 @@ model SiteSettings {
   value     String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AdminAccount {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  name         String
+  passwordHash String
+  role         AdminRole
+  isActive     Boolean       @default(true)
+  lastLoginAt  DateTime?
+  sessions     AdminSession[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model AdminSession {
+  id        Int          @id @default(autoincrement())
+  tokenHash String       @unique
+  adminId   Int
+  admin     AdminAccount @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime     @default(now())
 }

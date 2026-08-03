@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createToken, hasAdminCookie, requireAdmin } from "@/lib/auth";
 import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-types";
+import { createSessionToken, getAdminFromRequest, normalizeAdminName, storeAdminSession } from "@/lib/auth";
+import { prisma } from "@/lib/db/prisma";
+import { verifyPassword } from "@/lib/password";
 
 function withRateLimitHeaders(response: NextResponse, remaining: number, resetAt: number): NextResponse {
   response.headers.set("X-RateLimit-Remaining", String(remaining));
@@ -9,7 +12,7 @@ function withRateLimitHeaders(response: NextResponse, remaining: number, resetAt
 }
 
 function setAdminCookie(response: NextResponse, token: string) {
-  response.cookies.set("admin_token", token, {
+  response.cookies.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -20,11 +23,20 @@ function setAdminCookie(response: NextResponse, token: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = requireAdmin(request);
-  if (auth) {
-    return auth;
+  const admin = await getAdminFromRequest(request);
+  if (!admin) {
+    return NextResponse.json({ success: true, authenticated: false });
   }
-  return NextResponse.json({ success: true, authenticated: hasAdminCookie(request) });
+  return NextResponse.json({
+    success: true,
+    authenticated: true,
+    admin: {
+      id: admin.id,
+      username: admin.username,
+      name: admin.name,
+      role: admin.role,
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -45,7 +57,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    if (!body || typeof body !== "object" || Array.isArray(body) || typeof (body as Record<string, unknown>).password !== "string") {
+    if (
+      !body ||
+      typeof body !== "object" ||
+      Array.isArray(body) ||
+      typeof (body as Record<string, unknown>).username !== "string" ||
+      typeof (body as Record<string, unknown>).password !== "string"
+    ) {
       return withRateLimitHeaders(
         NextResponse.json(
           { success: false, error: "Format data tidak sesuai" },
@@ -56,36 +74,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { password } = body as { password: string };
+    const { username, password } = body as { username: string; password: string };
+    const admin = await prisma.adminAccount.findUnique({ where: { username } });
 
-    if (!process.env.ADMIN_PASSWORD) {
-      console.error("ADMIN_PASSWORD environment variable is not set");
+    if (!admin || !admin.isActive || !verifyPassword(password, admin.passwordHash)) {
       return withRateLimitHeaders(
         NextResponse.json(
-          { success: false, error: "Konfigurasi server tidak lengkap. Hubungi administrator." },
-          { status: 500 },
+          { success: false, error: "Username atau password salah" },
+          { status: 401 },
         ),
         limit.remaining,
         limit.resetAt,
       );
     }
 
-    if (password === process.env.ADMIN_PASSWORD) {
-      const token = createToken();
-      return withRateLimitHeaders(
-        setAdminCookie(NextResponse.json({ success: true, token }), token),
-        limit.remaining,
-        limit.resetAt,
-      );
-    }
-    return withRateLimitHeaders(
-      NextResponse.json(
-        { success: false, error: "Password salah" },
-        { status: 401 },
-      ),
-      limit.remaining,
-      limit.resetAt,
+    const token = createSessionToken();
+    await storeAdminSession(admin.id, token);
+
+    const response = setAdminCookie(
+      NextResponse.json({
+        success: true,
+        token,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          name: normalizeAdminName(admin.name),
+          role: admin.role,
+        },
+      }),
+      token,
     );
+
+    return withRateLimitHeaders(response, limit.remaining, limit.resetAt);
   } catch (err) {
     console.error("Admin auth error:", err);
     return NextResponse.json(
@@ -95,14 +115,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   const response = NextResponse.json({ success: true });
-  response.cookies.set("admin_token", "", {
+  response.cookies.set(ADMIN_SESSION_COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
     secure: process.env.NODE_ENV === "production",
     maxAge: 0,
   });
+
+  const admin = await getAdminFromRequest(request);
+  if (admin) {
+    await prisma.adminSession.deleteMany({ where: { adminId: admin.id } }).catch(() => {});
+  }
+
   return response;
 }

@@ -4,7 +4,6 @@ import HomePersyaratan from "@/components/home-persyaratan";
 import Navbar from "@/components/navbar";
 import TrackingSection from "@/components/tracking-section";
 import FloatingWhatsApp from "@/components/whatsapp-button";
-import Image from "next/image";
 
 export default function Home() {
   return (
