@@ -33,7 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/kutipan-rl", label: "Kutipan RL", icon: BookOpen, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
   { href: "/admin/validasi-pph", label: "Validasi PPh", icon: FileCheck, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
   { href: "/admin/riwayat", label: "Riwayat", icon: History, roles: ["superadmin", "kepala_kantor", "kepala_bagian"] },
-  { href: "/admin/pengaturan", label: "Pengaturan", icon: Settings, roles: ["superadmin"] },
+  { href: "/admin/pengaturan", label: "Pengaturan", icon: Settings, roles: ["superadmin", "kepala_kantor", "kepala_bagian"] },
   { href: "/admin/admin-akun", label: "Admin Akun", icon: Users, roles: ["superadmin"] },
 ];
 
@@ -65,8 +65,15 @@ export function AdminSidebar() {
   function handleLogout() {
     fetch("/api/admin/auth", { method: "DELETE" })
       .finally(() => {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("admin_session_token");
+        }
         router.push("/admin/login");
       });
+  }
+
+  function handleChangePassword() {
+    router.push("/admin/admin-akun?change-password=1");
   }
 
   const visibleItems = admin ? NAV_ITEMS.filter((item) => item.roles.includes(admin.role)) : NAV_ITEMS.filter((item) => item.href === "/admin");
@@ -158,10 +165,19 @@ export function AdminSidebar() {
             {!collapsed && (
               <div className="text-xs">
                 <p className="font-bold uppercase" style={{ color: "var(--admin-text-body)" }}>{admin?.name ?? "Administrator"}</p>
-                <p style={{ color: "var(--admin-text-secondary)" }}>{admin?.role ?? "-"}</p>
+                <p style={{ color: "var(--admin-text-secondary)" }}>{admin?.role === "karyawan" ? "staf" : admin?.role ?? "-"}</p>
               </div>
             )}
           </div>
+          <button
+            onClick={handleChangePassword}
+            className={`mb-2 flex w-full items-center gap-3 rounded-lg border text-sm font-semibold transition-colors hover:bg-[var(--admin-hover)] ${collapsed ? "justify-center px-2 py-2.5" : "px-4 py-2.5"}`}
+            style={{ borderColor: "var(--admin-border)", color: "var(--admin-text-secondary)" }}
+            title={collapsed ? "Ubah password" : undefined}
+          >
+            <Settings className="h-5 w-5 shrink-0" />
+            {!collapsed && "Ubah Password"}
+          </button>
           <button
             onClick={handleLogout}
             className={`mt-2 flex w-full items-center gap-3 rounded-lg bg-red-500 text-sm font-semibold text-white transition-colors hover:bg-red-700 hover:text-white ${collapsed ? "justify-center px-2 py-2.5" : "px-4 py-2.5"}`}
