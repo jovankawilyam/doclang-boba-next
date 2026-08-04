@@ -1,14 +1,39 @@
 import Image from "next/image";
 import { getFooterSettings } from "@/lib/site-settings";
 
-function toEmbedUrl(mapsUrl: string): string {
+async function toEmbedUrl(mapsUrl: string): Promise<string> {
   try {
-    const url = new URL(mapsUrl);
+    const resolvedUrl = mapsUrl.includes("maps.app.goo.gl")
+      ? (await fetch(mapsUrl, { redirect: "follow" })).url
+      : mapsUrl;
+    const url = new URL(resolvedUrl);
+
+    if (url.pathname.includes("/maps/embed")) {
+      return resolvedUrl;
+    }
+
     const q = url.searchParams.get("q");
     if (q) {
-      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+      return `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
     }
-    return `${url.origin}${url.pathname}?output=embed`;
+
+    const query = url.searchParams.get("query") || url.searchParams.get("destination") || url.searchParams.get("api") || "";
+    if (query) {
+      return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+    }
+
+    const placeMatch = url.pathname.match(/\/maps\/(?:place|search)\/([^/]+)/i);
+    const coordsMatch = resolvedUrl.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(\d+(?:\.\d+)?)z/);
+    if (coordsMatch?.[1] && coordsMatch?.[2]) {
+      const zoom = Math.max(15, Number(coordsMatch[3]) - 3);
+      return `https://www.google.com/maps?q=${coordsMatch[1]},${coordsMatch[2]}&z=${zoom}&output=embed`;
+    }
+
+    if (placeMatch?.[1]) {
+      return `https://www.google.com/maps?q=${encodeURIComponent(decodeURIComponent(placeMatch[1]))}&output=embed`;
+    }
+
+    return `${url.origin}${url.pathname}${url.search ? `${url.search}&` : "?"}output=embed`;
   } catch {
     return "";
   }
@@ -17,7 +42,7 @@ function toEmbedUrl(mapsUrl: string): string {
 export default async function Footer() {
   const footer = await getFooterSettings();
   const operationalLines = footer.operatingHours.split("\n").filter(Boolean);
-  const embedUrl = toEmbedUrl(footer.mapsUrl);
+  const embedUrl = await toEmbedUrl(footer.mapsUrl);
 
   return (
     <footer className="w-full bg-[#082B52] text-white mt-10">
