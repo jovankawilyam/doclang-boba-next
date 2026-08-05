@@ -9,11 +9,12 @@ import {
   Info,
   ShieldCheck,
   X,
+  FileDown,
 } from "lucide-react";
 
 const layanan = [
   {
-    title: "Pemberian Kuitansi Pembayaran Harga Lelang",
+    title: "Pemberian Kuitansi Pembayaran Harga Lelang",  
     icon: <ClipboardList className="h-8 w-8 text-[#0B3D73]" />,
     items: [
       "KTP Pemohon / Pemenang",
@@ -74,12 +75,30 @@ export default function HomePersyaratan() {
               mengajukan permohonan.
             </p>
           </div>
-          <div className="rounded-2xl border border-[#D8E0EC] bg-white px-4 py-4 shadow-sm sm:px-5">
-            <p className="text-sm font-semibold text-slate-950">Catatan singkat</p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              Gunakan dokumen yang masih berlaku, terbaca jelas, dan sesuai
-              dengan identitas pemohon.
-            </p>
+
+          <div className="flex flex-col gap-3 rounded-2xl border border-[#D8E0EC] bg-white px-4 py-4 shadow-sm sm:px-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#D8E0EC] pb-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-950">Unduh PDF Resmi</p>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Dapatkan salinan persyaratan resmi.
+                </p>
+              </div>
+              <a
+                href="/pdf/syarat_layanan_lelang.pdf"
+                download
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-[#EEF3FA] px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+              >
+                <FileDown className="h-4 w-4" />
+                Unduh PDF
+              </a>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-950">Catatan singkat</p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                Gunakan dokumen yang masih berlaku, terbaca jelas, dan sesuai dengan identitas pemohon.
+              </p>
+            </div>
           </div>
         </div>
 
