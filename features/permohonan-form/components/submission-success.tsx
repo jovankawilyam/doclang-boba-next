@@ -18,15 +18,7 @@ function buildWaLink(wa: string, text: string): string {
 }
 
 function buildNotificationText(receipt: SubmissionReceipt): string {
-  return `Yth. Bapak/Ibu ${receipt.nama},
-
-Dengan hormat, kami sampaikan bahwa permohonan Anda telah kami terima dengan nomor pengajuan ${receipt.id}.
-
-Kami akan segera memproses permohonan Anda sesuai layanan yang dipilih. Status permohonan dapat dilacak melalui situs kami.
-
-Atas perhatian dan kerja samanya, kami ucapkan terima kasih.
-
-Hormat kami, KPKNL Bogor`;
+  return `Yth. Bapak/Ibu ${receipt.nama},\n\nDengan ini, kami sampaikan bahwa permohonan Anda telah kami terima dengan nomor pengajuan *${receipt.id}*.\n\nKami akan segera memproses permohonan Anda sesuai layanan yang dipilih. Status permohonan dapat dilacak melalui situs kami.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\nHormat kami, KPKNL Bogor`;
 }
 
 export function SubmissionSuccess({
