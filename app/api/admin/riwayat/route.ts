@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRows } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminRole } from "@/lib/auth";
 import type { SheetRow } from "@/lib/db";
 
 const LOG_HEADERS = ["Waktu", "ID Pengajuan", "Jenis Layanan", "Status Lama", "Status Baru", "Keterangan"];
 
 export async function GET(request: NextRequest) {
-  const unauth = await requireAdmin(request);
+  const unauth = await requireAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian"]);
   if (unauth) return unauth;
   try {
     const { searchParams } = new URL(request.url);

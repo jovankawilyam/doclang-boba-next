@@ -255,9 +255,11 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    const textData: Record<string, string> = { ...body };
+    const textData: Record<string, string> = Object.fromEntries(
+      Object.entries(body).map(([key, value]) => [key.trim(), value.trim()]),
+    );
 
-    const jenisLayanan = textData["jenis_layanan"];
+    const jenisLayanan = textData["jenis_layanan"]?.trim();
 
     if (!jenisLayanan || !getSheetName(jenisLayanan)) {
       return withRateLimitHeaders(

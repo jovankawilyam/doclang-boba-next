@@ -4,6 +4,7 @@ import {
   findRowInSheet,
   getRows,
 } from "@/lib/db";
+import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const ID_MAP: Record<string, { sheet: string; col: string }> = {
   Kuitansi: { sheet: "Kuitansi", col: "ID KPHL" },
@@ -20,6 +21,10 @@ function detectLayanan(id: string): string | null {
 
 export async function GET(request: NextRequest) {
   try {
+    const limit = consumeRateLimit(getRateLimitKey("lacak", request), { limit: 20, windowMs: 60 * 1000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ success: false, error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
+    }
     const id = request.nextUrl.searchParams.get("id");
 
     if (!id) {

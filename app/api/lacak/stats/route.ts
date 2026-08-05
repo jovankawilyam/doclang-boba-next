@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRows } from "@/lib/db";
+import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const LAYANAN_LIST = ["Kuitansi", "Kutipan RL", "Validasi PPh"];
 
@@ -20,7 +21,11 @@ function countStats(rows: { get: (key: string) => string }[]): ServiceStats {
 
 export async function GET(request: NextRequest) {
   try {
-    const layananKey = request.nextUrl.searchParams.get("layanan") ?? "";
+    const limit = consumeRateLimit(getRateLimitKey("lacak-stats", request), { limit: 30, windowMs: 60 * 1000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ success: false, error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
+    }
+    const layananKey = (request.nextUrl.searchParams.get("layanan") ?? "").trim().toLowerCase();
     const rows = await getRows("Monitoring");
 
     if (layananKey) {

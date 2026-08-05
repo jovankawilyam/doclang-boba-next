@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRows, updateRow, appendRow } from "@/lib/db";
+import { getRows, updateRow } from "@/lib/db";
 import { requireAdmin, requireAdminRole } from "@/lib/auth";
+import { validateAdminCsrf } from "@/lib/csrf";
+import { appendActivityLog } from "@/lib/audit";
 
 export const dynamic = 'force-dynamic';
 
@@ -110,6 +112,9 @@ export async function PATCH(request: NextRequest) {
   const unauth = await requireAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"]);
   if (unauth) return unauth;
   try {
+    if (!validateAdminCsrf(request)) {
+      return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
+    }
     const body = await request.json();
     const { id, reason, tglPengambilan } = body;
     const newStatus = body.status?.toLowerCase();
@@ -158,13 +163,13 @@ export async function PATCH(request: NextRequest) {
     const monRow = monitoringRows.find((r) => r.get("ID Pengajuan") === id);
     const layanan = monRow?.get("Jenis Layanan") ?? "";
 
-    await appendRow("Activity Log", {
-      Waktu: new Date().toISOString(),
-      "ID Pengajuan": id,
-      "Jenis Layanan": layanan,
-      "Status Lama": oldStatus,
-      "Status Baru": newStatus,
-      Keterangan: reason || (tglPengambilan ? `Tanggal pengambilan: ${tglPengambilan}` : ""),
+    await appendActivityLog({
+      waktu: new Date().toISOString(),
+      idPengajuan: id,
+      jenisLayanan: layanan,
+      statusLama: oldStatus,
+      statusBaru: newStatus,
+      keterangan: reason || (tglPengambilan ? `Tanggal pengambilan: ${tglPengambilan}` : ""),
     });
 
     return NextResponse.json({

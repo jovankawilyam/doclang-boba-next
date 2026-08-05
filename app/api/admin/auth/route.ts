@@ -4,6 +4,7 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/admin-types";
 import { createSessionToken, getAdminFromRequest, normalizeAdminName, storeAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import { verifyPassword } from "@/lib/password";
+import { createCsrfToken, setCsrfCookie } from "@/lib/csrf";
 
 function withRateLimitHeaders(response: NextResponse, remaining: number, resetAt: number): NextResponse {
   response.headers.set("X-RateLimit-Remaining", String(remaining));
@@ -24,19 +25,19 @@ function setAdminCookie(response: NextResponse, token: string) {
 
 export async function GET(request: NextRequest) {
   const admin = await getAdminFromRequest(request);
-  if (!admin) {
-    return NextResponse.json({ success: true, authenticated: false });
-  }
-  return NextResponse.json({
-    success: true,
-    authenticated: true,
-    admin: {
-      id: admin.id,
-      username: admin.username,
-      name: admin.name,
-      role: admin.role,
-    },
-  });
+  const response = !admin
+    ? NextResponse.json({ success: true, authenticated: false })
+    : NextResponse.json({
+        success: true,
+        authenticated: true,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          name: admin.name,
+          role: admin.role,
+        },
+      });
+  return setCsrfCookie(response, createCsrfToken());
 }
 
 export async function POST(request: NextRequest) {
@@ -90,19 +91,23 @@ export async function POST(request: NextRequest) {
 
     const token = createSessionToken();
     await storeAdminSession(admin.id, token);
+    await prisma.adminAccount.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
 
-    const response = setAdminCookie(
-      NextResponse.json({
-        success: true,
+    const response = setCsrfCookie(
+      setAdminCookie(
+        NextResponse.json({
+          success: true,
+          token,
+          admin: {
+            id: admin.id,
+            username: admin.username,
+            name: normalizeAdminName(admin.name),
+            role: admin.role,
+          },
+        }),
         token,
-        admin: {
-          id: admin.id,
-          username: admin.username,
-          name: normalizeAdminName(admin.name),
-          role: admin.role,
-        },
-      }),
-      token,
+      ),
+      createCsrfToken(),
     );
 
     return withRateLimitHeaders(response, limit.remaining, limit.resetAt);
@@ -119,6 +124,13 @@ export async function DELETE(request: NextRequest) {
   const response = NextResponse.json({ success: true });
   response.cookies.set(ADMIN_SESSION_COOKIE, "", {
     httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 0,
+  });
+  response.cookies.set("admin_csrf", "", {
+    httpOnly: false,
     sameSite: "lax",
     path: "/",
     secure: process.env.NODE_ENV === "production",

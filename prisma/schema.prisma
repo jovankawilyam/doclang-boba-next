@@ -237,16 +237,27 @@ model AdminAccount {
   id           Int           @id @default(autoincrement())
   username     String        @unique
   name         String
+  unit         String        @default("")
   passwordHash String
   role         AdminRole
   isActive     Boolean       @default(true)
   lastLoginAt  DateTime?
   sessions     AdminSession[]
+  resetTokens  PasswordResetToken[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
 
 model AdminSession {
+  id        Int          @id @default(autoincrement())
+  tokenHash String       @unique
+  adminId   Int
+  admin     AdminAccount @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime     @default(now())
+}
+
+model PasswordResetToken {
   id        Int          @id @default(autoincrement())
   tokenHash String       @unique
   adminId   Int

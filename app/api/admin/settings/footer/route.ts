@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getFooterSettings, saveFooterSettings } from "@/lib/site-settings";
+import { validateAdminCsrf } from "@/lib/csrf";
 
 const DEFAULT_FOOTER = {
   officeName: "Kantor Pelayanan Kekayaan Negara dan Lelang Bogor",
@@ -30,6 +31,9 @@ export async function PUT(request: NextRequest) {
   if (unauth) return unauth;
 
   try {
+    if (!validateAdminCsrf(request)) {
+      return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
+    }
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ success: false, error: "Format data tidak sesuai" }, { status: 400 });

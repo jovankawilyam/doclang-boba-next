@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRows } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const HEADERS = [
   "Tgl Permintaan",
@@ -19,6 +20,10 @@ export async function GET(request: NextRequest) {
   const unauth = await requireAdmin(request);
   if (unauth) return unauth;
   try {
+    const limit = consumeRateLimit(getRateLimitKey("admin-stats", request), { limit: 30, windowMs: 60 * 1000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ success: false, error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
+    }
     const rows = await getRows("Monitoring");
 
     const allData = rows.map((r) => {

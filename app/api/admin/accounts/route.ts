@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { normalizeAdminName, requireAdminRole } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
+import { validateAdminCsrf } from "@/lib/csrf";
 
 const ROLES = ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] as const;
 
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
       id: a.id,
       username: a.username,
       name: a.name,
+      unit: a.unit,
       role: a.role,
       isActive: a.isActive,
       lastLoginAt: a.lastLoginAt,
@@ -29,6 +31,9 @@ export async function POST(request: NextRequest) {
   if (unauth) return unauth;
 
   try {
+    if (!validateAdminCsrf(request)) {
+      return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
+    }
     const body = await request.json();
     if (
       !body ||
@@ -43,6 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { username, password, name, role } = body as { username: string; password: string; name: string; role: string };
+    const unit = typeof (body as Record<string, unknown>).unit === "string" ? ((body as Record<string, unknown>).unit as string).trim() : "";
     if (!ROLES.includes(role as (typeof ROLES)[number])) {
       return NextResponse.json({ success: false, error: "Role tidak valid" }, { status: 400 });
     }
@@ -51,6 +57,7 @@ export async function POST(request: NextRequest) {
       data: {
         username: username.trim(),
         name: normalizeAdminName(name),
+        unit,
         passwordHash: hashPassword(password),
         role: role as (typeof ROLES)[number],
       },
@@ -62,6 +69,7 @@ export async function POST(request: NextRequest) {
         id: account.id,
         username: account.username,
         name: account.name,
+        unit: account.unit,
         role: account.role,
         isActive: account.isActive,
       },
@@ -77,6 +85,9 @@ export async function PATCH(request: NextRequest) {
   if (unauth) return unauth;
 
   try {
+    if (!validateAdminCsrf(request)) {
+      return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
+    }
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body) || typeof (body as Record<string, unknown>).id !== "number") {
       return NextResponse.json({ success: false, error: "Format data tidak sesuai" }, { status: 400 });
@@ -93,6 +104,7 @@ export async function PATCH(request: NextRequest) {
     const data: Record<string, unknown> = {};
     if (typeof payload.name === "string") data.name = normalizeAdminName(payload.name);
     if (typeof payload.username === "string") data.username = payload.username.trim();
+    if (typeof (payload as Record<string, unknown>).unit === "string") data.unit = ((payload as Record<string, unknown>).unit as string).trim();
     if (typeof payload.role === "string") {
       if (!ROLES.includes(payload.role as (typeof ROLES)[number])) {
         return NextResponse.json({ success: false, error: "Role tidak valid" }, { status: 400 });
@@ -115,6 +127,7 @@ export async function PATCH(request: NextRequest) {
         id: account.id,
         username: account.username,
         name: account.name,
+        unit: account.unit,
         role: account.role,
         isActive: account.isActive,
       },
@@ -130,6 +143,9 @@ export async function DELETE(request: NextRequest) {
   if (unauth) return unauth;
 
   try {
+    if (!validateAdminCsrf(request)) {
+      return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
+    }
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get("id") ?? "0");
     if (!id) {
