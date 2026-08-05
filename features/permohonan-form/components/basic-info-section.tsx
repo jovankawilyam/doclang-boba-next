@@ -20,15 +20,15 @@ export const BasicInfoSection = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-slate-900">
+        <h2 className="text-lg font-semibold text-slate-900">
           Informasi Pemohon
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm leading-6 text-slate-500">
           Lengkapi identitas pemohon terlebih dahulu.
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white px-5 py-6 md:px-8 md:py-7">
+      <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-sm md:px-8 md:py-8">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <TextField
             form={fieldHelpers}
@@ -89,7 +89,7 @@ export const BasicInfoSection = ({
       <button
         type="button"
         onClick={goToSlideTwo}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy px-6 py-3 text-sm font-semibold text-white transition hover:bg-navy/90 focus:ring-2 focus:ring-navy/20 focus:outline-none"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-navy px-6 py-3.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)] transition hover:bg-navy/90 focus:ring-4 focus:ring-navy/20 focus:outline-none"
       >
         Lanjut ke Detail Layanan
         <ArrowRight className="h-4 w-4" />

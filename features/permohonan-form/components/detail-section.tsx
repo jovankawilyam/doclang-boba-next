@@ -20,7 +20,7 @@ import { TextAreaField, TextField, UploadZone } from "./form-fields";
 
 const radioCard = (
   active: boolean,
-) => `flex cursor-pointer items-center gap-3 rounded-lg border p-4 text-sm font-medium transition ${
+) => `flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-4 text-sm font-medium transition ${
   active
     ? "border-navy bg-navy text-white"
     : "border-slate-200 bg-white text-slate-900 hover:border-navy/30"
@@ -48,10 +48,10 @@ export const DetailSection = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-slate-900">
+        <h2 className="text-lg font-semibold text-slate-900">
           Detail Permohonan
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm leading-6 text-slate-500">
           Pilih layanan dan lengkapi dokumen yang diperlukan.
         </p>
       </div>
@@ -78,9 +78,9 @@ export const DetailSection = ({
 
       {applicantRole === "kuasa" && (
         <div className={sectionClassName}>
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <FileText className="h-5 w-5 text-navy" />
-            <h3 className="text-sm font-bold text-slate-900">Data Pemberi Kuasa</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Data Pemberi Kuasa</h3>
           </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
             <TextField
@@ -235,14 +235,14 @@ export const DetailSection = ({
             type="button"
             onClick={() => setStep(1)}
             disabled={isSubmitting}
-            className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:ring-2 focus:ring-slate-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:ring-4 focus:ring-slate-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             Kembali
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-navy px-6 py-3 text-sm font-semibold text-white transition hover:bg-navy/90 focus:ring-2 focus:ring-navy/20 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-400"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)] transition hover:bg-navy/90 focus:ring-4 focus:ring-navy/20 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             {isSubmitting ? (
               <>
@@ -269,8 +269,8 @@ const ValidasiPphFields = ({
   fieldHelpers: FieldHelpers;
   fileInputHelpers: FileInputHelpers;
 }) => (
-  <div className={sectionClassName}>
-    <div className="rounded-lg border-l-4 border-navy bg-navy/[0.04] p-4 text-sm leading-6 text-slate-700">
+      <div className={sectionClassName}>
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
       Untuk proses validasi PPh, siapkan: NPWP pemenang lelang, kuitansi,
       slip setor PPh, slip setor PBB atau berkas BPHTB yang menunjukkan NOP
       dan luas T/B yang tepat.

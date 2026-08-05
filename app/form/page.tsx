@@ -14,17 +14,17 @@ function Stepper({ step }: { step: 1 | 2 }) {
       {[1, 2].map((s) => (
         <div key={s} className="flex items-center">
           <div
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition md:h-10 md:w-10 md:text-base ${
+            className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold shadow-sm transition md:h-11 md:w-11 md:text-base ${
               step >= s
-                ? "bg-navy text-white"
-                : "bg-slate-200 text-slate-500"
+                ? "border-navy bg-navy text-white"
+                : "border-slate-200 bg-white text-slate-500"
             }`}
           >
             {s}
           </div>
           {s < 2 && (
             <div
-              className={`mx-2 h-0.5 w-16 transition md:mx-4 md:w-32 ${
+              className={`mx-3 h-px w-16 transition md:mx-5 md:w-36 ${
                 step > s ? "bg-navy" : "bg-slate-200"
               }`}
             />
@@ -39,16 +39,16 @@ export default function FormPage() {
   const form = usePermohonanForm();
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900">
-      <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white px-4 py-4 shadow-sm sm:px-6 sm:py-5">
+    <div className="min-h-screen bg-white pb-20 text-slate-900">
+      <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white px-6 py-6 shadow-sm">
         <div className="mx-auto grid max-w-5xl grid-cols-[auto_1fr_auto] items-center gap-3">
           <Link
             href="/"
-            className="justify-self-start rounded-full p-2.5 transition-colors hover:bg-gray-100 sm:p-3"
+            className="justify-self-start rounded-full p-2.5 transition-colors hover:bg-slate-100 sm:p-3"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-600 sm:h-6 sm:w-6" />
+            <ChevronLeft className="h-5 w-5 text-slate-600 sm:h-6 sm:w-6" />
           </Link>
-          <span className="justify-self-center text-center text-xs font-bold tracking-[0.22em] text-[#3388CC] uppercase sm:text-sm sm:tracking-widest">
+          <span className="justify-self-center font-bold tracking-widest text-[#3388CC] uppercase">
             Formulir Permohonan
           </span>
           <div aria-hidden="true" />
@@ -60,16 +60,16 @@ export default function FormPage() {
         </div>
 
         {form.successMessage && (
-          <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-800 sm:px-5">
+          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-800 shadow-sm sm:px-5">
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm font-semibold">{form.successMessage}</p>
+              <p className="text-sm">{form.successMessage}</p>
             </div>
           </div>
         )}
 
         {form.serverErrors.length > 0 && (
-          <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-4 text-red-700 sm:px-5">
+          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-red-700 shadow-sm sm:px-5">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
               <AlertCircle className="h-5 w-5" />
               <span>Periksa kembali data Anda:</span>
@@ -84,15 +84,18 @@ export default function FormPage() {
 
         <form
           onSubmit={form.handleSubmit(form.onSubmit)}
-          className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+          className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm"
         >
-          <div className="border-b border-slate-200 bg-slate-900 px-4 py-4 text-white sm:px-5 md:px-8 md:py-6">
-            <p className="text-xs font-bold tracking-widest text-blue-200 uppercase">
+          <div className="border-b border-slate-200 bg-slate-900 px-4 py-5 text-white sm:px-5 md:px-8 md:py-7">
+            <p className="text-xs font-medium tracking-[0.2em] text-slate-300 uppercase">
               KPKNL Bogor
             </p>
-            <h1 className="mt-1 text-base font-bold leading-snug sm:text-lg md:text-xl">
+            <h1 className="mt-2 text-lg font-semibold leading-snug sm:text-xl md:text-[1.55rem]">
               Dokumen Pasca Lelang Bogor Bageur
             </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+              Isi data, unggah berkas yang dibutuhkan, lalu cek ulang sebelum mengirim.
+            </p>
           </div>
 
           <div className="px-4 py-5 sm:px-5 md:px-8 md:py-8">

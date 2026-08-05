@@ -36,9 +36,9 @@ export const defaultValues: DoclangFormValues = {
 };
 
 export const inputClassName =
-  "w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-navy focus:ring-2 focus:ring-navy/10";
-export const labelClassName = "text-sm font-semibold text-slate-700";
-export const helperClassName = "text-xs text-slate-500";
-export const errorClassName = "text-xs font-semibold text-red-600";
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm md:text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-navy focus:ring-2 focus:ring-navy/10";
+export const labelClassName = "text-sm md:text-[15px] font-medium tracking-[0.01em] text-slate-700";
+export const helperClassName = "text-xs md:text-sm leading-5 text-slate-500";
+export const errorClassName = "text-xs md:text-sm font-medium text-red-600";
 export const sectionClassName =
-  "space-y-5 rounded-xl border border-slate-200 bg-white px-5 py-6 md:px-8 md:py-7";
+  "space-y-6 rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-sm md:px-8 md:py-8";
