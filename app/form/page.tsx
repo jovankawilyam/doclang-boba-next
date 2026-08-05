@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, CheckCircle2, ChevronLeft } from "lucide-react";
+import { AlertCircle, ChevronLeft } from "lucide-react";
 
 import { BasicInfoSection } from "@/features/permohonan-form/components/basic-info-section";
 import { DetailSection } from "@/features/permohonan-form/components/detail-section";
+import { SubmissionSuccess } from "@/features/permohonan-form/components/submission-success";
 import { VerificationDialog } from "@/features/permohonan-form/components/verification-dialog";
 import { usePermohonanForm } from "@/features/permohonan-form/use-permohonan-form";
 
@@ -55,71 +56,71 @@ export default function FormPage() {
         </div>
       </nav>
       <main className="mx-auto mt-5 max-w-4xl px-4 md:mt-10 md:px-6">
-        <div className="mb-5 md:mb-10">
-          <Stepper step={form.step} />
-        </div>
-
-        {form.successMessage && (
-          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-800 shadow-sm sm:px-5">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="text-sm">{form.successMessage}</p>
+        {form.submissionReceipt ? (
+          <SubmissionSuccess
+            receipt={form.submissionReceipt}
+            onNewSubmission={form.clearSubmission}
+          />
+        ) : (
+          <>
+            <div className="mb-5 md:mb-10">
+              <Stepper step={form.step} />
             </div>
-          </div>
-        )}
 
-        {form.serverErrors.length > 0 && (
-          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-red-700 shadow-sm sm:px-5">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-              <AlertCircle className="h-5 w-5" />
-              <span>Periksa kembali data Anda:</span>
-            </div>
-            <ul className="list-inside list-disc space-y-1 text-sm">
-              {form.serverErrors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <form
-          onSubmit={form.handleSubmit(form.onSubmit)}
-          className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm"
-        >
-          <div className="border-b border-slate-200 bg-slate-900 px-4 py-5 text-white sm:px-5 md:px-8 md:py-7">
-            <p className="text-xs font-medium tracking-[0.2em] text-slate-300 uppercase">
-              KPKNL Bogor
-            </p>
-            <h1 className="mt-2 text-lg font-semibold leading-snug sm:text-xl md:text-[1.55rem]">
-              Dokumen Pasca Lelang Bogor Bageur
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Isi data, unggah berkas yang dibutuhkan, lalu cek ulang sebelum mengirim.
-            </p>
-          </div>
-
-          <div className="px-4 py-5 sm:px-5 md:px-8 md:py-8">
-            {form.step === 1 && (
-              <BasicInfoSection
-                fieldHelpers={form.fieldHelpers}
-                fileInputHelpers={form.fileInputHelpers}
-                goToSlideTwo={form.goToSlideTwo}
-              />
+            {form.serverErrors.length > 0 && (
+              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-red-700 shadow-sm sm:px-5">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <AlertCircle className="h-5 w-5" />
+                  <span>Periksa kembali data Anda:</span>
+                </div>
+                <ul className="list-inside list-disc space-y-1 text-sm">
+                  {form.serverErrors.map((error) => (
+                    <li key={error}>{error}</li>
+                  ))}
+                </ul>
+              </div>
             )}
 
-            {form.step === 2 && (
-              <DetailSection
-                applicantRole={form.applicantRole}
-                fieldHelpers={form.fieldHelpers}
-                fileInputHelpers={form.fileInputHelpers}
-                isSubmitting={form.isSubmitting}
-                selectedRlObject={form.selectedRlObject}
-                selectedService={form.selectedService}
-                setStep={form.setStep}
-              />
-            )}
-          </div>
-        </form>
+            <form
+              onSubmit={form.handleSubmit(form.onSubmit)}
+              className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm"
+            >
+              <div className="border-b border-slate-200 bg-slate-900 px-4 py-5 text-white sm:px-5 md:px-8 md:py-7">
+                <p className="text-xs font-medium tracking-[0.2em] text-slate-300 uppercase">
+                  KPKNL Bogor
+                </p>
+                <h1 className="mt-2 text-lg font-semibold leading-snug sm:text-xl md:text-[1.55rem]">
+                  Dokumen Pasca Lelang Bogor Bageur
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+                  Isi data, unggah berkas yang dibutuhkan, lalu cek ulang sebelum mengirim.
+                </p>
+              </div>
+
+              <div className="px-4 py-5 sm:px-5 md:px-8 md:py-8">
+                {form.step === 1 && (
+                  <BasicInfoSection
+                    fieldHelpers={form.fieldHelpers}
+                    fileInputHelpers={form.fileInputHelpers}
+                    goToSlideTwo={form.goToSlideTwo}
+                  />
+                )}
+
+                {form.step === 2 && (
+                  <DetailSection
+                    applicantRole={form.applicantRole}
+                    fieldHelpers={form.fieldHelpers}
+                    fileInputHelpers={form.fileInputHelpers}
+                    isSubmitting={form.isSubmitting}
+                    selectedRlObject={form.selectedRlObject}
+                    selectedService={form.selectedService}
+                    setStep={form.setStep}
+                  />
+                )}
+              </div>
+            </form>
+          </>
+        )}
       </main>
 
       <VerificationDialog

@@ -53,9 +53,9 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
           const nama = data?.["Nama Pemohon"] ?? "";
           let waText = "";
           if (status === "Siap Diambil")
-            waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) telah DIVALIDASI. Silakan ambil dokumen di KPKNL Bogor.\n\nTerima kasih.`;
+            waText = `Yth. Bapak/Ibu *${nama}*,\n\n Dengan ini, kami sampaikan bahwa permohonan Anda dengan nomor pengajuan *${id}* telah diproses dan *SIAP DIAMBIL*.\n\nSilakan datang ke KPKNL Bogor untuk mengambil dokumen Anda.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\nHormat kami, KPKNL Bogor`;
           else if (status === "Tidak Valid")
-            waText = `Yth. ${nama},\n\nPermohonan Anda (${id}) DITOLAK.\nAlasan: ${reason || "-"}\n\nSilakan lengkapi persyaratan dan ajukan ulang.\n\nTerima kasih.`;
+            waText = `Yth. Bapak/Ibu *${nama}*,\n\n Dengan ini, kami sampaikan bahwa permohonan Anda dengan nomor pengajuan *${id}* *TIDAK VALID*.\n\nAlasan: ${reason || "-"}\n\nSilakan lengkapi persyaratan yang diperlukan dan ajukan kembali permohonan Anda. Apabila memerlukan bantuan, silahkan untuk menghubungi kami.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\nHormat kami, KPKNL Bogor`;
           if (waNumber) {
             window.open(waLink(waNumber, waText), "_blank");
           }

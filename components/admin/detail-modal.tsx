@@ -38,7 +38,7 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl rounded-xl shadow-2xl"
+        className="relative w-full max-w-5xl rounded-xl shadow-2xl"
         style={{ backgroundColor: "var(--admin-bg-card)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -65,7 +65,7 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
           </div>
         ) : (
           <div className="px-6 py-4">
-            <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-2">
+            <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-3 lg:grid-cols-4">
               {Object.entries(data)
                 .filter(
                   ([k, v]) =>

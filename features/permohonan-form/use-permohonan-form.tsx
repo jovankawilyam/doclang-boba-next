@@ -15,7 +15,7 @@ import {
   SERVICE_MAX_FILE_SIZE_BYTES,
   serviceOptions,
 } from "./constants";
-import type { DoclangFormValues, UploadedFileInfo } from "./types";
+import type { DoclangFormValues, SubmissionReceipt, UploadedFileInfo } from "./types";
 
 const requiredString = (message: string): z.ZodString =>
   z.string().trim().min(1, message);
@@ -201,8 +201,9 @@ const slideOneFields: FieldPath<DoclangFormValues>[] = [
 
 export const usePermohonanForm = () => {
   const [step, setStep] = useState<1 | 2>(1);
-  const [successMessage, setSuccessMessage] = useState("");
   const [serverErrors, setServerErrors] = useState<string[]>([]);
+  const [submissionReceipt, setSubmissionReceipt] =
+    useState<SubmissionReceipt | null>(null);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<
     Partial<Record<FieldPath<DoclangFormValues>, UploadedFileInfo>>
@@ -232,7 +233,6 @@ export const usePermohonanForm = () => {
 
   const goToSlideTwo = async (): Promise<void> => {
     setServerErrors([]);
-    setSuccessMessage("");
     const isValid = await trigger(slideOneFields, { shouldFocus: true });
     if (isValid) {
       setStep(2);
@@ -329,11 +329,21 @@ export const usePermohonanForm = () => {
         return;
       }
 
+      let idPengajuan = "";
+      try {
+        const body = await response.json();
+        if (typeof body?.id_pengajuan === "string") idPengajuan = body.id_pengajuan;
+      } catch {}
+
       reset(defaultValues);
       setUploadedFiles({});
       setStep(1);
       setUploadingFiles(false);
-      setSuccessMessage("Permohonan berhasil dikirim. Notifikasi WhatsApp sedang diproses.");
+      setSubmissionReceipt({
+        id: idPengajuan,
+        nama: values.nama_pemohon,
+        wa: values.nomor_wa_pemohon,
+      });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setUploadingFiles(false);
@@ -348,7 +358,6 @@ export const usePermohonanForm = () => {
 
   const onSubmit: SubmitHandler<DoclangFormValues> = (values) => {
     setServerErrors([]);
-    setSuccessMessage("");
     setPendingValues(values);
     setShowVerification(true);
   };
@@ -365,6 +374,12 @@ export const usePermohonanForm = () => {
     setPendingValues(null);
   };
 
+  const clearSubmission = (): void => {
+    setSubmissionReceipt(null);
+    setServerErrors([]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const renderError = (name: FieldPath<DoclangFormValues>) => {
     const message = fieldErrorMessage(errors, name);
     if (!message) return null;
@@ -374,6 +389,7 @@ export const usePermohonanForm = () => {
   return {
     applicantRole,
     cancelSubmit,
+    clearSubmission,
     confirmSubmit,
     errors,
     fileInputHelpers: { errors, register, setUploadedFiles, uploadedFiles },
@@ -390,7 +406,7 @@ export const usePermohonanForm = () => {
     setStep,
     showVerification,
     step,
-    successMessage,
+    submissionReceipt,
     uploadedFiles,
     uploadingFiles,
   };

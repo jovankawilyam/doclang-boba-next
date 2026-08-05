@@ -48,6 +48,12 @@ export type UploadedFileInfo = {
   size: number;
 };
 
+export type SubmissionReceipt = {
+  id: string;
+  nama: string;
+  wa: string;
+};
+
 export type FieldHelpers = {
   register: UseFormRegister<DoclangFormValues>;
   renderError: (name: FieldPath<DoclangFormValues>) => ReactNode;
