@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Check, Copy, RotateCcw } from "lucide-react";
+import { CheckCircle2, Check, Copy, RotateCcw, FileDown } from "lucide-react";
 import { useState } from "react";
 
 import type { SubmissionReceipt } from "../types";
@@ -39,6 +39,7 @@ export function SubmissionSuccess({
   };
 
   const waLink = buildWaLink(receipt.wa, buildNotificationText(receipt));
+  const pdfUrl = `/api/bukti/pdf?id=${encodeURIComponent(receipt.id)}`;
 
   return (
     <div className="mx-auto max-w-xl px-4 pt-6 md:pt-10">
@@ -94,10 +95,18 @@ export function SubmissionSuccess({
               </svg>
               Kirim Notifikasi WhatsApp
             </a>
-            <button
-              onClick={onNewSubmission}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-navy px-6 py-3.5 text-sm font-semibold text-navy transition hover:bg-navy/5"
-            >
+              <a
+                href={pdfUrl}
+                download
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-navy px-6 py-3.5 text-sm font-semibold text-navy transition hover:bg-navy/5"
+              >
+                <FileDown className="h-4 w-4" />
+                Download PDF Tanda Terima
+              </a>
+              <button
+                onClick={onNewSubmission}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-navy px-6 py-3.5 text-sm font-semibold text-navy transition hover:bg-navy/5"
+              >
               <RotateCcw className="h-4 w-4" />
               Buat Permohonan Baru
             </button>
