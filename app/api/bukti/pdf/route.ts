@@ -33,6 +33,28 @@ function toWinAnsi(text: string): string {
   return text.replace(/[^\x00-\xFF]/g, "?");
 }
 
+function formatTglPermintaan(value: string): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const tanggal = date.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  });
+  const waktu = date
+    .toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Jakarta",
+      hour12: false,
+    })
+    .replace(".", ":");
+  return `${tanggal}, ${waktu} WIB`;
+}
+
 function wrapText(
   text: string,
   font: PDFFont,
@@ -89,7 +111,7 @@ export async function GET(request: NextRequest) {
 
   const namaPemohon = row.get("Nama Pemohon") || "-";
   const kodeLot = row.get("Kode Lot Lelang") || "-";
-  const tglPermintaan = row.get("Tgl Permintaan") || "-";
+  const tglPermintaan = formatTglPermintaan(row.get("Tgl Permintaan") || "");
   const rawStatus =
     row.get("Status Proses") || row.get("Status Permohonan") || "-";
   const status = STATUS_TEXT[rawStatus] ?? rawStatus;
@@ -209,7 +231,7 @@ export async function GET(request: NextRequest) {
     y -= 22;
 
     const note =
-      "Simpan dokumen ini sebagai bukti pengajuan. Anda dapat melacak status permohonan di situs Doclang Boba (doclang-boba-next.vercel.app) dengan memasukkan nomor tiket pada menu 'Lacak'.";
+      "Simpan dokumen ini sebagai bukti pengajuan. Anda dapat melacak status permohonan di situs Doclang Boba dengan memasukkan nomor tiket pada menu 'Lacak Dokumen'.";
     const noteLines = wrapText(toWinAnsi(note), helv, 10, contentWidth - 20);
     page.drawText("Catatan", {
       x: margin,
