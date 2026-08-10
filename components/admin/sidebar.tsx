@@ -100,9 +100,9 @@ export function AdminSidebar() {
         <div className="flex items-center justify-between border-b px-3 py-4" style={{ borderColor: "var(--admin-border)" }}>
           <Link href="/admin" className="flex items-center justify-center gap-3">
             {collapsed ? (
-              <Image src="/images/image.png" alt="Logo" width={1920} height={483} className="h-8 w-auto object-contain" />
+              <Image src="/images/image.png" alt="Logo" width={1920} height={483} sizes="120px" className="h-8 w-auto object-contain" />
             ) : (
-              <Image src="/images/image.png" alt="Logo" width={1920} height={483} className="h-10 w-auto object-contain" />
+              <Image src="/images/image.png" alt="Logo" width={1920} height={483} sizes="160px" className="h-10 w-auto object-contain" />
             )}
           </Link>
           <div className="flex items-center gap-1">

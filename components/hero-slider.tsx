@@ -30,14 +30,20 @@ export default function HeroSlider() {
   return (
     <section className="w-full overflow-hidden">
       <div className="relative w-full aspect-[16/11] overflow-hidden md:aspect-video md:max-h-[590px]">
-        <Image
-          src={images[current]}
-          alt="slider"
-          fill
-          className="object-cover object-center transition-all duration-700"
-          sizes="100vw"
-          priority
-        />
+        {images.map((src, index) => (
+          <Image
+            key={src}
+            src={src}
+            alt={index === 0 ? "slider" : ""}
+            fill
+            className={`object-cover object-center transition-opacity duration-700 ${
+              current === index ? "opacity-100" : "opacity-0"
+            }`}
+            sizes="100vw"
+            priority={index === 0}
+            loading={index === 0 ? undefined : "eager"}
+          />
+        ))}
         <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent" />
         <button
           type="button"
@@ -61,6 +67,7 @@ export default function HeroSlider() {
               alt="Nagara Dana Rakça"
               width={1072}
               height={1020}
+              sizes="120px"
             />
             <Image
               className="h-[80px] w-auto object-contain drop-shadow-lg md:h-[100px]"
@@ -68,6 +75,7 @@ export default function HeroSlider() {
               alt=""
               width={354}
               height={335}
+              sizes="120px"
             />
           </div>
           <h1
@@ -113,6 +121,7 @@ export default function HeroSlider() {
             alt="Nagara Dana Rakça"
             width={1072}
             height={1020}
+            sizes="72px"
           />
           <Image
             className="h-12 w-auto object-contain sm:h-14"
@@ -120,6 +129,7 @@ export default function HeroSlider() {
             alt="KPKNL Bogor"
             width={354}
             height={335}
+            sizes="72px"
           />
         </div>
         <h1 className="mt-4 max-w-xs text-2xl font-bold leading-tight text-[#005FAC] sm:text-[2rem]">

@@ -16,6 +16,7 @@ export default function Navbar() {
             alt="Logo"
             width={1920}
             height={483}
+            sizes="200px"
             className="h-10 w-auto object-contain sm:h-12 md:h-14"
           />
         </Link>

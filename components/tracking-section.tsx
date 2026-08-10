@@ -125,10 +125,10 @@ function TrackingResult({
 }
 
 const STAT_ITEMS: { label: string; key: keyof ServiceStats; icon: React.ElementType; border: string; bg: string; text: string }[] = [
-  { label: "Proses", key: "proses", icon: Clock, border: "#FDE68A", bg: "#FEF3C7", text: "#FAB715" },
+  { label: "Proses", key: "proses", icon: Clock, border: "#FDE68A", bg: "#FEF3C7", text: "#B45309" },
   { label: "Siap Diambil", key: "siap_diambil", icon: CheckCircle2, border: "#B3D4F0", bg: "#E6F0FA", text: "#005FAC" },
-  { label: "Tidak Valid", key: "tidak_valid", icon: XCircle, border: "#FECACA", bg: "#FEE2E2", text: "#DC2626" },
-  { label: "Selesai", key: "selesai", icon: Inbox, border: "#A8E6C0", bg: "#E8F8F0", text: "#02A54F" },
+  { label: "Tidak Valid", key: "tidak_valid", icon: XCircle, border: "#FECACA", bg: "#FEE2E2", text: "#B91C1C" },
+  { label: "Selesai", key: "selesai", icon: Inbox, border: "#A8E6C0", bg: "#E8F8F0", text: "#047857" },
 ];
 
 function ServiceStatsCard({ label, stats }: { label: string; stats: ServiceStats }) {

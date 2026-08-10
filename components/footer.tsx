@@ -127,7 +127,7 @@ export default async function Footer() {
             href={footer.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Buka lokasi di Google Maps"
+            aria-label="Buka di Google Maps"
             className="group relative mt-4 block overflow-hidden rounded-2xl border border-white/10 transition hover:border-white/25"
           >
             {embedUrl ? (

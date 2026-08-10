@@ -122,7 +122,7 @@ export default function AdminLoginPage() {
           <div className="w-full max-w-sm">
             <div className="mb-8 text-center">
               <div className="mx-auto mb-6 inline-flex items-center justify-center gap-6 rounded-xl bg-[#F4F7FB] px-6 py-4 ring-1 ring-[#D8E0EC]/40">
-                <Image src="/images/image.png" alt="Kemenkeu" width={1920} height={483} className="h-14 w-auto object-contain" />
+                <Image src="/images/image.png" alt="Kemenkeu" width={1920} height={483} sizes="230px" className="h-14 w-auto object-contain" />
                 <div className="h-14 w-px bg-[#D8E0EC]" />
                 <Image src="/images/kpknl-bogor.png" alt="KPKNL Bogor" width={354} height={335} className="h-14 w-auto object-contain" />
               </div>

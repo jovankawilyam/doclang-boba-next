@@ -20,6 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${roboto.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://maps.googleapis.com" />
+      </head>
       <body>{children}</body>
     </html>
   );
