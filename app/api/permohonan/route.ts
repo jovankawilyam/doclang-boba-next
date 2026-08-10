@@ -219,6 +219,133 @@ function buildMonitoringRow(
   };
 }
 
+const ALLOWED_IDENTITAS = ["KTP", "SIM", "NPWP"];
+
+function isAllowedFileUrl(url: string): boolean {
+  return /^https:\/\/utfs\.io\//.test(url);
+}
+
+function requiredFileFieldsFor(jenisLayanan: string, peran: string): string[] {
+  const fields: string[] = ["dokumen_identitas_pemohon"];
+  if (peran === "kuasa") {
+    fields.push("dokumen_identitas_pemberi_kuasa", "surat_kuasa");
+  }
+  switch (jenisLayanan) {
+    case "Pemberian Kuitansi Pembayaran Harga Lelang":
+      fields.push("bukti_pelunasan");
+      break;
+    case "Pemberian Kutipan Risalah Lelang":
+      fields.push("kuitansi_pembayaran_harga_lelang_file");
+      break;
+    case "Validasi PPh (1 Bidang)":
+      fields.push(
+        "kuitansi_pembayaran_harga_lelang_file",
+        "slip_setor_pbb_atau_bphtb",
+        "slip_setor_pph",
+        "npwp_pemenang_lelang_file",
+      );
+      break;
+  }
+  return fields;
+}
+
+function textValidationError(textData: Record<string, string>, jenisLayanan: string): string | null {
+  const v = (key: string): string => (textData[key] ?? "").trim();
+
+  const required: Array<[string, string]> = [
+    ["email_pemohon", "Email wajib diisi."],
+    ["nama_pemohon", "Nama Pemohon wajib diisi."],
+    ["nomor_identitas_pemohon", "Nomor Identitas Pemohon wajib diisi."],
+    ["alamat_pemohon", "Alamat Pemohon wajib diisi."],
+    ["nomor_wa_pemohon", "Nomor WhatsApp Pemohon wajib diisi."],
+    ["kode_lot_lelang", "Kode Lot Lelang wajib diisi."],
+    ["tanggal_pelunasan", "Tanggal Pelunasan Pembayaran wajib diisi."],
+  ];
+  for (const [key, msg] of required) {
+    if (!v(key)) return msg;
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("email_pemohon"))) {
+    return "Format email tidak valid.";
+  }
+  if (!/^[0-9]+$/.test(v("nomor_identitas_pemohon"))) {
+    return "Nomor Identitas Pemohon wajib berisi angka saja.";
+  }
+  if (!/^(08|\+62)[0-9]{8,13}$/.test(v("nomor_wa_pemohon"))) {
+    return "Nomor WhatsApp Pemohon harus diawali 08 atau +62 dan hanya berisi angka.";
+  }
+  if (!ALLOWED_IDENTITAS.includes(v("jenis_identitas_pemohon"))) {
+    return "Jenis Identitas Pemohon tidak valid.";
+  }
+  if (!/^[A-Z0-9]{1,6}$/.test(v("kode_lot_lelang"))) {
+    return "Kode Lot Lelang maksimal 6 karakter (huruf kapital A-Z dan angka 0-9).";
+  }
+
+  const peran = v("peran_pemohon");
+  if (peran !== "pemenang" && peran !== "kuasa") {
+    return "Tipe Pemohon wajib dipilih.";
+  }
+
+  if (peran === "kuasa") {
+    const kuasaRequired: Array<[string, string]> = [
+      ["nama_pemberi_kuasa", "Nama Pemberi Kuasa wajib diisi."],
+      ["nomor_identitas_pemberi_kuasa", "Nomor Identitas Pemberi Kuasa wajib diisi."],
+      ["alamat_pemberi_kuasa", "Alamat Pemberi Kuasa wajib diisi."],
+    ];
+    for (const [key, msg] of kuasaRequired) {
+      if (!v(key)) return msg;
+    }
+    if (!/^(08|\+62)[0-9]{8,13}$/.test(v("nomor_wa_pemberi_kuasa"))) {
+      return "Nomor WhatsApp Pemberi Kuasa wajib diawali 08 atau +62 dan hanya berisi angka.";
+    }
+  }
+
+  if (jenisLayanan === "Pemberian Kutipan Risalah Lelang") {
+    const objek = v("jenis_objek_risalah");
+    if (objek !== "tanah_bangunan" && objek !== "kendaraan") {
+      return "Jenis objek risalah lelang wajib dipilih.";
+    }
+  }
+
+  if (jenisLayanan === "Validasi PPh (1 Bidang)") {
+    const vpphRequired: Array<[string, string]> = [
+      ["nomor_kuitansi_pembayaran_harga_lelang", "Nomor Kuitansi Pembayaran Harga Lelang wajib diisi."],
+      ["nomor_objek_pajak", "Nomor Objek Pajak wajib diisi."],
+      ["alamat_objek_lelang", "Alamat Objek Lelang wajib diisi."],
+      ["ntpn", "Nomor Transaksi Penerimaan Negara wajib diisi."],
+    ];
+    for (const [key, msg] of vpphRequired) {
+      if (!v(key)) return msg;
+    }
+    if (!/^[0-9]+$/.test(v("npwp_pemenang_lelang"))) {
+      return "NPWP Pemenang Lelang wajib diisi angka saja tanpa tanda hubung atau titik.";
+    }
+  }
+
+  return null;
+}
+
+function fileValidationError(
+  textData: Record<string, string>,
+  fileColumnMap: Record<string, string>,
+  jenisLayanan: string,
+  peran: string,
+): string | null {
+  for (const field of requiredFileFieldsFor(jenisLayanan, peran)) {
+    const url = (textData[field] ?? "").trim();
+    if (!url) return "Dokumen wajib diunggah.";
+    if (!isAllowedFileUrl(url)) return "URL dokumen tidak valid.";
+  }
+
+  for (const [field, value] of Object.entries(textData)) {
+    if (fileColumnMap[field] && value.trim() && !isAllowedFileUrl(value.trim())) {
+      return "URL dokumen tidak valid.";
+    }
+  }
+
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const limit = consumeRateLimit(getRateLimitKey("permohonan", request), {
@@ -272,7 +399,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const textValidationResult = textValidationError(textData, jenisLayanan);
+    if (textValidationResult) {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: textValidationResult },
+          { status: 400 },
+        ),
+        limit.remaining,
+        limit.resetAt,
+      );
+    }
+
     const fileColumnMap = getFileColumnMap(jenisLayanan);
+    const fileValidationResult = fileValidationError(
+      textData,
+      fileColumnMap,
+      jenisLayanan,
+      textData["peran_pemohon"] ?? "",
+    );
+    if (fileValidationResult) {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: fileValidationResult },
+          { status: 400 },
+        ),
+        limit.remaining,
+        limit.resetAt,
+      );
+    }
+
     const driveLinks: Record<string, string> = {};
     for (const [field, column] of Object.entries(fileColumnMap)) {
       if (textData[field]) {

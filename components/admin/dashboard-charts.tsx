@@ -4,11 +4,16 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend,
 } from "recharts";
+import { useState } from "react";
 import { StatsCards } from "./stats-cards";
 import { StatusBadge } from "./status-badge";
 import { ExternalLink, Inbox } from "lucide-react";
 
 const COLORS = { Kuitansi: "#005FAC", "Kutipan RL": "#FAB715", "Validasi PPh": "#02A54F" };
+
+const TREND_SERVICES = ["Kuitansi", "Kutipan RL", "Validasi PPh"] as const;
+type TrendService = (typeof TREND_SERVICES)[number];
+type TrendFilter = TrendService | "Semua";
 
 type Stats = { total: number; proses: number; siap_diambil: number; tidak_valid: number; selesai: number };
 type Row = Record<string, string>;
@@ -36,6 +41,8 @@ function cardCls(): string {
 }
 
 export function DashboardCharts({ stats, perLayanan, monthlyTrend, recent, onOpenDetail }: Props) {
+  const [activeTrend, setActiveTrend] = useState<TrendFilter>("Semua");
+
   const kuitansi = perLayanan?.Kuitansi ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
   const kutipanRL = perLayanan?.["Kutipan RL"] ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
   const validasiPPh = perLayanan?.["Validasi PPh"] ?? { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
@@ -59,6 +66,11 @@ export function DashboardCharts({ stats, perLayanan, monthlyTrend, recent, onOpe
     "Kutipan RL": m["Kutipan RL"],
     "Validasi PPh": m["Validasi PPh"],
   })) ?? [];
+
+  const filteredLineData =
+    activeTrend === "Semua"
+      ? lineData
+      : lineData.map((m) => ({ bulan: m.bulan, [activeTrend]: m[activeTrend] }));
 
   return (
     <div className="space-y-6">
@@ -113,17 +125,58 @@ export function DashboardCharts({ stats, perLayanan, monthlyTrend, recent, onOpe
 
       <div className={cardCls()} style={{ borderColor: "var(--admin-border)", backgroundColor: "var(--admin-bg-card)" }}>
         <div className="p-6">
-          <h3 className="mb-5 text-base font-bold" style={{ color: "var(--admin-text-primary)" }}>Tren Bulanan Permohonan</h3>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-base font-bold" style={{ color: "var(--admin-text-primary)" }}>Tren Bulanan Permohonan</h3>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Filter grafik tren">
+              {(["Semua", ...TREND_SERVICES] as TrendFilter[]).map((key) => {
+                const isActive = activeTrend === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setActiveTrend(key)}
+                    className="rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors"
+                    style={{
+                      borderColor: isActive ? "var(--admin-text-primary)" : "var(--admin-border-input)",
+                      backgroundColor: isActive ? "var(--admin-text-primary)" : "transparent",
+                      color: isActive ? "#fff" : "var(--admin-text-body)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.borderColor = "var(--admin-text-primary)";
+                        e.currentTarget.style.color = "var(--admin-text-primary)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.borderColor = "var(--admin-border-input)";
+                        e.currentTarget.style.color = "var(--admin-text-body)";
+                      }
+                    }}
+                  >
+                    {key}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={360}>
-            <LineChart data={lineData}>
+            <LineChart data={filteredLineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" />
               <XAxis dataKey="bulan" tick={{ fontSize: 12, fill: "var(--admin-text-secondary)" }} />
               <YAxis tick={{ fontSize: 12, fill: "var(--admin-text-secondary)" }} allowDecimals={false} />
               <Tooltip contentStyle={{ backgroundColor: "var(--admin-bg-card)", border: "1px solid var(--admin-border)", borderRadius: 8, fontSize: 13, color: "var(--admin-text-body)" }} />
               <Legend iconSize={12} wrapperStyle={{ fontSize: 12, color: "var(--admin-text-body)" }} />
-              <Line type="monotone" dataKey="Kuitansi" stroke={COLORS.Kuitansi} strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="Kutipan RL" stroke={COLORS["Kutipan RL"]} strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="Validasi PPh" stroke={COLORS["Validasi PPh"]} strokeWidth={2} dot={{ r: 4 }} />
+              {activeTrend === "Semua" ? (
+                <>
+                  <Line type="monotone" dataKey="Kuitansi" stroke={COLORS.Kuitansi} strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Kutipan RL" stroke={COLORS["Kutipan RL"]} strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Validasi PPh" stroke={COLORS["Validasi PPh"]} strokeWidth={2} dot={{ r: 4 }} />
+                </>
+              ) : (
+                <Line type="monotone" dataKey={activeTrend} stroke={COLORS[activeTrend]} strokeWidth={2} dot={{ r: 4 }} />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>

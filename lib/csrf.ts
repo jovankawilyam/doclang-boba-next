@@ -30,8 +30,18 @@ function readCookie(request: NextRequest, name: string): string | null {
   );
 }
 
+function isSameOrigin(request: NextRequest): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  try {
+    return new URL(origin).origin === new URL(request.url).origin;
+  } catch {
+    return false;
+  }
+}
+
 export function validateAdminCsrf(request: NextRequest): boolean {
   const cookieToken = readCookie(request, ADMIN_CSRF_COOKIE);
   const headerToken = request.headers.get(ADMIN_CSRF_HEADER);
-  return Boolean(cookieToken && headerToken && cookieToken === headerToken);
+  return Boolean(cookieToken && headerToken && cookieToken === headerToken) && isSameOrigin(request);
 }

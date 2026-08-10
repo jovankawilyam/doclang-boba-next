@@ -18,6 +18,11 @@ const DEFAULT_FOOTER = {
 
 type FooterSettings = typeof DEFAULT_FOOTER;
 
+function isValidUrlOrEmpty(value: string): boolean {
+  if (value === "") return true;
+  return /^https:\/\//i.test(value);
+}
+
 export async function GET(request: NextRequest) {
   const unauth = await requireAdmin(request);
   if (unauth) return unauth;
@@ -52,6 +57,23 @@ export async function PUT(request: NextRequest) {
       mapsUrl: typeof input.mapsUrl === "string" ? input.mapsUrl : DEFAULT_FOOTER.mapsUrl,
       copyright: typeof input.copyright === "string" ? input.copyright : DEFAULT_FOOTER.copyright,
     };
+
+    const invalidUrlFields: Array<[string, string]> = [
+      ["YouTube", value.socialLinks.youtube],
+      ["Instagram", value.socialLinks.instagram],
+      ["TikTok", value.socialLinks.tiktok],
+      ["Google Maps", value.mapsUrl],
+    ].filter(([, v]) => !isValidUrlOrEmpty(v)) as Array<[string, string]>;
+
+    if (invalidUrlFields.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `URL tidak valid (harus https:// atau kosong): ${invalidUrlFields.map(([label]) => label).join(", ")}`,
+        },
+        { status: 400 },
+      );
+    }
 
     await saveFooterSettings(value);
 

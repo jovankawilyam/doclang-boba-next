@@ -6,6 +6,8 @@ import { appendActivityLog } from "@/lib/audit";
 
 export const dynamic = 'force-dynamic';
 
+const ALLOWED_STATUSES = ["proses", "siap diambil", "tidak valid", "selesai"];
+
 function getSheetFromId(id: string): { sheetName: string; idColumn: string } | null {
   if (id.includes("/KPHL/")) return { sheetName: "Kuitansi", idColumn: "ID KPHL" };
   if (id.includes("/K-RL/")) return { sheetName: "Kutipan RL", idColumn: "ID K-RL" };
@@ -122,6 +124,13 @@ export async function PATCH(request: NextRequest) {
     if (!id || !newStatus) {
       return NextResponse.json(
         { success: false, error: "ID dan status harus diisi" },
+        { status: 400 },
+      );
+    }
+
+    if (!ALLOWED_STATUSES.includes(newStatus)) {
+      return NextResponse.json(
+        { success: false, error: "Status tidak valid" },
         { status: 400 },
       );
     }

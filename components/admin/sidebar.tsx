@@ -63,13 +63,9 @@ export function AdminSidebar() {
   }, []);
 
   function handleLogout() {
-    fetch("/api/admin/auth", { method: "DELETE" })
-      .finally(() => {
-        if (typeof window !== "undefined") {
-          window.localStorage.removeItem("admin_session_token");
-        }
-        router.push("/admin/login");
-      });
+    fetch("/api/admin/auth", { method: "DELETE" }).finally(() => {
+      router.push("/admin/login");
+    });
   }
 
   function handleChangePassword() {

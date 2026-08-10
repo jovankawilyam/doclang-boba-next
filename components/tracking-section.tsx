@@ -196,7 +196,8 @@ export default function TrackingSection() {
     if (!query) return;
     setSearchLoading(true);
     try {
-      const res = await fetch(`/api/lacak?id=${query}`);
+      const params = new URLSearchParams({ id: query });
+      const res = await fetch(`/api/lacak?${params.toString()}`);
       const json = await res.json();
       const d = json.data;
       setResult({

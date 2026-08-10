@@ -33,9 +33,6 @@ export default function AdminLoginPage() {
       });
       const json = await res.json();
       if (json.success) {
-        if (json.token) {
-          window.localStorage.setItem("admin_session_token", json.token);
-        }
         router.push("/admin");
       } else {
         setError(json.error || "Username atau password salah");

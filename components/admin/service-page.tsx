@@ -14,6 +14,11 @@ type Stats = { total: number; proses: number; siap_diambil: number; tidak_valid:
 
 type Props = { layanan: string; title: string; description: string };
 
+function escapeCsvCell(value: string): string {
+  const safe = /^[=+\-@]/.test(value) ? `'${value}` : value;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
 export function ServicePage({ layanan, title, description }: Props) {
   const [rows, setRows] = useState<MonitoringRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +102,7 @@ export function ServicePage({ layanan, title, description }: Props) {
         const csvContent = [
           headers.join(","),
           ...exportRows.map((r) =>
-            headers.map((h) => `"${(r[h] || "").replace(/"/g, '""')}"`).join(",")
+            headers.map((h) => escapeCsvCell(r[h] || "")).join(",")
           ),
         ].join("\n");
 

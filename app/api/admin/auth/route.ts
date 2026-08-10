@@ -97,7 +97,6 @@ export async function POST(request: NextRequest) {
       setAdminCookie(
         NextResponse.json({
           success: true,
-          token,
           admin: {
             id: admin.id,
             username: admin.username,

@@ -155,27 +155,50 @@ async function seedAdminAccounts() {
     {
       username: "jovankawilyam",
       name: "JOVANKA WILYAM",
-      password: "jovanka123bgr",
       role: "superadmin" as const,
     },
   ];
 
+  const seedPassword = process.env.SEED_ADMIN_PASSWORD;
+
   for (const account of accounts) {
-    await prisma.adminAccount.upsert({
+    const existing = await prisma.adminAccount.findUnique({
       where: { username: account.username },
-      update: {
+    });
+
+    if (existing) {
+      await prisma.adminAccount.update({
+        where: { username: account.username },
+        data: {
+          name: normalizeAdminName(account.name),
+          role: account.role,
+          isActive: true,
+          ...(seedPassword ? { passwordHash: hashPassword(seedPassword) } : {}),
+        },
+      });
+      console.log(
+        `  Updated admin '${account.username}'${seedPassword ? " (password reset via SEED_ADMIN_PASSWORD)" : ""}`,
+      );
+      continue;
+    }
+
+    if (!seedPassword) {
+      console.warn(
+        `  SKIP creating admin '${account.username}': set SEED_ADMIN_PASSWORD to create a new admin account.`,
+      );
+      continue;
+    }
+
+    await prisma.adminAccount.create({
+      data: {
+        username: account.username,
         name: normalizeAdminName(account.name),
-        passwordHash: hashPassword(account.password),
+        passwordHash: hashPassword(seedPassword),
         role: account.role,
         isActive: true,
       },
-      create: {
-        username: account.username,
-        name: normalizeAdminName(account.name),
-        passwordHash: hashPassword(account.password),
-        role: account.role,
-      },
     });
+    console.log(`  Created admin '${account.username}'`);
   }
 }
 
