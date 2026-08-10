@@ -60,13 +60,17 @@ function mappingFor(sheetName: string): FieldMapping[] {
   return m
 }
 
-export async function getRows(sheetName: string): Promise<SheetRow[]> {
+export async function getRows(
+  sheetName: string,
+  opts: { onlyDeleted?: boolean } = {},
+): Promise<SheetRow[]> {
   const mapping = mappingFor(sheetName)
+  const where = opts.onlyDeleted ? { deletedAt: { not: null } } : { deletedAt: null }
   let rows: RowData[]
 
   switch (sheetName) {
     case "Monitoring": {
-      const result = await prisma.monitoring.findMany({ orderBy: { id: "desc" } })
+      const result = await prisma.monitoring.findMany({ where, orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) {
@@ -84,7 +88,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       break
     }
     case "Kuitansi": {
-      const result = await prisma.kuitansi.findMany({ orderBy: { id: "desc" } })
+      const result = await prisma.kuitansi.findMany({ where, orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -93,7 +97,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       break
     }
     case "Kutipan RL": {
-      const result = await prisma.kutipanRL.findMany({ orderBy: { id: "desc" } })
+      const result = await prisma.kutipanRL.findMany({ where, orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -102,7 +106,7 @@ export async function getRows(sheetName: string): Promise<SheetRow[]> {
       break
     }
     case "Validasi PPh": {
-      const result = await prisma.validasiPPh.findMany({ orderBy: { id: "desc" } })
+      const result = await prisma.validasiPPh.findMany({ where, orderBy: { id: "desc" } })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -213,7 +217,7 @@ export async function findRowInSheet(
 
   switch (sheetName) {
     case "Kuitansi": {
-      const r = await prisma.kuitansi.findFirst({ where: { [field]: value } })
+      const r = await prisma.kuitansi.findFirst({ where: { [field]: value, deletedAt: null } })
       if (r) {
         row = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -221,7 +225,7 @@ export async function findRowInSheet(
       break
     }
     case "Kutipan RL": {
-      const r = await prisma.kutipanRL.findFirst({ where: { [field]: value } })
+      const r = await prisma.kutipanRL.findFirst({ where: { [field]: value, deletedAt: null } })
       if (r) {
         row = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -229,7 +233,7 @@ export async function findRowInSheet(
       break
     }
     case "Validasi PPh": {
-      const r = await prisma.validasiPPh.findFirst({ where: { [field]: value } })
+      const r = await prisma.validasiPPh.findFirst({ where: { [field]: value, deletedAt: null } })
       if (r) {
         row = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -286,7 +290,7 @@ export async function updateRow(
 }
 
 export async function getStats() {
-  const rows = await prisma.monitoring.findMany()
+  const rows = await prisma.monitoring.findMany({ where: { deletedAt: null } })
   const total = rows.length
   let proses = 0, siapDiambil = 0, tidakValid = 0, selesai = 0
   for (const r of rows) {
@@ -298,4 +302,75 @@ export async function getStats() {
     else if (s === "selesai") selesai++
   }
   return { total, proses, siap_diambil: siapDiambil, tidak_valid: tidakValid, selesai }
+}
+
+function serviceDeleteFlags(
+  sheetName: string,
+  idValue: string,
+  deletedAt: Date | null,
+  deletedBy: string,
+): Prisma.PrismaPromise<unknown>[] {
+  const data = { deletedAt, deletedBy }
+  switch (sheetName) {
+    case "Monitoring":
+      return [prisma.monitoring.updateMany({ where: { idPengajuan: idValue }, data: data as Prisma.MonitoringUpdateManyMutationInput })]
+    case "Kuitansi":
+      return [
+        prisma.kuitansi.updateMany({ where: { idKPHL: idValue }, data: data as Prisma.KuitansiUpdateManyMutationInput }),
+        prisma.monitoring.updateMany({ where: { idPengajuan: idValue }, data: data as Prisma.MonitoringUpdateManyMutationInput }),
+      ]
+    case "Kutipan RL":
+      return [
+        prisma.kutipanRL.updateMany({ where: { idKRL: idValue }, data: data as Prisma.KutipanRLUpdateManyMutationInput }),
+        prisma.monitoring.updateMany({ where: { idPengajuan: idValue }, data: data as Prisma.MonitoringUpdateManyMutationInput }),
+      ]
+    case "Validasi PPh":
+      return [
+        prisma.validasiPPh.updateMany({ where: { idVPPh: idValue }, data: data as Prisma.ValidasiPPhUpdateManyMutationInput }),
+        prisma.monitoring.updateMany({ where: { idPengajuan: idValue }, data: data as Prisma.MonitoringUpdateManyMutationInput }),
+      ]
+    default:
+      throw new Error(`Unknown sheet: ${sheetName}`)
+  }
+}
+
+export async function softDeleteSubmission(
+  sheetName: string,
+  idValue: string,
+  deletedBy: string,
+) {
+  await prisma.$transaction(serviceDeleteFlags(sheetName, idValue, new Date(), deletedBy))
+}
+
+export async function restoreSubmission(sheetName: string, idValue: string) {
+  await prisma.$transaction(serviceDeleteFlags(sheetName, idValue, null, ""))
+}
+
+function serviceDeleteRows(
+  sheetName: string,
+  idValue: string,
+): Prisma.PrismaPromise<unknown>[] {
+  switch (sheetName) {
+    case "Kuitansi":
+      return [
+        prisma.kuitansi.deleteMany({ where: { idKPHL: idValue } }),
+        prisma.monitoring.deleteMany({ where: { idPengajuan: idValue } }),
+      ]
+    case "Kutipan RL":
+      return [
+        prisma.kutipanRL.deleteMany({ where: { idKRL: idValue } }),
+        prisma.monitoring.deleteMany({ where: { idPengajuan: idValue } }),
+      ]
+    case "Validasi PPh":
+      return [
+        prisma.validasiPPh.deleteMany({ where: { idVPPh: idValue } }),
+        prisma.monitoring.deleteMany({ where: { idPengajuan: idValue } }),
+      ]
+    default:
+      throw new Error(`Unknown sheet: ${sheetName}`)
+  }
+}
+
+export async function hardDeleteSubmission(sheetName: string, idValue: string) {
+  await prisma.$transaction(serviceDeleteRows(sheetName, idValue))
 }

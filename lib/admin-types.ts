@@ -16,6 +16,7 @@ export const NAVIGATION_ACCESS: Record<string, AdminRole[]> = {
   "/admin/kutipan-rl": ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"],
   "/admin/validasi-pph": ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"],
   "/admin/riwayat": ["superadmin", "kepala_kantor", "kepala_bagian"],
+  "/admin/sampah": ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"],
   "/admin/pengaturan": ["superadmin", "kepala_kantor", "kepala_bagian"],
   "/admin/admin-akun": ["superadmin"],
 };

@@ -7,6 +7,7 @@ import { PermohonanTable } from "@/components/admin/permohonan-table";
 import { Pagination } from "@/components/admin/pagination";
 import { DetailModal } from "@/components/admin/detail-modal";
 import { StatsCards } from "@/components/admin/stats-cards";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { getAuthHeaders } from "@/lib/admin-fetch";
 
 type MonitoringRow = Record<string, string>;
@@ -32,6 +33,8 @@ export function ServicePage({ layanan, title, description }: Props) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const [detailId, setDetailId] = useState("");
+  const [deleteId, setDeleteId] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const fetchIdRef = useRef(0);
 
@@ -68,6 +71,31 @@ export function ServicePage({ layanan, title, description }: Props) {
   function handlePageChange(p: number) {
     setPage(p);
     setLoading(true);
+  }
+
+  async function handleDelete() {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch("/api/admin/permohonan", {
+        method: "DELETE",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ id: deleteId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast("success", "Permohonan dipindahkan ke Sampah");
+        setDeleteId("");
+        setRefreshKey((k) => k + 1);
+      } else {
+        toast("error", json.error || "Gagal menghapus permohonan");
+        setDeleteId("");
+      }
+    } catch {
+      toast("error", "Gagal menghapus permohonan");
+      setDeleteId("");
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -142,7 +170,7 @@ export function ServicePage({ layanan, title, description }: Props) {
         </div>
 
         <div className="overflow-hidden rounded-xl border shadow-sm" style={{ borderColor: "var(--admin-border)", backgroundColor: "var(--admin-bg-card)" }}>
-          <PermohonanTable rows={rows} loading={loading} onOpenDetail={setDetailId} />
+          <PermohonanTable rows={rows} loading={loading} onOpenDetail={setDetailId} onDelete={setDeleteId} />
           <Pagination page={page} totalPages={totalPages} total={total} onPageChange={handlePageChange} />
         </div>
       </div>
@@ -156,6 +184,17 @@ export function ServicePage({ layanan, title, description }: Props) {
           toast={toast}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteId !== ""}
+        title="Pindahkan ke Sampah?"
+        message="Permohonan ini akan dipindahkan ke Sampah dan tidak tampil di daftar utama. Anda dapat memulihkannya nanti."
+        confirmLabel="Hapus"
+        confirmClass="bg-red-600 hover:bg-red-700"
+        loading={deleteLoading}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId("")}
+      />
 
       <ToastContainer toasts={toasts} dismiss={dismiss} />
     </>

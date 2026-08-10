@@ -23,6 +23,8 @@ model Monitoring {
   nomorDokumen      String   @default("")
   tanggalDokumen    String   @default("")
   statusProses      String   @default("")
+  deletedAt         DateTime?
+  deletedBy         String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -82,6 +84,8 @@ model Kuitansi {
   mergedDocURLPenolakanKuitansi               String   @default("")
   linkToMergedDocPenolakanKuitansi            String   @default("")
   documentMergeStatusPenolakanKuitansi        String   @default("")
+  deletedAt                                   DateTime?
+  deletedBy                                   String?
   createdAt                                   DateTime @default(now())
   updatedAt                                   DateTime @updatedAt
 }
@@ -144,9 +148,11 @@ model KutipanRL {
   mergedDocURLAutoNotifKutipan                          String   @default("")
   linkToMergedDocAutoNotifKutipan                       String   @default("")
   documentMergeStatusAutoNotifKutipan                   String   @default("")
-  mergedDocURLAutoKutipanRL                             String   @default("")
-  createdAt                                             DateTime @default(now())
-  updatedAt                                             DateTime @updatedAt
+  mergedDocURLAutoKutipanRL             String   @default("")
+  deletedAt                             DateTime?
+  deletedBy                             String?
+  createdAt                             DateTime @default(now())
+  updatedAt                             DateTime @updatedAt
 }
 
 model ValidasiPPh {
@@ -210,6 +216,8 @@ model ValidasiPPh {
   mergedDocURLAutoNotifValidasiPPh            String   @default("")
   linkToMergedDocAutoNotifValidasiPPh         String   @default("")
   documentMergeStatusAutoNotifValidasiPPh     String   @default("")
+  deletedAt                                   DateTime?
+  deletedBy                                   String?
   createdAt                                   DateTime @default(now())
   updatedAt                                   DateTime @updatedAt
 }

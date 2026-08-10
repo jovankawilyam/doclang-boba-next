@@ -12,6 +12,8 @@ export const MONITORING_MAPPING: FieldMapping[] = [
   { field: "nomorDokumen", column: "Nomor Dokumen" },
   { field: "tanggalDokumen", column: "Tanggal Dokumen" },
   { field: "statusProses", column: "Status Proses" },
+  { field: "deletedAt", column: "Tgl Dihapus" },
+  { field: "deletedBy", column: "Dihapus Oleh" },
 ]
 
 export const KUITANSI_MAPPING: FieldMapping[] = [
@@ -68,6 +70,8 @@ export const KUITANSI_MAPPING: FieldMapping[] = [
   { field: "mergedDocURLPenolakanKuitansi", column: "Merged Doc URL - penolakan kuitansi" },
   { field: "linkToMergedDocPenolakanKuitansi", column: "Link to merged Doc - penolakan kuitansi" },
   { field: "documentMergeStatusPenolakanKuitansi", column: "Document Merge Status - penolakan kuitansi" },
+  { field: "deletedAt", column: "Tgl Dihapus" },
+  { field: "deletedBy", column: "Dihapus Oleh" },
 ]
 
 export const KUTIPAN_RL_MAPPING: FieldMapping[] = [
@@ -128,6 +132,8 @@ export const KUTIPAN_RL_MAPPING: FieldMapping[] = [
   { field: "linkToMergedDocAutoNotifKutipan", column: "Link to merged Doc - auto notif kutipan" },
   { field: "documentMergeStatusAutoNotifKutipan", column: "Document Merge Status - auto notif kutipan" },
   { field: "mergedDocURLAutoKutipanRL", column: "Merged Doc URL - auto Kutipan RL" },
+  { field: "deletedAt", column: "Tgl Dihapus" },
+  { field: "deletedBy", column: "Dihapus Oleh" },
 ]
 
 export const VALIDASI_PPH_MAPPING: FieldMapping[] = [
@@ -190,6 +196,8 @@ export const VALIDASI_PPH_MAPPING: FieldMapping[] = [
   { field: "mergedDocURLAutoNotifValidasiPPh", column: "Merged Doc URL - auto notif validasi pph" },
   { field: "linkToMergedDocAutoNotifValidasiPPh", column: "Link to merged Doc - auto notif validasi pph" },
   { field: "documentMergeStatusAutoNotifValidasiPPh", column: "Document Merge Status - auto notif validasi pph" },
+  { field: "deletedAt", column: "Tgl Dihapus" },
+  { field: "deletedBy", column: "Dihapus Oleh" },
 ]
 
 export const ACTIVITY_LOG_MAPPING: FieldMapping[] = [

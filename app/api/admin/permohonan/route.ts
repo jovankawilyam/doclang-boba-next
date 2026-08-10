@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRows, updateRow } from "@/lib/db";
-import { requireAdmin, requireAdminRole } from "@/lib/auth";
+import { getRows, softDeleteSubmission, updateRow } from "@/lib/db";
+import { getAdminFromRequest, requireAdmin, requireAdminRole } from "@/lib/auth";
 import { validateAdminCsrf } from "@/lib/csrf";
 import { appendActivityLog } from "@/lib/audit";
 
@@ -189,6 +189,63 @@ export async function PATCH(request: NextRequest) {
     console.error("Admin PATCH error:", error);
     return NextResponse.json(
       { success: false, error: "Gagal memperbarui status" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const unauth = await requireAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"]);
+  if (unauth) return unauth;
+  try {
+    if (!validateAdminCsrf(request)) {
+      return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
+    }
+    const admin = await getAdminFromRequest(request);
+    const body = await request.json().catch(() => null);
+    const id = body?.id;
+    if (!id || typeof id !== "string") {
+      return NextResponse.json(
+        { success: false, error: "ID harus diisi" },
+        { status: 400 },
+      );
+    }
+
+    const sheetInfo = getSheetFromId(id);
+    if (!sheetInfo) {
+      return NextResponse.json(
+        { success: false, error: "ID tidak valid" },
+        { status: 400 },
+      );
+    }
+
+    const rows = await getRows(sheetInfo.sheetName);
+    const currentRow = rows.find((r) => r.get(sheetInfo.idColumn) === id);
+    const oldStatus = currentRow?.get("Status Proses") ?? "";
+
+    const monitoringRows = await getRows("Monitoring");
+    const monRow = monitoringRows.find((r) => r.get("ID Pengajuan") === id);
+    const layanan = monRow?.get("Jenis Layanan") ?? "";
+
+    await softDeleteSubmission(sheetInfo.sheetName, id, admin?.name ?? "");
+
+    await appendActivityLog({
+      waktu: new Date().toISOString(),
+      idPengajuan: id,
+      jenisLayanan: layanan,
+      statusLama: oldStatus,
+      statusBaru: "Dihapus",
+      keterangan: "Permohonan dipindahkan ke Sampah",
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Permohonan dipindahkan ke Sampah",
+    });
+  } catch (error) {
+    console.error("Admin DELETE error:", error);
+    return NextResponse.json(
+      { success: false, error: "Gagal menghapus permohonan" },
       { status: 500 },
     );
   }

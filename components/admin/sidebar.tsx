@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  Trash2,
   Users,
   X,
 } from "lucide-react";
@@ -33,6 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/kutipan-rl", label: "Kutipan RL", icon: BookOpen, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
   { href: "/admin/validasi-pph", label: "Validasi PPh", icon: FileCheck, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
   { href: "/admin/riwayat", label: "Riwayat", icon: History, roles: ["superadmin", "kepala_kantor", "kepala_bagian"] },
+  { href: "/admin/sampah", label: "Sampah", icon: Trash2, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
   { href: "/admin/pengaturan", label: "Pengaturan", icon: Settings, roles: ["superadmin", "kepala_kantor", "kepala_bagian"] },
   { href: "/admin/admin-akun", label: "Admin Akun", icon: Users, roles: ["superadmin"] },
 ];
