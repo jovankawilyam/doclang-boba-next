@@ -25,8 +25,16 @@ type Props = {
   toast: (type: "success" | "error", message: string) => void;
 };
 
+function normalizeStatus(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "siap diambil") return "Siap Diambil";
+  if (s === "tidak valid") return "Tidak Valid";
+  if (s === "selesai") return "Selesai";
+  return "";
+}
+
 export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
-  const [actionType, setActionType] = useState("");
+  const [actionType, setActionType] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,6 +80,8 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
     }
   }
 
+  const activeStatus = actionType ?? normalizeStatus(data?.["Status Proses"] ?? "");
+
   const BUTTONS = [
     { label: "Siap Diambil", value: "Siap Diambil", color: "#005FAC" },
     { label: "Tidak Valid", value: "Tidak Valid", color: "#DC2626" },
@@ -84,12 +94,12 @@ export function StatusUpdate({ id, data, onUpdated, toast }: Props) {
 
       <div className="flex flex-wrap gap-2">
         {BUTTONS.map((s) => {
-          const isActive = actionType === s.value;
+          const isActive = activeStatus === s.value;
           return (
             <button
               key={s.label}
               onClick={() => {
-                setActionType(isActive ? "" : s.value);
+                setActionType(isActive ? null : s.value);
                 setReason("");
                 setDate("");
               }}

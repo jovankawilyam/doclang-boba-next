@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
 import { StatusUpdate } from "./status-update";
+import { StatusBadge } from "./status-badge";
 import { getAuthHeaders } from "@/lib/admin-fetch";
 
 type DetailData = Record<string, string>;
@@ -16,11 +17,17 @@ type Props = {
 
 export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
   const [data, setData] = useState<DetailData | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
-      fetch(`/api/admin/permohonan?id=${encodeURIComponent(id)}`, { signal: controller.signal, headers: getAuthHeaders() })
-      .then((r) => r.json())
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    fetch(`/api/admin/permohonan?id=${encodeURIComponent(id)}`, { signal: controller.signal, headers: getAuthHeaders() })
+    .then((r) => r.json())
+
       .then((json) => {
         if (!controller.signal.aborted && json.success) setData(json.data);
         else if (!controller.signal.aborted) toast("error", json.error || "Gagal memuat detail");
@@ -28,8 +35,11 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
       .catch((err) => {
         if (err.name !== "AbortError") toast("error", "Gagal memuat detail");
       });
-    return () => controller.abort();
-  }, [id, toast]);
+    return () => {
+      controller.abort();
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [id, toast, onClose]);
 
   return (
     <div
@@ -46,6 +56,9 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
           <div>
             <h2 className="text-base font-bold" style={{ color: "var(--admin-text-primary)" }}>Detail Permohonan</h2>
             <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>ID: {id}</p>
+          </div>
+          <div className="ml-auto mr-3">
+            <StatusBadge status={data?.["Status Proses"] ?? ""} />
           </div>
           <button
             onClick={onClose}
@@ -65,6 +78,15 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
           </div>
         ) : (
           <div className="px-6 py-4">
+            {previewUrl ? (
+              <div className="mb-5 overflow-hidden rounded-xl border" style={{ borderColor: "var(--admin-border)" }}>
+                <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: "var(--admin-border)" }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--admin-text-primary)" }}>Preview Dokumen</p>
+                  <button onClick={() => setPreviewUrl("")} className="rounded-md px-3 py-1 text-xs font-semibold" style={{ color: "var(--admin-text-secondary)" }}>Tutup Preview</button>
+                </div>
+                <iframe src={previewUrl} className="h-[70vh] w-full" />
+              </div>
+            ) : null}
             <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-3 lg:grid-cols-4">
               {Object.entries(data)
                 .filter(
@@ -89,16 +111,15 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
                       </div>
                       <div className="mt-0.5 text-sm">
                         {isUrl ? (
-                          <a
-                            href={val}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => setPreviewUrl(val)}
                             className="inline-flex items-center gap-1 break-all hover:underline"
                             style={{ color: "var(--admin-text-primary)" }}
                           >
                             <ExternalLink className="h-3 w-3 shrink-0" />
                             {val.length > 50 ? val.slice(0, 50) + "..." : val}
-                          </a>
+                          </button>
                         ) : (
                           <span style={{ color: val ? "var(--admin-text-body)" : "var(--admin-text-secondary)" }}>{val || "-"}</span>
                         )}
