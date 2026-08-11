@@ -302,16 +302,9 @@ export default function TrackingSection() {
         )}
 
         <div className="mt-6 rounded-2xl border border-[#D8E0EC] bg-white p-4 sm:p-5 md:p-6">
-          <div className="flex flex-col gap-2 border-b border-[#D8E0EC] pb-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-bold tracking-[0.35em] text-[#0B3D73] uppercase">Ringkasan Status</p>
-              <h3 className="mt-2 text-lg font-bold text-slate-950 sm:text-xl">Gambaran singkat per layanan</h3>
-            </div>
-            <p className="max-w-xl text-sm leading-relaxed text-slate-500">
-              Ringkasan ini membantu melihat sebaran permohonan secara umum,
-              tanpa mengganggu fokus utama pada pencarian dokumen.
-            </p>
-          </div>
+          <h3 className="border-b border-[#D8E0EC] pb-4 text-center text-lg font-bold text-slate-950 sm:text-xl">
+            Dashboard Ringkasan
+          </h3>
 
           {statsLoading ? (
             <div className="flex items-center justify-center py-10">
