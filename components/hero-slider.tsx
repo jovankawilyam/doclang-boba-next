@@ -133,7 +133,7 @@ export default function HeroSlider() {
           ))}
         </div>
       </div>
-      <div className="flex flex-col items-start border-b border-slate-200 bg-white px-4 py-6 text-left sm:px-6 sm:py-8 md:hidden">
+      <div className="flex flex-col items-center border-b border-slate-200 bg-white px-4 py-6 text-left sm:px-6 sm:py-8 md:hidden">
         <div className="flex items-center gap-3">
           <Image
             className="h-10 w-auto object-contain sm:h-12"
@@ -152,7 +152,7 @@ export default function HeroSlider() {
             sizes="72px"
           />
         </div>
-        <div className="flex flex-col items-start gap-2">
+        <div className="mt-4 flex flex-col items-start gap-2">
           <h1 className="text-3xl font-bold tracking-[0.1em] text-[#005FAC] sm:text-4xl">
             DOCLANG BOBA
           </h1>
@@ -160,7 +160,7 @@ export default function HeroSlider() {
             Dokumen Pasca Lelang Bogor Bageur
           </p>
         </div>
-        <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600 sm:mt-7 sm:text-base">
+        <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600 sm:mt-7 sm:text-base text-center">
           Layanan pengajuan dokumen pasca lelang secara daring yang cepat,
           tertib, dan mudah diakses.
         </p>

@@ -91,7 +91,7 @@ export default function PersyaratanPage() {
               Pilih layanan untuk melihat dokumen yang dibutuhkan sebelum mengajukan permohonan.
             </p>
           </div>
-          <div className="rounded-2xl border border-[#D8E0EC] bg-white px-4 py-4 shadow-sm sm:px-5">
+          <div className="hidden rounded-2xl border border-[#D8E0EC] bg-white px-4 py-4 shadow-sm lg:block sm:px-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-950">Unduh PDF Resmi</p>
@@ -100,7 +100,7 @@ export default function PersyaratanPage() {
                 </p>
               </div>
               <a
-                href="/pdf/syarat_layanan_lelang.pdf"
+                href="/pdf/Persyaratan_Layanan.pdf"
                 download
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-[#EEF3FA] px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
               >
@@ -128,6 +128,25 @@ export default function PersyaratanPage() {
               </span>
             </button>
           ))}
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-[#D8E0EC] bg-white px-4 py-4 shadow-sm lg:hidden sm:px-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-950">Unduh PDF Resmi</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Dapatkan salinan persyaratan resmi.
+              </p>
+            </div>
+            <a
+              href="/pdf/Persyaratan_Layanan.pdf"
+              download
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-[#EEF3FA] px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+            >
+              <FileDown className="h-4 w-4" />
+              Unduh PDF
+            </a>
+          </div>
         </div>
 
         <div className="mt-10 rounded-3xl border border-[#D8E0EC] bg-white px-5 py-7 shadow-sm sm:px-6 md:px-8 md:py-10">
