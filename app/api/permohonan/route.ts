@@ -469,9 +469,13 @@ export async function POST(request: NextRequest) {
       await appendPermohonanRows(sheetName, rowData, buildMonitoringRow(textData, id, jenisLayanan));
     } catch (sheetError) {
       console.error("Append row error:", sheetError);
+      const message =
+        sheetError instanceof Error && sheetError.message
+          ? `Gagal menyimpan data: ${sheetError.message}`
+          : "Gagal menyimpan data. Periksa koneksi database.";
       return withRateLimitHeaders(
         NextResponse.json(
-          { success: false, error: "Gagal menyimpan data. Periksa koneksi database." },
+          { success: false, error: message },
           { status: 500 },
         ),
         limit.remaining,
@@ -489,7 +493,9 @@ export async function POST(request: NextRequest) {
     const message =
       error instanceof TypeError
         ? "Format data tidak sesuai"
-        : "Gagal mengirim permohonan";
+        : error instanceof Error && error.message
+          ? error.message
+          : "Gagal mengirim permohonan";
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 },
