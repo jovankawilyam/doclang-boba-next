@@ -191,8 +191,8 @@ function buildRowData(
         "Nomor Kuitansi Pembayaran Harga Lelang":
           textData["nomor_kuitansi_pembayaran_harga_lelang"] ?? "",
         "NPWP Pemenang Lelang": textData["npwp_pemenang_lelang"] ?? "",
-        NTPN: textData["ntpn"] ?? "",
-        NOP: textData["nomor_objek_pajak"] ?? "",
+        "NTPN": textData["ntpn"] ?? "",
+        "NOP": textData["nomor_objek_pajak"] ?? "",
         "Alamat Objek Lelang": textData["alamat_objek_lelang"] ?? "",
       });
       break;

@@ -142,7 +142,10 @@ function toRecord(sheetName: string, data: Record<string, string>): Record<strin
   const mapping = mappingFor(sheetName)
   const record: Record<string, string> = {}
   for (const m of mapping) {
-    record[m.field] = data[m.column] ?? ""
+    const value = data[m.column]
+    if (value !== undefined && value !== "") {
+      record[m.field] = value
+    }
   }
   return record
 }
