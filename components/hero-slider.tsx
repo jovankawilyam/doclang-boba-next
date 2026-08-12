@@ -44,7 +44,7 @@ export default function HeroSlider() {
             loading={index === 0 ? undefined : "lazy"}
           />
         ))}
-        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-black/80 via-black/55 to-black/75 " />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-black/80 via-black/45 to-black/80 " />
         <button
           type="button"
           onClick={prevSlide}
@@ -78,8 +78,26 @@ export default function HeroSlider() {
               sizes="120px"
             />
           </div>
+          <p
+            className="mt-8 animate-fade-slide-up text-2xl font-bold tracking-[0.2em] text-white uppercase opacity-0 md:mt-6 md:text-6xl"
+            style={{
+              textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+              animationDelay: "200ms",
+            }}
+          >
+            Selamat Datang
+          </p>
+          <p
+            className="mt-3 animate-fade-slide-up text-2xl font-bold tracking-[0.15em] text-white opacity-0 md:mt-3 md:text-4xl"
+            style={{
+              textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+              animationDelay: "300ms",
+            }}
+          >
+            DI SITUS RESMI
+          </p>
           <h1
-            className="mt-20 animate-fade-slide-up text-7xl font-bold tracking-[0.1em] text-white opacity-0 md:mt-20 md:text-7xl"
+            className="mt-3 animate-fade-slide-up text-4xl font-bold tracking-[0.15em] text-white opacity-0 md:mt-3 md:text-6xl"
             style={{
               textShadow: "0 4px 12px rgba(0,0,0,0.8)",
               animationDelay: "300ms",
@@ -89,7 +107,7 @@ export default function HeroSlider() {
           </h1>
 
           <p
-            className="mt-4 max-w-5xl animate-fade-slide-up text-base font-medium tracking-[0.08em] text-white/95 opacity-0 md:mt-4 md:text-2xl"
+            className="mt-1 animate-fade-slide-up text-base font-semibold tracking-[0.15em] text-white/95 opacity-0 md:mt-2 md:text-2xl"
             style={{
               textShadow: "0 2px 8px rgba(0,0,0,0.8)",
               animationDelay: "400ms",
@@ -100,8 +118,8 @@ export default function HeroSlider() {
 
           <a
             href="#persyaratan"
-            className="mt-12 inline-flex animate-fade-slide-up items-center rounded-xl border-2 border-white px-6 py-3 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-white hover:text-[#123C69] hover:shadow-lg md:mt-16 md:text-base"
-            style={{ animationDelay: "600ms" }}
+            className="mt-12 inline-flex animate-fade-slide-up items-center gap-2 rounded-xl border-2 border-white px-6 py-3 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-white hover:text-[#123C69] hover:shadow-lg md:text-base"
+            style={{ animationDelay: "700ms" }}
           >
             Lihat Persyaratan
           </a>
@@ -140,21 +158,27 @@ export default function HeroSlider() {
           />
         </div>
         <div className="flex flex-col items-center">
-          <h1 className="mt-4 text-3xl font-bold tracking-[0.1em] text-[#005FAC] sm:text-4xl">
+          <p className="mt-4 text-3xl font-bold tracking-[0.2em] text-slate-600 uppercase sm:text-4xl">
+            Selamat Datang
+          </p>
+          <p className="mt-3 text-xl font-bold tracking-[0.15em] text-slate-500 sm:text-2xl">
+            DI SITUS RESMI
+          </p>
+          <h1 className="mt-2 text-xl font-bold tracking-[0.15em] text-[#005FAC] sm:text-2xl">
             DOCLANG BOBA
           </h1>
-          <p className="mt-3 text-sm font-semibold tracking-[0.08em] text-slate-700 sm:text-base">
+          <p className="mt-2 text-sm font-semibold tracking-[0.15em] text-slate-700 sm:text-base">
             Dokumen Pasca Lelang Bogor Bageur
           </p>
         </div>
-        <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-600 sm:mt-7 sm:text-base">
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-600 sm:text-base">
           Ajukan permohonan dokumen pasca lelang secara online.
           <br />
           Cek status dan ambil dokumen di KPKNL Bogor.
         </p>
         <a
           href="#persyaratan"
-          className="mt-7 inline-flex items-center gap-2 rounded-xl bg-[#005FAC] px-5 py-3 text-sm font-semibold text-white shadow-md transition-all active:scale-95 hover:bg-[#004A8C]"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#005FAC] px-5 py-3 text-sm font-semibold text-white shadow-md transition-all active:scale-95 hover:bg-[#004A8C]"
         >
           Lihat Persyaratan
         </a>
