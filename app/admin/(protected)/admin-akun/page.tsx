@@ -445,6 +445,33 @@ export default function AdminAkunPage() {
     }
   }
 
+  if (showChangePassword) {
+    return (
+      <div className="space-y-6 max-w-2xl">
+        <div className="overflow-hidden rounded-3xl border bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-lg" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+          <div className="max-w-2xl">
+            <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">Admin Management</span>
+            <h1 className="mt-4 text-2xl font-bold tracking-tight lg:text-3xl">Ubah password</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">Halaman ini hanya untuk mengganti password akunmu.</p>
+          </div>
+        </div>
+
+        <Notice text={message} error={error} />
+
+        <PasswordChangeForm
+          saving={saving}
+          currentPassword={currentPassword}
+          newPassword={newPassword}
+          confirmPassword={confirmPassword}
+          setCurrentPassword={setCurrentPassword}
+          setNewPassword={setNewPassword}
+          setConfirmPassword={setConfirmPassword}
+          onSubmit={handleChangeOwnPassword}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-3xl border bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-lg" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
@@ -468,19 +495,6 @@ export default function AdminAkunPage() {
       </div>
 
       <Notice text={message} error={error} />
-
-      {showChangePassword && (
-        <PasswordChangeForm
-          saving={saving}
-          currentPassword={currentPassword}
-          newPassword={newPassword}
-          confirmPassword={confirmPassword}
-          setCurrentPassword={setCurrentPassword}
-          setNewPassword={setNewPassword}
-          setConfirmPassword={setConfirmPassword}
-          onSubmit={handleChangeOwnPassword}
-        />
-      )}
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <AccountForm
