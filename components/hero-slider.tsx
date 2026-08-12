@@ -41,7 +41,7 @@ export default function HeroSlider() {
             }`}
             sizes="100vw"
             priority={index === 0}
-            loading={index === 0 ? undefined : "lazy"}
+            loading="eager"
           />
         ))}
         <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-black/80 via-black/55 to-black/75 " />

@@ -279,7 +279,7 @@ export const usePermohonanForm = () => {
           return;
         }
         result.forEach((r, i) => {
-          fileUrlByField[fileEntries[i].apiKey] = r.url;
+          fileUrlByField[fileEntries[i].apiKey] = r.ufsUrl;
         });
       }
 

@@ -9,7 +9,7 @@
   --color-orange: #FAB715;
   --color-background: var(--color-bg-light);
   --color-foreground: #171717;
-  --font-sans: var(--font-roboto);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --animate-fade-slide-down: fade-slide-down 0.7s ease-out forwards;
   --animate-fade-slide-up: fade-slide-up 0.7s ease-out forwards;
