@@ -105,9 +105,9 @@ export default function AdminLoginPage() {
       <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#3388CC]/5 blur-3xl" />
       <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-[#005FAC]/5 blur-3xl" />
 
-      <div className="flex w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/10">
+      <div className="flex w-full max-w-5xl overflow-hidden rounded-[20px] bg-white shadow-2xl shadow-black/10">
         <div className="hidden w-[42%] flex-col bg-[#005FAC] lg:flex relative">
-          <Image src="/profile/profile4.jpeg" alt="" fill className="object-cover" sizes="42vw" priority />
+          <Image src="/profile/profile-login.JPG" alt="" fill className="object-cover object-[45%_70%]" sizes="42vw" priority={true} />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/100" />
           <div className="relative z-10 flex min-h-full flex-col justify-between">
             <div className="p-10 pb-0" />
