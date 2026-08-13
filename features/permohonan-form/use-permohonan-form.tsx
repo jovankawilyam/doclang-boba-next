@@ -283,7 +283,9 @@ export const usePermohonanForm = () => {
     try {
       const fileUrlByField: Record<string, string> = {};
       for (const [field, file] of Object.entries(uploadedFiles)) {
-        if (file?.url) fileUrlByField[field] = file.url;
+        if (!file?.url) continue;
+        const apiKey = field === "bukti_pelunasan_file" ? "bukti_pelunasan" : field;
+        fileUrlByField[apiKey] = file.url;
       }
 
       const incompleteUpload = Object.values(uploadedFiles).some((file) => file?.uploading);
