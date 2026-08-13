@@ -222,7 +222,7 @@ function buildMonitoringRow(
 const ALLOWED_IDENTITAS = ["KTP", "SIM", "NPWP"];
 
 function isAllowedFileUrl(url: string): boolean {
-  return /^https:\/\/utfs\.io\//.test(url);
+  return /^https:\/\/(utfs\.io|uploadthing\.com)\//.test(url);
 }
 
 function requiredFileFieldsFor(jenisLayanan: string, peran: string): string[] {
