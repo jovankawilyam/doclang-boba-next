@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Upload } from "lucide-react";
+import { CheckCircle2, RotateCcw, Upload } from "lucide-react";
 import type { ChangeEvent, ChangeEventHandler, HTMLAttributes } from "react";
 import type { FieldPath } from "react-hook-form";
 
@@ -99,7 +99,7 @@ export const UploadZone = ({
   label: string;
   note: string;
 }) => {
-  const { errors, register, setUploadedFiles, uploadedFiles } = form;
+  const { errors, register, uploadedFiles, uploadFile } = form;
   const message = fieldErrorMessage(errors, name);
   const selectedFile = uploadedFiles[name];
   const fileRegistration = register(name);
@@ -109,22 +109,13 @@ export const UploadZone = ({
   ): Promise<void> => {
     await fileRegistration.onChange(event);
 
-    const file = event.target.files?.item(0);
+    const file = event.target.files?.item(0) ?? null;
+    await uploadFile(name, file);
+  };
 
-    setUploadedFiles((currentFiles) => {
-      if (!file) {
-        const nextFiles = { ...currentFiles };
-        delete nextFiles[name];
-        return nextFiles;
-      }
-      return {
-        ...currentFiles,
-        [name]: {
-          name: file.name,
-          size: file.size,
-        },
-      };
-    });
+  const handleRetry = (): void => {
+    const input = document.getElementById(String(name)) as HTMLInputElement | null;
+    input?.click();
   };
 
   return (
@@ -134,17 +125,27 @@ export const UploadZone = ({
       </span>
       <label
         className={`flex cursor-pointer items-center gap-4 rounded-lg border-2 px-5 py-4 transition ${
-          selectedFile
-            ? "border-emerald-300 bg-emerald-50 hover:border-emerald-400"
-            : "border-slate-200 bg-white hover:border-navy/30 hover:bg-navy/[0.02]"
+          selectedFile?.uploading
+            ? "border-amber-300 bg-amber-50 hover:border-amber-400"
+            : selectedFile?.error
+              ? "border-red-300 bg-red-50 hover:border-red-400"
+              : selectedFile
+                ? "border-emerald-300 bg-emerald-50 hover:border-emerald-400"
+                : "border-slate-200 bg-white hover:border-navy/30 hover:bg-navy/[0.02]"
         }`}
       >
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-            selectedFile ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+            selectedFile?.uploading
+              ? "bg-amber-100 text-amber-700"
+              : selectedFile
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-slate-100 text-slate-500"
           }`}
         >
-          {selectedFile ? (
+          {selectedFile?.uploading ? (
+            <Upload className="h-5 w-5" />
+          ) : selectedFile ? (
             <CheckCircle2 className="h-5 w-5" />
           ) : (
             <Upload className="h-5 w-5" />
@@ -153,11 +154,11 @@ export const UploadZone = ({
         <div className="flex-1 text-left">
           {selectedFile ? (
             <>
-              <p className="text-sm font-medium text-emerald-800">
+              <p className={`text-sm font-medium ${selectedFile.uploading ? "text-amber-800" : selectedFile.error ? "text-red-800" : "text-emerald-800"}`}>
                 {selectedFile.name}
               </p>
-              <p className="mt-0.5 text-xs text-emerald-600">
-                {formatUploadedFileSize(selectedFile.size)}
+              <p className={`mt-0.5 text-xs ${selectedFile.uploading ? "text-amber-600" : selectedFile.error ? "text-red-600" : "text-emerald-600"}`}>
+                {selectedFile.uploading ? "Sedang mengunggah..." : selectedFile.error ?? formatUploadedFileSize(selectedFile.size)}
               </p>
             </>
           ) : (
@@ -169,7 +170,20 @@ export const UploadZone = ({
             </>
           )}
         </div>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          {selectedFile?.error && (
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Upload ulang
+            </button>
+          )}
+        </div>
         <input
+          id={String(name)}
           type="file"
           accept={FILE_ACCEPT_ATTRIBUTE}
           className="hidden"
@@ -178,9 +192,9 @@ export const UploadZone = ({
         />
       </label>
       {selectedFile && (
-        <p className="text-xs text-emerald-600">
+        <p className={`text-xs ${selectedFile.uploading ? "text-amber-600" : selectedFile.error ? "text-red-600" : "text-emerald-600"}`}>
           <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />
-          Dokumen siap dikirim
+          {selectedFile.uploading ? "Sedang mengunggah" : selectedFile.error ?? "Dokumen siap dikirim"}
         </p>
       )}
       {message && <p className={errorClassName}>{message}</p>}

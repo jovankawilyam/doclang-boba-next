@@ -46,6 +46,9 @@ export type DoclangFormValues = {
 export type UploadedFileInfo = {
   name: string;
   size: number;
+  url?: string;
+  uploading?: boolean;
+  error?: string;
 };
 
 export type SubmissionReceipt = {
@@ -70,4 +73,5 @@ export type FileInputHelpers = {
       Partial<Record<FieldPath<DoclangFormValues>, UploadedFileInfo>>
     >
   >;
+  uploadFile: (name: FieldPath<DoclangFormValues>, file: File | null) => Promise<void>;
 };

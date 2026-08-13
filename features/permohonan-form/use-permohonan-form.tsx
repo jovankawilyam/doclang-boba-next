@@ -213,6 +213,44 @@ export const usePermohonanForm = () => {
     useState<DoclangFormValues | null>(null);
   const { startUpload } = useUploadThing("dokumenLelang");
 
+  const uploadFile = async (name: FieldPath<DoclangFormValues>, file: File | null): Promise<void> => {
+    if (!file) {
+      setUploadedFiles((currentFiles) => {
+        const nextFiles = { ...currentFiles };
+        delete nextFiles[name];
+        return nextFiles;
+      });
+      return;
+    }
+
+    setUploadedFiles((currentFiles) => ({
+      ...currentFiles,
+      [name]: { name: file.name, size: file.size, uploading: true, error: undefined },
+    }));
+
+    try {
+      const result = await startUpload([file]);
+      const uploaded = result?.[0];
+      if (!uploaded?.ufsUrl) {
+        throw new Error("Upload failed");
+      }
+      setUploadedFiles((currentFiles) => ({
+        ...currentFiles,
+        [name]: { name: file.name, size: file.size, url: uploaded.ufsUrl, uploading: false, error: undefined },
+      }));
+    } catch {
+      setUploadedFiles((currentFiles) => ({
+        ...currentFiles,
+        [name]: { name: file.name, size: file.size, uploading: false, error: "Gagal mengunggah berkas. Coba lagi." },
+      }));
+      setServerErrors((currentErrors) =>
+        currentErrors.includes("Gagal mengunggah berkas. Coba lagi.")
+          ? currentErrors
+          : ["Gagal mengunggah berkas. Coba lagi.", ...currentErrors],
+      );
+    }
+  };
+
   const {
     register,
     handleSubmit,
@@ -243,44 +281,22 @@ export const usePermohonanForm = () => {
   const executeSubmit: SubmitHandler<DoclangFormValues> = async (values) => {
     setUploadingFiles(true);
     try {
-      type FileEntry = { apiKey: string; file: File };
-      const fileEntries: FileEntry[] = [];
-      const addFile = (formField: string, apiKey: string, value: unknown) => {
-        const f = getSelectedFile(value);
-        if (f) fileEntries.push({ apiKey, file: f });
-      };
-      addFile("dokumen_identitas_pemohon", "dokumen_identitas_pemohon", values.dokumen_identitas_pemohon);
-      addFile("dokumen_identitas_pemberi_kuasa", "dokumen_identitas_pemberi_kuasa", values.dokumen_identitas_pemberi_kuasa);
-      addFile("surat_kuasa", "surat_kuasa", values.surat_kuasa);
-      addFile("bukti_validasi_sspd_bphtb", "bukti_validasi_sspd_bphtb", values.bukti_validasi_sspd_bphtb);
-      addFile("kuitansi_pembayaran_harga_lelang_file", "kuitansi_pembayaran_harga_lelang_file", values.kuitansi_pembayaran_harga_lelang_file);
-      addFile("slip_setor_pbb_atau_bphtb", "slip_setor_pbb_atau_bphtb", values.slip_setor_pbb_atau_bphtb);
-      addFile("slip_setor_pph", "slip_setor_pph", values.slip_setor_pph);
-      addFile("npwp_pemenang_lelang_file", "npwp_pemenang_lelang_file", values.npwp_pemenang_lelang_file);
-      if (values.jenis_layanan === "Pemberian Kuitansi Pembayaran Harga Lelang") {
-        addFile("bukti_pelunasan_file", "bukti_pelunasan", values.bukti_pelunasan_file);
+      const fileUrlByField: Record<string, string> = {};
+      for (const [field, file] of Object.entries(uploadedFiles)) {
+        if (file?.url) fileUrlByField[field] = file.url;
       }
 
-      const fileUrlByField: Record<string, string> = {};
-      if (fileEntries.length > 0) {
-        let result;
-        try {
-          result = await startUpload(fileEntries.map((e) => e.file));
-        } catch {
-          setServerErrors(["Gagal mengunggah berkas. Periksa konfigurasi UploadThing atau koneksi internet Anda."]);
-          setUploadingFiles(false);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          return;
-        }
-        if (!result || result.length !== fileEntries.length) {
-          setServerErrors(["Gagal mengunggah beberapa berkas. Coba lagi."]);
-          setUploadingFiles(false);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          return;
-        }
-        result.forEach((r, i) => {
-          fileUrlByField[fileEntries[i].apiKey] = r.ufsUrl;
-        });
+      const incompleteUpload = Object.values(uploadedFiles).some((file) => file?.uploading);
+      if (incompleteUpload) {
+        setServerErrors(["Tunggu upload file selesai dulu."]);
+        setUploadingFiles(false);
+        return;
+      }
+      const failedUpload = Object.values(uploadedFiles).some((file) => file?.error);
+      if (failedUpload) {
+        setServerErrors(["Ada file yang gagal diunggah. Upload ulang file tersebut."]);
+        setUploadingFiles(false);
+        return;
       }
 
       const payload: Record<string, string> = {};
@@ -392,7 +408,7 @@ export const usePermohonanForm = () => {
     clearSubmission,
     confirmSubmit,
     errors,
-    fileInputHelpers: { errors, register, setUploadedFiles, uploadedFiles },
+    fileInputHelpers: { errors, register, setUploadedFiles, uploadedFiles, uploadFile },
     fieldHelpers: { register, renderError },
     goToSlideTwo,
     handleSubmit,
