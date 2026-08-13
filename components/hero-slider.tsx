@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 export default function HeroSlider() {
@@ -48,6 +49,7 @@ export default function HeroSlider() {
         <button
           type="button"
           onClick={prevSlide}
+          aria-label="Previous slide"
           className="absolute top-1/2 left-4 z-20 -translate-y-1/2 rounded-full bg-white/20 px-3 py-2 text-white transition hover:bg-white/40"
         >
           ‹
@@ -55,6 +57,7 @@ export default function HeroSlider() {
         <button
           type="button"
           onClick={nextSlide}
+          aria-label="Next slide"
           className="absolute top-1/2 right-4 z-20 -translate-y-1/2 rounded-full bg-white/20 px-3 py-2 text-white transition hover:bg-white/40"
         >
           ›
@@ -110,13 +113,13 @@ export default function HeroSlider() {
               tertib, dan mudah diakses.
             </p>
 
-            <a
+            <Link
               href="#persyaratan"
               className="mt-6 inline-flex animate-fade-slide-up items-center rounded-xl border-2 border-white px-6 py-3 text-sm font-semibold text-white opacity-0 transition-all duration-300 hover:bg-white hover:text-[#123C69] hover:shadow-lg md:mt-8 md:text-base"
               style={{ animationDelay: "480ms" }}
             >
               Lihat Persyaratan
-            </a>
+            </Link>
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 z-20 hidden justify-center gap-2 pb-4 md:flex">
@@ -164,12 +167,12 @@ export default function HeroSlider() {
           Layanan pengajuan dokumen pasca lelang secara daring yang cepat,
           tertib, dan mudah diakses.
         </p>
-        <a
+        <Link
           href="#persyaratan"
           className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#005FAC] px-5 py-3 text-sm font-semibold text-white shadow-md transition-all active:scale-95 hover:bg-[#004A8C]"
         >
           Lihat Persyaratan
-        </a>
+        </Link>
       </div>
     </section>
   );

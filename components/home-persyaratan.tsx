@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   AlertCircle,
   ArrowRight,
@@ -162,13 +163,13 @@ export default function HomePersyaratan() {
                 </p>
               </div>
             </div>
-            <a
+            <Link
               href="/form"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0B3D73] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#082B52]"
             >
               Ajukan Permohonan
               <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -1,40 +1,43 @@
+import { prisma } from "./db/prisma";
+
 type RateLimitConfig = {
   limit: number;
   windowMs: number;
 };
 
-type RateLimitState = {
-  count: number;
-  resetAt: number;
-};
+type MemoryBucket = { points: number; resetAt: number };
 
-const STORE = new Map<string, RateLimitState>();
+const MEMORY_STORE = new Map<string, MemoryBucket>();
 
-export function consumeRateLimit(
+async function consumeMemoryRateLimit(
   key: string,
   config: RateLimitConfig,
-): { allowed: boolean; remaining: number; resetAt: number } {
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   const now = Date.now();
-  const current = STORE.get(key);
+  const current = MEMORY_STORE.get(key);
 
   if (!current || current.resetAt <= now) {
     const resetAt = now + config.windowMs;
-    STORE.set(key, { count: 1, resetAt });
+    MEMORY_STORE.set(key, { points: 1, resetAt });
     return { allowed: true, remaining: Math.max(0, config.limit - 1), resetAt };
   }
 
-  current.count += 1;
-  const allowed = current.count <= config.limit;
-
-  if (!allowed) {
-    return { allowed: false, remaining: 0, resetAt: current.resetAt };
-  }
+  const points = current.points + 1;
+  const allowed = points <= config.limit;
+  MEMORY_STORE.set(key, { points, resetAt: current.resetAt });
 
   return {
-    allowed: true,
-    remaining: Math.max(0, config.limit - current.count),
+    allowed,
+    remaining: Math.max(0, config.limit - points),
     resetAt: current.resetAt,
   };
+}
+
+export async function consumeRateLimit(
+  key: string,
+  config: RateLimitConfig,
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  return consumeMemoryRateLimit(key, config);
 }
 
 export function getRateLimitKey(prefix: string, request: Request): string {
@@ -43,3 +46,4 @@ export function getRateLimitKey(prefix: string, request: Request): string {
   const ip = forwardedFor.split(",")[0]?.trim() || realIp || "unknown";
   return `${prefix}:${ip}`;
 }
+

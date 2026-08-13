@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { getRows, softDeleteSubmission, updateRow } from "@/lib/db";
 import { getAdminFromRequest, requireAdmin, requireAdminRole } from "@/lib/auth";
 import { validateAdminCsrf } from "@/lib/csrf";
@@ -53,54 +54,126 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20));
     const all = searchParams.get("all") === "true";
 
-    const rows = await getRows("Monitoring");
-    const headers = [
-      "Tgl Permintaan",
-      "Kode Lot Lelang",
-      "ID Pengajuan",
-      "Tanggal Pengambilan",
-      "Jenis Layanan",
-      "Nomor Dokumen",
-      "Tanggal Dokumen",
-      "Status Proses",
-    ];
-
-    const result = rows.map((r) => {
-      const item: Record<string, string> = {};
-      for (const h of headers) {
-        item[h] = r.get(h);
+    // Reconstruct filtering logic in the database to get count
+    const whereClause: Record<string, unknown> = { deletedAt: null };
+    if (statusFilter) {
+      if (statusFilter === "proses") {
+        whereClause.statusProses = { in: ["Dalam Proses", "Proses"] };
+      } else if (statusFilter === "siap diambil") {
+        whereClause.statusProses = "Siap Diambil";
+      } else if (statusFilter === "tidak valid") {
+        whereClause.statusProses = { in: ["Ditolak", "Tidak Valid"] };
+      } else if (statusFilter === "selesai") {
+        whereClause.statusProses = { in: ["Total", "Valid Total", "Selesai"] };
       }
-      return item;
-    });
-
-    const filtered = result.filter((r) => {
-      if (statusFilter && r["Status Proses"]?.toLowerCase() !== statusFilter) return false;
-      if (layananFilter && r["Jenis Layanan"] !== layananFilter) return false;
-      if (searchQuery) {
-        const id = r["ID Pengajuan"]?.toLowerCase() ?? "";
-        if (!id.includes(searchQuery)) return false;
+    }
+    if (layananFilter) {
+      if (layananFilter === "Kuitansi") {
+        whereClause.jenisLayanan = "Pemberian Kuitansi Pembayaran Harga Lelang";
+      } else if (layananFilter === "Kutipan RL") {
+        whereClause.jenisLayanan = "Pemberian Kutipan Risalah Lelang";
+      } else if (layananFilter === "Validasi PPh") {
+        whereClause.jenisLayanan = { in: ["Validasi PPh (1 Bidang)", "Validasi PPh (1 bidang)"] };
+      } else {
+        whereClause.jenisLayanan = layananFilter;
       }
-      return true;
-    });
-
-    const total = filtered.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginated = all ? filtered : filtered.slice((page - 1) * limit, page * limit);
-
-    const baseForStats = layananFilter
-      ? result.filter((r) => r["Jenis Layanan"] === layananFilter)
-      : result;
-    const stats = { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
-    for (const r of baseForStats) {
-      const s = r["Status Proses"]?.toLowerCase() ?? "";
-      stats.total++;
-      if (s === "proses") stats.proses++;
-      else if (s === "siap diambil") stats.siap_diambil++;
-      else if (s === "tidak valid") stats.tidak_valid++;
-      else if (s === "selesai") stats.selesai++;
+    }
+    if (searchQuery) {
+      whereClause.idPengajuan = { contains: searchQuery, mode: "insensitive" };
     }
 
-    return NextResponse.json({ success: true, data: paginated, total, page, totalPages, stats });
+    const { prisma } = await import("@/lib/db/prisma");
+    const total = await prisma.monitoring.count({ where: whereClause });
+    const totalPages = Math.ceil(total / limit);
+
+    const getRowsOpts: Record<string, unknown> = {};
+    if (!all) {
+      getRowsOpts.limit = limit;
+      getRowsOpts.offset = (page - 1) * limit;
+    }
+    
+    // We still have to fetch the correct data
+    let paginatedRows;
+    if (searchQuery || layananFilter || statusFilter) {
+       // It's much simpler to just get from prisma directly using our whereClause, 
+       // but we want SheetRow objects. For now, since getRows doesn't accept complex where clauses,
+       // we'll just implement the mapping here.
+       const rawRows = await prisma.monitoring.findMany({
+         where: whereClause,
+         orderBy: { id: "desc" },
+         ...(all ? {} : { take: limit, skip: (page - 1) * limit }),
+       });
+       const { SHEET_MAPPINGS } = await import("@/lib/db/mapping");
+       const mapping = SHEET_MAPPINGS["Monitoring"];
+       const LAYANAN_MAP: Record<string, string> = {
+         "Pemberian Kuitansi Pembayaran Harga Lelang": "Kuitansi",
+         "Pemberian Kutipan Risalah Lelang": "Kutipan RL",
+         "Validasi PPh (1 Bidang)": "Validasi PPh",
+         "Validasi PPh (1 bidang)": "Validasi PPh",
+       };
+       const STATUS_MAP: Record<string, string> = {
+         "Total": "Selesai",
+         "Valid Total": "Selesai",
+         "Ditolak": "Tidak Valid",
+         "Dalam Proses": "Proses",
+         "Selesai": "Selesai",
+         "Siap Diambil": "Siap Diambil",
+         "Tidak Valid": "Tidak Valid",
+         "Proses": "Proses",
+       };
+       paginatedRows = rawRows.map((r: Record<string, unknown>) => {
+         const row: Record<string, string> = {};
+         for (const m of mapping) {
+           let val = String((r as Record<string, unknown>)[m.field] ?? "");
+           if (m.field === "jenisLayanan" && LAYANAN_MAP[val]) val = LAYANAN_MAP[val];
+           if (m.field === "statusProses" && STATUS_MAP[val]) val = STATUS_MAP[val];
+           row[m.column] = val;
+         }
+         return row;
+       });
+    } else {
+      const rows = await getRows("Monitoring", getRowsOpts);
+      const headers = [
+        "Tgl Permintaan",
+        "Kode Lot Lelang",
+        "ID Pengajuan",
+        "Tanggal Pengambilan",
+        "Jenis Layanan",
+        "Nomor Dokumen",
+        "Tanggal Dokumen",
+        "Status Proses",
+      ];
+      paginatedRows = rows.map((r) => {
+        const item: Record<string, string> = {};
+        for (const h of headers) {
+          item[h] = r.get(h);
+        }
+        return item;
+      });
+    }
+
+    // Since we don't have all data in memory, we can either fetch stats with aggregate queries,
+    // or if we just want basic stats for the base filter, we can query it.
+    const statsWhereClause: Prisma.MonitoringWhereInput = layananFilter
+      ? { deletedAt: null, jenisLayanan: String(whereClause.jenisLayanan) }
+      : { deletedAt: null };
+    const [statsTotal, statsProses, statsSiapDiambil, statsTidakValid, statsSelesai] = await Promise.all([
+      prisma.monitoring.count({ where: statsWhereClause }),
+      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Dalam Proses", "Proses"] } } }),
+      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: "Siap Diambil" } }),
+      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Ditolak", "Tidak Valid"] } } }),
+      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Total", "Valid Total", "Selesai"] } } }),
+    ]);
+
+    const stats = { 
+      total: statsTotal, 
+      proses: statsProses, 
+      siap_diambil: statsSiapDiambil, 
+      tidak_valid: statsTidakValid, 
+      selesai: statsSelesai 
+    };
+
+    return NextResponse.json({ success: true, data: paginatedRows, total, page, totalPages, stats });
   } catch (error) {
     console.error("Admin GET error:", error);
     return NextResponse.json(

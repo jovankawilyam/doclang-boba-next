@@ -4,7 +4,7 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/admin-types";
 import { createSessionToken, getAdminFromRequest, normalizeAdminName, storeAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import { verifyPassword } from "@/lib/password";
-import { createCsrfToken, setCsrfCookie } from "@/lib/csrf";
+import { createCsrfToken, setCsrfCookie, ADMIN_CSRF_COOKIE } from "@/lib/csrf";
 
 function withRateLimitHeaders(response: NextResponse, remaining: number, resetAt: number): NextResponse {
   response.headers.set("X-RateLimit-Remaining", String(remaining));
@@ -37,12 +37,13 @@ export async function GET(request: NextRequest) {
           role: admin.role,
         },
       });
-  return setCsrfCookie(response, createCsrfToken());
+  const existingCsrf = request.cookies.get(ADMIN_CSRF_COOKIE)?.value;
+  return setCsrfCookie(response, existingCsrf || createCsrfToken());
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const limit = consumeRateLimit(getRateLimitKey("admin-login", request), {
+    const limit = await consumeRateLimit(getRateLimitKey("admin-login", request), {
       limit: 5,
       windowMs: 15 * 60 * 1000,
     });
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
         }),
         token,
       ),
-      createCsrfToken(),
+      request.cookies.get(ADMIN_CSRF_COOKIE)?.value || createCsrfToken(),
     );
 
     return withRateLimitHeaders(response, limit.remaining, limit.resetAt);

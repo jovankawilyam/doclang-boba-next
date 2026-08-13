@@ -62,7 +62,7 @@ function mappingFor(sheetName: string): FieldMapping[] {
 
 export async function getRows(
   sheetName: string,
-  opts: { onlyDeleted?: boolean } = {},
+  opts: { onlyDeleted?: boolean; limit?: number; offset?: number } = {},
 ): Promise<SheetRow[]> {
   const mapping = mappingFor(sheetName)
   const where = opts.onlyDeleted ? { deletedAt: { not: null } } : { deletedAt: null }
@@ -70,7 +70,12 @@ export async function getRows(
 
   switch (sheetName) {
     case "Monitoring": {
-      const result = await prisma.monitoring.findMany({ where, orderBy: { id: "desc" } })
+      const result = await prisma.monitoring.findMany({
+        where,
+        orderBy: { id: "desc" },
+        ...(opts.limit !== undefined ? { take: opts.limit } : {}),
+        ...(opts.offset !== undefined ? { skip: opts.offset } : {}),
+      })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) {
@@ -88,7 +93,12 @@ export async function getRows(
       break
     }
     case "Kuitansi": {
-      const result = await prisma.kuitansi.findMany({ where, orderBy: { id: "desc" } })
+      const result = await prisma.kuitansi.findMany({
+        where,
+        orderBy: { id: "desc" },
+        ...(opts.limit !== undefined ? { take: opts.limit } : {}),
+        ...(opts.offset !== undefined ? { skip: opts.offset } : {}),
+      })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -97,7 +107,12 @@ export async function getRows(
       break
     }
     case "Kutipan RL": {
-      const result = await prisma.kutipanRL.findMany({ where, orderBy: { id: "desc" } })
+      const result = await prisma.kutipanRL.findMany({
+        where,
+        orderBy: { id: "desc" },
+        ...(opts.limit !== undefined ? { take: opts.limit } : {}),
+        ...(opts.offset !== undefined ? { skip: opts.offset } : {}),
+      })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -106,7 +121,12 @@ export async function getRows(
       break
     }
     case "Validasi PPh": {
-      const result = await prisma.validasiPPh.findMany({ where, orderBy: { id: "desc" } })
+      const result = await prisma.validasiPPh.findMany({
+        where,
+        orderBy: { id: "desc" },
+        ...(opts.limit !== undefined ? { take: opts.limit } : {}),
+        ...(opts.offset !== undefined ? { skip: opts.offset } : {}),
+      })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -115,7 +135,11 @@ export async function getRows(
       break
     }
     case "Activity Log": {
-      const result = await prisma.activityLog.findMany({ orderBy: { id: "desc" } })
+      const result = await prisma.activityLog.findMany({
+        orderBy: { id: "desc" },
+        ...(opts.limit !== undefined ? { take: opts.limit } : {}),
+        ...(opts.offset !== undefined ? { skip: opts.offset } : {}),
+      })
       rows = result.map((r) => {
         const row: RowData = {}
         for (const m of mapping) row[m.field] = String((r as unknown as Record<string, string>)[m.field] ?? "")
@@ -293,25 +317,21 @@ export async function updateRow(
 }
 
 export async function getStats() {
-  const rows = await prisma.monitoring.findMany({ where: { deletedAt: null } })
-  const total = rows.length
-  let proses = 0, siapDiambil = 0, tidakValid = 0, selesai = 0
-  for (const r of rows) {
-    const raw = STATUS_MAP[r.statusProses] ?? r.statusProses
-    const s = raw.toLowerCase()
-    if (s === "proses") proses++
-    else if (s === "siap diambil") siapDiambil++
-    else if (s === "tidak valid") tidakValid++
-    else if (s === "selesai") selesai++
-  }
-  return { total, proses, siap_diambil: siapDiambil, tidak_valid: tidakValid, selesai }
+  const [total, proses, siap_diambil, tidak_valid, selesai] = await Promise.all([
+    prisma.monitoring.count({ where: { deletedAt: null } }),
+    prisma.monitoring.count({ where: { deletedAt: null, statusProses: { in: ["Dalam Proses", "Proses"] } } }),
+    prisma.monitoring.count({ where: { deletedAt: null, statusProses: "Siap Diambil" } }),
+    prisma.monitoring.count({ where: { deletedAt: null, statusProses: { in: ["Ditolak", "Tidak Valid"] } } }),
+    prisma.monitoring.count({ where: { deletedAt: null, statusProses: { in: ["Total", "Valid Total", "Selesai"] } } }),
+  ]);
+  return { total, proses, siap_diambil, tidak_valid, selesai }
 }
 
 function serviceDeleteFlags(
   sheetName: string,
   idValue: string,
   deletedAt: Date | null,
-  deletedBy: string,
+  deletedBy: string | null,
 ): Prisma.PrismaPromise<unknown>[] {
   const data = { deletedAt, deletedBy }
   switch (sheetName) {
@@ -346,7 +366,7 @@ export async function softDeleteSubmission(
 }
 
 export async function restoreSubmission(sheetName: string, idValue: string) {
-  await prisma.$transaction(serviceDeleteFlags(sheetName, idValue, null, ""))
+  await prisma.$transaction(serviceDeleteFlags(sheetName, idValue, null, null as unknown as string))
 }
 
 function serviceDeleteRows(

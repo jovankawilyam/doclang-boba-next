@@ -348,7 +348,7 @@ function fileValidationError(
 
 export async function POST(request: NextRequest) {
   try {
-    const limit = consumeRateLimit(getRateLimitKey("permohonan", request), {
+    const limit = await consumeRateLimit(getRateLimitKey("permohonan", request), {
       limit: 10,
       windowMs: 10 * 60 * 1000,
     });

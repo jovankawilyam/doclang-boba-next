@@ -18,27 +18,47 @@ function getServiceInfo(
 }
 
 async function getLatestCounter(model: ServiceInfo["model"], idField: string, prefix: string, year: number): Promise<number> {
-  const select = { [idField]: true } as Record<string, boolean>
-  let rows: Record<string, string>[]
-  if (model === "kuitansi") {
-    rows = await prisma.kuitansi.findMany({ select }) as unknown as Record<string, string>[]
-  } else if (model === "kutipanRL") {
-    rows = await prisma.kutipanRL.findMany({ select }) as unknown as Record<string, string>[]
-  } else {
-    rows = await prisma.validasiPPh.findMany({ select }) as unknown as Record<string, string>[]
-  }
-  let maxCounter = 0
-  for (const row of rows) {
-    const id: string = row[idField] ?? ""
-    if (id) {
-      const parts = id.split("/")
-      if (parts.length === 3 && parts[1] === prefix && parts[2] === String(year)) {
-        const counter = parseInt(parts[0], 10)
-        if (counter > maxCounter) maxCounter = counter
-      }
+  const suffix = `/${prefix}/${year}`
+  let id = ""
+  
+  try {
+    if (model === "kuitansi") {
+      const rows = await prisma.$queryRaw<Array<{ idKPHL: string }>>`
+        SELECT "idKPHL" FROM "Kuitansi"
+        WHERE "idKPHL" LIKE ${'%' + suffix}
+        ORDER BY CAST(SPLIT_PART("idKPHL", '/', 1) AS INTEGER) DESC
+        LIMIT 1
+      `
+      id = rows[0]?.idKPHL ?? ""
+    } else if (model === "kutipanRL") {
+      const rows = await prisma.$queryRaw<Array<{ idKRL: string }>>`
+        SELECT "idKRL" FROM "KutipanRL"
+        WHERE "idKRL" LIKE ${'%' + suffix}
+        ORDER BY CAST(SPLIT_PART("idKRL", '/', 1) AS INTEGER) DESC
+        LIMIT 1
+      `
+      id = rows[0]?.idKRL ?? ""
+    } else if (model === "validasiPPh") {
+      const rows = await prisma.$queryRaw<Array<{ idVPPh: string }>>`
+        SELECT "idVPPh" FROM "ValidasiPPh"
+        WHERE "idVPPh" LIKE ${'%' + suffix}
+        ORDER BY CAST(SPLIT_PART("idVPPh", '/', 1) AS INTEGER) DESC
+        LIMIT 1
+      `
+      id = rows[0]?.idVPPh ?? ""
     }
+  } catch (err) {
+    console.error("Error fetching latest counter:", err)
+    return 0
   }
-  return maxCounter
+  
+  if (id) {
+    const parts = id.split("/")
+    const counter = parseInt(parts[0], 10)
+    if (!isNaN(counter)) return counter
+  }
+
+  return 0
 }
 
 export async function generateId(

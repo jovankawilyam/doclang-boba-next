@@ -9,7 +9,7 @@ function hashToken(token: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const limit = consumeRateLimit(getRateLimitKey("admin-forgot-password", request), {
+    const limit = await consumeRateLimit(getRateLimitKey("admin-forgot-password", request), {
       limit: 5,
       windowMs: 15 * 60 * 1000,
     });

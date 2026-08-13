@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ToastContainer, useToast } from "@/components/toast";
-import { DashboardCharts } from "@/components/admin/dashboard-charts";
+import dynamic from "next/dynamic";
+const DashboardCharts = dynamic(() => import("@/components/admin/dashboard-charts").then(m => m.DashboardCharts), { ssr: false, loading: () => <div className="h-[360px] flex items-center justify-center">Memuat grafik...</div> });
 import { DetailModal } from "@/components/admin/detail-modal";
 import { getAuthHeaders } from "@/lib/admin-fetch";
 

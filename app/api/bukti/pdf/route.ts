@@ -78,7 +78,7 @@ function wrapText(
 }
 
 export async function GET(request: NextRequest) {
-  const limit = consumeRateLimit(getRateLimitKey("bukti-pdf", request), {
+  const limit = await consumeRateLimit(getRateLimitKey("bukti-pdf", request), {
     limit: 10,
     windowMs: 60 * 1000,
   });

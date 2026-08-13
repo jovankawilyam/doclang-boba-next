@@ -116,6 +116,18 @@ export async function PATCH(request: NextRequest) {
     }
     if (typeof payload.isActive === "boolean") data.isActive = payload.isActive;
 
+    if (existing.role === "superadmin" && existing.isActive) {
+      const willDowngrade = data.role && data.role !== "superadmin";
+      const willDeactivate = data.isActive === false;
+
+      if (willDowngrade || willDeactivate) {
+        const totalSuperadmin = await prisma.adminAccount.count({ where: { role: "superadmin", isActive: true } });
+        if (totalSuperadmin <= 1) {
+          return NextResponse.json({ success: false, error: "Minimal harus ada satu superadmin aktif" }, { status: 400 });
+        }
+      }
+    }
+
     const account = await prisma.adminAccount.update({
       where: { id },
       data,
@@ -156,7 +168,7 @@ export async function DELETE(request: NextRequest) {
     if (!existing) {
       return NextResponse.json({ success: false, error: "Akun tidak ditemukan" }, { status: 404 });
     }
-    if (existing.role === "superadmin") {
+    if (existing.role === "superadmin" && existing.isActive) {
       const totalSuperadmin = await prisma.adminAccount.count({ where: { role: "superadmin", isActive: true } });
       if (totalSuperadmin <= 1) {
         return NextResponse.json({ success: false, error: "Minimal harus ada satu superadmin aktif" }, { status: 400 });

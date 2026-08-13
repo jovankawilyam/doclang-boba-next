@@ -10,7 +10,7 @@ const { GET, POST: rawPOST } = createRouteHandler({
 export { GET };
 
 export async function POST(request: NextRequest) {
-  const limit = consumeRateLimit(getRateLimitKey("uploadthing", request), {
+  const limit = await consumeRateLimit(getRateLimitKey("uploadthing", request), {
     limit: 20,
     windowMs: 15 * 60 * 1000,
   });

@@ -272,8 +272,8 @@ export const usePermohonanForm = () => {
           window.scrollTo({ top: 0, behavior: "smooth" });
           return;
         }
-        if (!result) {
-          setServerErrors(["Gagal mengunggah berkas. Coba lagi."]);
+        if (!result || result.length !== fileEntries.length) {
+          setServerErrors(["Gagal mengunggah beberapa berkas. Coba lagi."]);
           setUploadingFiles(false);
           window.scrollTo({ top: 0, behavior: "smooth" });
           return;

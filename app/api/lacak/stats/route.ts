@@ -21,7 +21,7 @@ function countStats(rows: { get: (key: string) => string }[]): ServiceStats {
 
 export async function GET(request: NextRequest) {
   try {
-    const limit = consumeRateLimit(getRateLimitKey("lacak-stats", request), { limit: 30, windowMs: 60 * 1000 });
+    const limit = await consumeRateLimit(getRateLimitKey("lacak-stats", request), { limit: 30, windowMs: 60 * 1000 });
     if (!limit.allowed) {
       return NextResponse.json({ success: false, error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
     }

@@ -273,3 +273,10 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime     @default(now())
 }
+
+model RateLimit {
+  key       String   @id
+  points    Int      @default(0)
+  resetAt   DateTime
+}
+
