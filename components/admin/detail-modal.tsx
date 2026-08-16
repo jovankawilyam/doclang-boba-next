@@ -15,6 +15,17 @@ type Props = {
   toast: (type: "success" | "error", message: string) => void;
 };
 
+function isSafePreviewUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    return host.endsWith("googleusercontent.com") || host.endsWith("drive.google.com") || host.endsWith("uploadthing.com");
+  } catch {
+    return false;
+  }
+}
+
 export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
   const [data, setData] = useState<DetailData | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -113,7 +124,10 @@ export function DetailModal({ id, onClose, onUpdated, toast }: Props) {
                         {isUrl ? (
                           <button
                             type="button"
-                            onClick={() => setPreviewUrl(val)}
+                            onClick={() => {
+                              if (isSafePreviewUrl(val)) setPreviewUrl(val);
+                              else toast("error", "URL dokumen tidak aman");
+                            }}
                             className="inline-flex items-center gap-1 break-all hover:underline"
                             style={{ color: "var(--admin-text-primary)" }}
                           >

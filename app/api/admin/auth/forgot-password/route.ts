@@ -27,11 +27,19 @@ export async function POST(request: NextRequest) {
     const role = typeof payload.role === "string" ? payload.role.trim() : "";
     const unit = typeof payload.unit === "string" ? payload.unit.trim() : "";
 
-    if (!username || !role || !unit) {
-      return NextResponse.json({ success: false, error: "Semua field wajib diisi" }, { status: 400 });
+    if (!username || !role) {
+      return NextResponse.json({ success: false, error: "Username dan role wajib diisi" }, { status: 400 });
     }
 
-    const admin = await prisma.adminAccount.findFirst({ where: { username, role: role as never, unit } });
+    const where: { username: string; role: never; unit?: string } = { username, role: role as never };
+    if (role !== "superadmin") {
+      if (!unit) {
+        return NextResponse.json({ success: false, error: "Unit wajib diisi" }, { status: 400 });
+      }
+      where.unit = unit;
+    }
+
+    const admin = await prisma.adminAccount.findFirst({ where });
     if (!admin || !admin.isActive) {
       return NextResponse.json({ success: false, error: "Data tidak cocok" }, { status: 404 });
     }

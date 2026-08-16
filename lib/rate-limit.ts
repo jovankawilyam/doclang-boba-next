@@ -1,4 +1,3 @@
-import { prisma } from "./db/prisma";
 
 type RateLimitConfig = {
   limit: number;

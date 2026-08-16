@@ -15,6 +15,21 @@ const HEADERS = [
 
 const LAYANAN = ["Kuitansi", "Kutipan RL", "Validasi PPh"];
 
+function normalizeLayanan(value: string): string {
+  if (value === "Pemberian Kuitansi Pembayaran Harga Lelang") return "Kuitansi";
+  if (value === "Pemberian Kutipan Risalah Lelang") return "Kutipan RL";
+  if (value === "Validasi PPh (1 Bidang)" || value === "Validasi PPh (1 bidang)") return "Validasi PPh";
+  return value;
+}
+
+function normalizeStatus(value: string): string {
+  if (value === "Dalam Proses" || value === "Proses") return "Proses";
+  if (value === "Siap Diambil") return "Siap Diambil";
+  if (value === "Ditolak" || value === "Tidak Valid") return "Tidak Valid";
+  if (value === "Total" || value === "Valid Total" || value === "Selesai") return "Selesai";
+  return value;
+}
+
 export async function GET(request: NextRequest) {
   const unauth = await requireAdmin(request);
   if (unauth) return unauth;
@@ -25,54 +40,40 @@ export async function GET(request: NextRequest) {
     }
     const { prisma } = await import("@/lib/db/prisma");
 
-    const [total, proses, siap_diambil, tidak_valid, selesai] = await Promise.all([
-      prisma.monitoring.count({ where: { deletedAt: null } }),
-      prisma.monitoring.count({ where: { deletedAt: null, statusProses: { in: ["Dalam Proses", "Proses"] } } }),
-      prisma.monitoring.count({ where: { deletedAt: null, statusProses: "Siap Diambil" } }),
-      prisma.monitoring.count({ where: { deletedAt: null, statusProses: { in: ["Ditolak", "Tidak Valid"] } } }),
-      prisma.monitoring.count({ where: { deletedAt: null, statusProses: { in: ["Total", "Valid Total", "Selesai"] } } }),
-    ]);
-    const stats = { total, proses, siap_diambil, tidak_valid, selesai };
+    const allMonitoring = await prisma.monitoring.findMany({
+      where: { deletedAt: null },
+      select: { jenisLayanan: true, statusProses: true, tglPermintaan: true },
+    });
+    const normalizedAll = allMonitoring.map((row) => ({
+      layanan: normalizeLayanan(row.jenisLayanan),
+      status: normalizeStatus(row.statusProses),
+      tglPermintaan: row.tglPermintaan,
+    }));
 
-    const LAYANAN_MAPPING: Record<string, string | string[]> = {
-      "Kuitansi": "Pemberian Kuitansi Pembayaran Harga Lelang",
-      "Kutipan RL": "Pemberian Kutipan Risalah Lelang",
-      "Validasi PPh": ["Validasi PPh (1 Bidang)", "Validasi PPh (1 bidang)"],
-    };
+    const total = normalizedAll.length;
+    const proses = normalizedAll.filter((row) => row.status === "Proses").length;
+    const siap_diambil = normalizedAll.filter((row) => row.status === "Siap Diambil").length;
+    const tidak_valid = normalizedAll.filter((row) => row.status === "Tidak Valid").length;
+    const selesai = normalizedAll.filter((row) => row.status === "Selesai").length;
+    const stats = { total, proses, siap_diambil, tidak_valid, selesai };
 
     const perLayanan: Record<string, typeof stats> = {};
     for (const l of LAYANAN) {
-      const condition = Array.isArray(LAYANAN_MAPPING[l]) 
-        ? { in: LAYANAN_MAPPING[l] } 
-        : LAYANAN_MAPPING[l];
-      const whereClause = { deletedAt: null, jenisLayanan: condition };
-
-      const [ltotal, lproses, lsiap, ltidak, lselesai] = await Promise.all([
-        prisma.monitoring.count({ where: whereClause }),
-        prisma.monitoring.count({ where: { ...whereClause, statusProses: { in: ["Dalam Proses", "Proses"] } } }),
-        prisma.monitoring.count({ where: { ...whereClause, statusProses: "Siap Diambil" } }),
-        prisma.monitoring.count({ where: { ...whereClause, statusProses: { in: ["Ditolak", "Tidak Valid"] } } }),
-        prisma.monitoring.count({ where: { ...whereClause, statusProses: { in: ["Total", "Valid Total", "Selesai"] } } }),
-      ]);
-      perLayanan[l] = { total: ltotal, proses: lproses, siap_diambil: lsiap, tidak_valid: ltidak, selesai: lselesai };
+      const filtered = normalizedAll.filter((row) => row.layanan === l);
+      perLayanan[l] = {
+        total: filtered.length,
+        proses: filtered.filter((row) => row.status === "Proses").length,
+        siap_diambil: filtered.filter((row) => row.status === "Siap Diambil").length,
+        tidak_valid: filtered.filter((row) => row.status === "Tidak Valid").length,
+        selesai: filtered.filter((row) => row.status === "Selesai").length,
+      };
     }
 
     // Process monthly trend (might require loading specific fields since we don't have GROUP BY on extracted date parts easily)
-    const allData = await prisma.monitoring.findMany({
-      where: { deletedAt: null },
-      select: { tglPermintaan: true, jenisLayanan: true }
-    });
-
     const monthlyTrend: Record<string, Record<string, number>> = {};
-    const REVERSE_LAYANAN_MAP: Record<string, string> = {
-      "Pemberian Kuitansi Pembayaran Harga Lelang": "Kuitansi",
-      "Pemberian Kutipan Risalah Lelang": "Kutipan RL",
-      "Validasi PPh (1 Bidang)": "Validasi PPh",
-      "Validasi PPh (1 bidang)": "Validasi PPh",
-    };
 
-    for (const r of allData) {
-      const layanan = REVERSE_LAYANAN_MAP[r.jenisLayanan] || r.jenisLayanan;
+    for (const r of normalizedAll) {
+      const layanan = r.layanan;
       const tgl = r.tglPermintaan;
 
       let monthKey = "";
@@ -102,38 +103,44 @@ export async function GET(request: NextRequest) {
 
     // recent
     const recent: Record<string, Record<string, string>[]> = {};
-    const { SHEET_MAPPINGS } = await import("@/lib/db/mapping");
-    const mapping = SHEET_MAPPINGS["Monitoring"];
-    const STATUS_MAP: Record<string, string> = {
-      "Total": "Selesai",
-      "Valid Total": "Selesai",
-      "Ditolak": "Tidak Valid",
-      "Dalam Proses": "Proses",
-      "Selesai": "Selesai",
-      "Siap Diambil": "Siap Diambil",
-      "Tidak Valid": "Tidak Valid",
-      "Proses": "Proses",
-    };
+    const recentRows = await prisma.monitoring.findMany({
+      where: { deletedAt: null },
+      orderBy: { id: "desc" },
+      take: 200,
+      select: {
+        tglPermintaan: true,
+        kodeLotLelang: true,
+        idPengajuan: true,
+        tanggalPengambilan: true,
+        jenisLayanan: true,
+        nomorDokumen: true,
+        tanggalDokumen: true,
+        statusProses: true,
+      },
+    });
 
     for (const l of LAYANAN) {
-      const condition = Array.isArray(LAYANAN_MAPPING[l]) 
-        ? { in: LAYANAN_MAPPING[l] } 
-        : LAYANAN_MAPPING[l];
-      const r = await prisma.monitoring.findMany({
-        where: { deletedAt: null, jenisLayanan: condition },
-        orderBy: { id: "desc" },
-        take: 5
-      });
-      recent[l] = r.map((rec: Record<string, unknown>) => {
-        const item: Record<string, string> = {};
-        for (const m of mapping) {
-          let val = String((rec as Record<string, unknown>)[m.field] ?? "");
-          if (m.field === "jenisLayanan" && REVERSE_LAYANAN_MAP[val]) val = REVERSE_LAYANAN_MAP[val];
-          if (m.field === "statusProses" && STATUS_MAP[val]) val = STATUS_MAP[val];
-          if (HEADERS.includes(m.column)) item[m.column] = val;
-        }
-        return item;
-      });
+      const filtered = recentRows
+        .map((row) => ({
+          ...row,
+          jenisLayanan: normalizeLayanan(row.jenisLayanan),
+          statusProses: normalizeStatus(row.statusProses),
+        }))
+        .filter((row) => row.jenisLayanan === l)
+        .slice(0, 5)
+        .map((row) => ({
+          "Tgl Permintaan": row.tglPermintaan,
+          "Kode Lot Lelang": row.kodeLotLelang,
+          "ID Pengajuan": row.idPengajuan,
+          "Tanggal Pengambilan": row.tanggalPengambilan,
+          "Jenis Layanan": row.jenisLayanan,
+          "Nomor Dokumen": row.nomorDokumen,
+          "Tanggal Dokumen": row.tanggalDokumen,
+          "Status Proses": row.statusProses,
+        }));
+      recent[l] = filtered.map((row) =>
+        Object.fromEntries(HEADERS.map((header) => [header, row[header as keyof typeof row] ?? ""])),
+      );
     }
 
     return NextResponse.json({ success: true, stats, perLayanan, monthlyTrend: trend, recent });

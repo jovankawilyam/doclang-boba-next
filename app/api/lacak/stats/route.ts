@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
         layananKey === "kuitansi" ? "Kuitansi" :
         layananKey === "kutipan_rl" ? "Kutipan RL" :
         layananKey === "validasi_pph" ? "Validasi PPh" : "";
-      const filtered = target ? rows.filter((r) => r.get("Jenis Layanan") === target) : rows;
+      if (!target) {
+        return NextResponse.json({ success: false, error: "Layanan tidak valid" }, { status: 400 });
+      }
+      const filtered = rows.filter((r) => r.get("Jenis Layanan") === target);
       const stats = countStats(filtered);
       return NextResponse.json({ success: true, ...stats });
     }

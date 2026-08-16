@@ -222,7 +222,20 @@ function buildMonitoringRow(
 const ALLOWED_IDENTITAS = ["KTP", "SIM", "NPWP"];
 
 function isAllowedFileUrl(url: string): boolean {
-  return /^https:\/\/[\w.-]+\//.test(url);
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+    const host = parsed.hostname.toLowerCase();
+    return (
+      host.endsWith("uploadthing.com") ||
+      host.endsWith("googleusercontent.com") ||
+      host.endsWith("googleapis.com") ||
+      host.endsWith("google.com") ||
+      host.endsWith("drive.google.com")
+    );
+  } catch {
+    return false;
+  }
 }
 
 function requiredFileFieldsFor(jenisLayanan: string, peran: string): string[] {

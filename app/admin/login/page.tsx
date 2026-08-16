@@ -165,7 +165,7 @@ export default function AdminLoginPage() {
                         <option value="kepala_bagian">kepala_bagian</option>
                         <option value="karyawan">staf</option>
                       </select>
-                      <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="Unit" className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10" required />
+                      <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={role === "superadmin" ? "Unit (opsional untuk superadmin)" : "Unit"} className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10" required={role !== "superadmin"} />
                     </div>
                     {error && <p className="rounded-xl border border-red-100/60 bg-red-50/80 px-4 py-2.5 text-sm text-red-600">{error}</p>}
                     <button type="submit" disabled={loading} className="flex w-full items-center justify-center rounded-xl bg-[#005FAC] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#3388CC] disabled:opacity-50">{loading ? "Memeriksa..." : "Lanjut"}</button>

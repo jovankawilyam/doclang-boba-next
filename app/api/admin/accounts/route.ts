@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { normalizeAdminName, requireAdminRole } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
@@ -76,6 +77,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Admin account create error:", error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ success: false, error: "Username sudah digunakan" }, { status: 409 });
+    }
     return NextResponse.json({ success: false, error: "Gagal membuat akun admin" }, { status: 500 });
   }
 }

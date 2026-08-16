@@ -218,7 +218,10 @@ export async function PATCH(request: NextRequest) {
 
     const rows = await getRows(sheetInfo.sheetName);
     const currentRow = rows.find((r) => r.get(sheetInfo.idColumn) === id);
-    const oldStatus = currentRow?.get("Status Proses") ?? "";
+    if (!currentRow) {
+      return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 });
+    }
+    const oldStatus = currentRow.get("Status Proses") ?? "";
 
     const serviceUpdates: Record<string, string> = {
       "Status Permohonan": newStatus,
@@ -294,11 +297,17 @@ export async function DELETE(request: NextRequest) {
 
     const rows = await getRows(sheetInfo.sheetName);
     const currentRow = rows.find((r) => r.get(sheetInfo.idColumn) === id);
-    const oldStatus = currentRow?.get("Status Proses") ?? "";
+    if (!currentRow) {
+      return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 });
+    }
+    const oldStatus = currentRow.get("Status Proses") ?? "";
 
     const monitoringRows = await getRows("Monitoring");
     const monRow = monitoringRows.find((r) => r.get("ID Pengajuan") === id);
-    const layanan = monRow?.get("Jenis Layanan") ?? "";
+    if (!monRow) {
+      return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 });
+    }
+    const layanan = monRow.get("Jenis Layanan") ?? "";
 
     await softDeleteSubmission(sheetInfo.sheetName, id, admin?.name ?? "");
 
