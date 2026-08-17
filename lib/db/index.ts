@@ -24,6 +24,10 @@ const STATUS_MAP: Record<string, string> = {
   "Siap Diambil": "Siap Diambil",
   "Tidak Valid": "Tidak Valid",
   "Proses": "Proses",
+  "selesai": "Selesai",
+  "siap diambil": "Siap Diambil",
+  "tidak valid": "Tidak Valid",
+  "proses": "Proses",
 }
 
 export interface SheetRow {

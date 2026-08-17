@@ -20,7 +20,14 @@ function isSafePreviewUrl(value: string): boolean {
     const url = new URL(value);
     if (url.protocol !== "https:") return false;
     const host = url.hostname.toLowerCase();
-    return host.endsWith("googleusercontent.com") || host.endsWith("drive.google.com") || host.endsWith("uploadthing.com");
+    return (
+      host.endsWith("googleusercontent.com") ||
+      host.endsWith("drive.google.com") ||
+      host.endsWith("uploadthing.com") ||
+      host.endsWith("ufs.sh") ||
+      host.endsWith("utfs.io") ||
+      host.endsWith("uploadthing-prod.com")
+    );
   } catch {
     return false;
   }

@@ -282,9 +282,12 @@ export const usePermohonanForm = () => {
     setUploadingFiles(true);
     try {
       const fileUrlByField: Record<string, string> = {};
+      const fileFieldMap: Partial<Record<FieldPath<DoclangFormValues>, string>> = {
+        bukti_pelunasan_file: "bukti_pelunasan",
+      };
       for (const [field, file] of Object.entries(uploadedFiles)) {
         if (!file?.url) continue;
-        const apiKey = field === "bukti_pelunasan_file" ? "bukti_pelunasan" : field;
+        const apiKey = fileFieldMap[field as FieldPath<DoclangFormValues>] ?? field;
         fileUrlByField[apiKey] = file.url;
       }
 

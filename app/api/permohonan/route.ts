@@ -58,19 +58,6 @@ function getSheetName(jenisLayanan: string): string | null {
   }
 }
 
-function getJenisLayananLabel(jenisLayanan: string): string {
-  switch (jenisLayanan) {
-    case "Pemberian Kuitansi Pembayaran Harga Lelang":
-      return "Kuitansi";
-    case "Pemberian Kutipan Risalah Lelang":
-      return "Kutipan RL";
-    case "Validasi PPh (1 Bidang)":
-      return "Validasi PPh";
-    default:
-      return jenisLayanan;
-  }
-}
-
 function getFileColumnMap(
   jenisLayanan: string,
 ): Record<string, string> {
@@ -109,7 +96,7 @@ function buildRowData(
   const base = {
     "Tgl Permintaan": new Date().toISOString(),
     "Kode Lot Lelang": textData["kode_lot_lelang"] ?? "",
-    "Status Proses": "proses",
+    "Status Proses": "Proses",
   };
 
   const serviceSpecific: Record<string, string> = {};
@@ -212,10 +199,10 @@ function buildMonitoringRow(
     "Kode Lot Lelang": textData["kode_lot_lelang"] ?? "",
     "ID Pengajuan": idPengajuan,
     "Tanggal Pengambilan": "",
-    "Jenis Layanan": getJenisLayananLabel(jenisLayanan),
+    "Jenis Layanan": jenisLayanan,
     "Nomor Dokumen": "",
     "Tanggal Dokumen": "",
-    "Status Proses": "proses",
+    "Status Proses": "Proses",
   };
 }
 
@@ -228,10 +215,13 @@ function isAllowedFileUrl(url: string): boolean {
     const host = parsed.hostname.toLowerCase();
     return (
       host.endsWith("uploadthing.com") ||
+      host.endsWith("ufs.sh") ||
+      host.endsWith("utfs.io") ||
       host.endsWith("googleusercontent.com") ||
       host.endsWith("googleapis.com") ||
       host.endsWith("google.com") ||
-      host.endsWith("drive.google.com")
+      host.endsWith("drive.google.com") ||
+      host.endsWith("uploadthing-prod.com")
     );
   } catch {
     return false;

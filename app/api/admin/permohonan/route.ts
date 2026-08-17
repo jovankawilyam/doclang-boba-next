@@ -9,6 +9,23 @@ export const dynamic = 'force-dynamic';
 
 const ALLOWED_STATUSES = ["proses", "siap diambil", "tidak valid", "selesai"];
 
+const LAYANAN_FILTERS: Record<string, string[]> = {
+  Kuitansi: ["Pemberian Kuitansi Pembayaran Harga Lelang", "Kuitansi"],
+  "Kutipan RL": ["Pemberian Kutipan Risalah Lelang", "Kutipan RL"],
+  "Validasi PPh": ["Validasi PPh (1 Bidang)", "Validasi PPh (1 bidang)", "Validasi PPh"],
+};
+
+const STATUS_FILTERS: Record<string, Prisma.MonitoringWhereInput["statusProses"]> = {
+  proses: { in: ["Dalam Proses", "Proses", "proses"] },
+  "siap diambil": { in: ["Siap Diambil", "siap diambil"] },
+  "tidak valid": { in: ["Ditolak", "Tidak Valid", "tidak valid"] },
+  selesai: { in: ["Total", "Valid Total", "Selesai", "selesai"] },
+};
+
+function layananLabels(layanan: string): string[] {
+  return LAYANAN_FILTERS[layanan] ?? [layanan];
+}
+
 function getSheetFromId(id: string): { sheetName: string; idColumn: string } | null {
   if (id.includes("/KPHL/")) return { sheetName: "Kuitansi", idColumn: "ID KPHL" };
   if (id.includes("/K-RL/")) return { sheetName: "Kutipan RL", idColumn: "ID K-RL" };
@@ -57,26 +74,10 @@ export async function GET(request: NextRequest) {
     // Reconstruct filtering logic in the database to get count
     const whereClause: Record<string, unknown> = { deletedAt: null };
     if (statusFilter) {
-      if (statusFilter === "proses") {
-        whereClause.statusProses = { in: ["Dalam Proses", "Proses"] };
-      } else if (statusFilter === "siap diambil") {
-        whereClause.statusProses = "Siap Diambil";
-      } else if (statusFilter === "tidak valid") {
-        whereClause.statusProses = { in: ["Ditolak", "Tidak Valid"] };
-      } else if (statusFilter === "selesai") {
-        whereClause.statusProses = { in: ["Total", "Valid Total", "Selesai"] };
-      }
+      whereClause.statusProses = STATUS_FILTERS[statusFilter];
     }
     if (layananFilter) {
-      if (layananFilter === "Kuitansi") {
-        whereClause.jenisLayanan = "Pemberian Kuitansi Pembayaran Harga Lelang";
-      } else if (layananFilter === "Kutipan RL") {
-        whereClause.jenisLayanan = "Pemberian Kutipan Risalah Lelang";
-      } else if (layananFilter === "Validasi PPh") {
-        whereClause.jenisLayanan = { in: ["Validasi PPh (1 Bidang)", "Validasi PPh (1 bidang)"] };
-      } else {
-        whereClause.jenisLayanan = layananFilter;
-      }
+      whereClause.jenisLayanan = { in: layananLabels(layananFilter) };
     }
     if (searchQuery) {
       whereClause.idPengajuan = { contains: searchQuery, mode: "insensitive" };
@@ -98,82 +99,87 @@ export async function GET(request: NextRequest) {
        // It's much simpler to just get from prisma directly using our whereClause, 
        // but we want SheetRow objects. For now, since getRows doesn't accept complex where clauses,
        // we'll just implement the mapping here.
-       const rawRows = await prisma.monitoring.findMany({
-         where: whereClause,
-         orderBy: { id: "desc" },
-         ...(all ? {} : { take: limit, skip: (page - 1) * limit }),
-       });
-       const { SHEET_MAPPINGS } = await import("@/lib/db/mapping");
-       const mapping = SHEET_MAPPINGS["Monitoring"];
-       const LAYANAN_MAP: Record<string, string> = {
-         "Pemberian Kuitansi Pembayaran Harga Lelang": "Kuitansi",
-         "Pemberian Kutipan Risalah Lelang": "Kutipan RL",
-         "Validasi PPh (1 Bidang)": "Validasi PPh",
-         "Validasi PPh (1 bidang)": "Validasi PPh",
-       };
-       const STATUS_MAP: Record<string, string> = {
-         "Total": "Selesai",
-         "Valid Total": "Selesai",
-         "Ditolak": "Tidak Valid",
-         "Dalam Proses": "Proses",
-         "Selesai": "Selesai",
-         "Siap Diambil": "Siap Diambil",
-         "Tidak Valid": "Tidak Valid",
-         "Proses": "Proses",
-       };
-       paginatedRows = rawRows.map((r: Record<string, unknown>) => {
-         const row: Record<string, string> = {};
-         for (const m of mapping) {
-           let val = String((r as Record<string, unknown>)[m.field] ?? "");
-           if (m.field === "jenisLayanan" && LAYANAN_MAP[val]) val = LAYANAN_MAP[val];
-           if (m.field === "statusProses" && STATUS_MAP[val]) val = STATUS_MAP[val];
-           row[m.column] = val;
+        const rawRows = await prisma.monitoring.findMany({
+          where: whereClause,
+          orderBy: { id: "desc" },
+          ...(all ? {} : { take: limit, skip: (page - 1) * limit }),
+        });
+        const { SHEET_MAPPINGS } = await import("@/lib/db/mapping");
+        const mapping = SHEET_MAPPINGS["Monitoring"];
+        const LAYANAN_MAP: Record<string, string> = {
+          "Pemberian Kuitansi Pembayaran Harga Lelang": "Kuitansi",
+          "Pemberian Kutipan Risalah Lelang": "Kutipan RL",
+          "Validasi PPh (1 Bidang)": "Validasi PPh",
+          "Validasi PPh (1 bidang)": "Validasi PPh",
+        };
+        const STATUS_MAP: Record<string, string> = {
+          "Total": "Selesai",
+          "Valid Total": "Selesai",
+          "Ditolak": "Tidak Valid",
+          "Dalam Proses": "Proses",
+          "Selesai": "Selesai",
+          "Siap Diambil": "Siap Diambil",
+          "Tidak Valid": "Tidak Valid",
+          "Proses": "Proses",
+          "selesai": "Selesai",
+          "siap diambil": "Siap Diambil",
+          "tidak valid": "Tidak Valid",
+          "proses": "Proses",
+        };
+        paginatedRows = rawRows.map((r: Record<string, unknown>) => {
+          const row: Record<string, string> = {};
+          for (const m of mapping) {
+            let val = String((r as Record<string, unknown>)[m.field] ?? "");
+            if (m.field === "jenisLayanan" && LAYANAN_MAP[val]) val = LAYANAN_MAP[val];
+            if (m.field === "statusProses" && STATUS_MAP[val]) val = STATUS_MAP[val];
+            row[m.column] = val;
+          }
+          return row;
+        });
+     } else {
+       const rows = await getRows("Monitoring", getRowsOpts);
+       const headers = [
+         "Tgl Permintaan",
+         "Kode Lot Lelang",
+         "ID Pengajuan",
+         "Tanggal Pengambilan",
+         "Jenis Layanan",
+         "Nomor Dokumen",
+         "Tanggal Dokumen",
+         "Status Proses",
+       ];
+       paginatedRows = rows.map((r) => {
+         const item: Record<string, string> = {};
+         for (const h of headers) {
+           item[h] = r.get(h);
          }
-         return row;
+         return item;
        });
-    } else {
-      const rows = await getRows("Monitoring", getRowsOpts);
-      const headers = [
-        "Tgl Permintaan",
-        "Kode Lot Lelang",
-        "ID Pengajuan",
-        "Tanggal Pengambilan",
-        "Jenis Layanan",
-        "Nomor Dokumen",
-        "Tanggal Dokumen",
-        "Status Proses",
-      ];
-      paginatedRows = rows.map((r) => {
-        const item: Record<string, string> = {};
-        for (const h of headers) {
-          item[h] = r.get(h);
-        }
-        return item;
-      });
-    }
+     }
 
-    // Since we don't have all data in memory, we can either fetch stats with aggregate queries,
-    // or if we just want basic stats for the base filter, we can query it.
-    const statsWhereClause: Prisma.MonitoringWhereInput = layananFilter
-      ? { deletedAt: null, jenisLayanan: String(whereClause.jenisLayanan) }
-      : { deletedAt: null };
-    const [statsTotal, statsProses, statsSiapDiambil, statsTidakValid, statsSelesai] = await Promise.all([
-      prisma.monitoring.count({ where: statsWhereClause }),
-      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Dalam Proses", "Proses"] } } }),
-      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: "Siap Diambil" } }),
-      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Ditolak", "Tidak Valid"] } } }),
-      prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Total", "Valid Total", "Selesai"] } } }),
-    ]);
+     // Since we don't have all data in memory, we can either fetch stats with aggregate queries,
+     // or if we just want basic stats for the base filter, we can query it.
+     const statsWhereClause: Prisma.MonitoringWhereInput = layananFilter
+       ? { deletedAt: null, jenisLayanan: { in: layananLabels(layananFilter) } }
+       : { deletedAt: null };
+     const [statsTotal, statsProses, statsSiapDiambil, statsTidakValid, statsSelesai] = await Promise.all([
+       prisma.monitoring.count({ where: statsWhereClause }),
+       prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Dalam Proses", "Proses", "proses"] } } }),
+       prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Siap Diambil", "siap diambil"] } } }),
+       prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Ditolak", "Tidak Valid", "tidak valid"] } } }),
+       prisma.monitoring.count({ where: { ...statsWhereClause, statusProses: { in: ["Total", "Valid Total", "Selesai", "selesai"] } } }),
+     ]);
 
-    const stats = { 
-      total: statsTotal, 
-      proses: statsProses, 
-      siap_diambil: statsSiapDiambil, 
-      tidak_valid: statsTidakValid, 
-      selesai: statsSelesai 
-    };
+     const stats = { 
+       total: statsTotal, 
+       proses: statsProses, 
+       siap_diambil: statsSiapDiambil, 
+       tidak_valid: statsTidakValid, 
+       selesai: statsSelesai 
+     };
 
     return NextResponse.json({ success: true, data: paginatedRows, total, page, totalPages, stats });
+
   } catch (error) {
     console.error("Admin GET error:", error);
     return NextResponse.json(
