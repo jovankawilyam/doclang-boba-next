@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRows } from "@/lib/db";
+import { prisma } from "@/lib/db/prisma";
 import { requireAdminRole } from "@/lib/auth";
-import type { SheetRow } from "@/lib/db";
-
-const LOG_HEADERS = ["Waktu", "ID Pengajuan", "Jenis Layanan", "Status Lama", "Status Baru", "Keterangan"];
 
 export async function GET(request: NextRequest) {
   const unauth = await requireAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian"]);
@@ -13,39 +10,27 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20));
 
-    let rows: SheetRow[] = [];
-    try {
-      rows = await getRows("Activity Log");
-    } catch {
-      rows = [];
-    }
+    const where = { idPengajuan: { not: "" } };
 
-    const result = rows
-      .map((r) => {
-        const item: Record<string, string> = {};
-        for (const h of LOG_HEADERS) {
-          item[h] = r.get(h);
-        }
-        return item;
-      })
-      .filter((r) => r["ID Pengajuan"])
-      .sort((a, b) => {
-        const dateA = a["Waktu"] || "";
-        const dateB = b["Waktu"] || "";
-        return dateB.localeCompare(dateA);
-      });
+    const [total, rows] = await Promise.all([
+      prisma.activityLog.count({ where }),
+      prisma.activityLog.findMany({
+        where,
+        orderBy: { waktu: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
 
-    const total = result.length;
     const totalPages = Math.ceil(total / limit);
-    const paginated = result.slice((page - 1) * limit, page * limit);
 
-    const data = paginated.map((r) => ({
-      id: r["ID Pengajuan"] || "-",
-      waktu: r["Waktu"] || "-",
-      jenis_layanan: r["Jenis Layanan"] || "-",
-      status_lama: r["Status Lama"] || "",
-      status_baru: r["Status Baru"] || "-",
-      keterangan: r["Keterangan"] || "",
+    const data = rows.map((r) => ({
+      id: r.idPengajuan || "-",
+      waktu: r.waktu || "-",
+      jenis_layanan: r.jenisLayanan || "-",
+      status_lama: r.statusLama || "",
+      status_baru: r.statusBaru || "-",
+      keterangan: r.keterangan || "",
     }));
 
     return NextResponse.json({ success: true, data, total, page, totalPages });

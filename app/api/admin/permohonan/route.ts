@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { getRows, softDeleteSubmission, updateRow } from "@/lib/db";
+import { findRowInSheet, getRows, LAYANAN_MAP, softDeleteSubmission, updateRow } from "@/lib/db";
+import { prisma } from "@/lib/db/prisma";
 import { getAdminFromRequest, requireAdmin, requireAdminRole } from "@/lib/auth";
 import { validateAdminCsrf } from "@/lib/csrf";
 import { appendActivityLog } from "@/lib/audit";
@@ -48,8 +49,7 @@ export async function GET(request: NextRequest) {
           { status: 400 },
         );
       }
-      const rows = await getRows(sheetInfo.sheetName);
-      const row = rows.find((r) => r.get(sheetInfo.idColumn) === id);
+      const row = await findRowInSheet(sheetInfo.sheetName, sheetInfo.idColumn, id);
       if (!row) {
         return NextResponse.json(
           { success: false, error: "Data tidak ditemukan" },
@@ -222,8 +222,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const rows = await getRows(sheetInfo.sheetName);
-    const currentRow = rows.find((r) => r.get(sheetInfo.idColumn) === id);
+    const currentRow = await findRowInSheet(sheetInfo.sheetName, sheetInfo.idColumn, id);
     if (!currentRow) {
       return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 });
     }
@@ -250,9 +249,11 @@ export async function PATCH(request: NextRequest) {
     await updateRow(sheetInfo.sheetName, sheetInfo.idColumn, id, serviceUpdates);
     await updateRow("Monitoring", "ID Pengajuan", id, monitoringUpdates);
 
-    const monitoringRows = await getRows("Monitoring");
-    const monRow = monitoringRows.find((r) => r.get("ID Pengajuan") === id);
-    const layanan = monRow?.get("Jenis Layanan") ?? "";
+    const monRow = await prisma.monitoring.findFirst({
+      where: { idPengajuan: id, deletedAt: null },
+      select: { jenisLayanan: true },
+    });
+    const layanan = LAYANAN_MAP[monRow?.jenisLayanan ?? ""] ?? monRow?.jenisLayanan ?? "";
 
     await appendActivityLog({
       waktu: new Date().toISOString(),
@@ -301,19 +302,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const rows = await getRows(sheetInfo.sheetName);
-    const currentRow = rows.find((r) => r.get(sheetInfo.idColumn) === id);
+    const currentRow = await findRowInSheet(sheetInfo.sheetName, sheetInfo.idColumn, id);
     if (!currentRow) {
       return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 });
     }
     const oldStatus = currentRow.get("Status Proses") ?? "";
 
-    const monitoringRows = await getRows("Monitoring");
-    const monRow = monitoringRows.find((r) => r.get("ID Pengajuan") === id);
+    const monRow = await prisma.monitoring.findFirst({
+      where: { idPengajuan: id, deletedAt: null },
+      select: { jenisLayanan: true },
+    });
     if (!monRow) {
       return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 });
     }
-    const layanan = monRow.get("Jenis Layanan") ?? "";
+    const layanan = LAYANAN_MAP[monRow.jenisLayanan] ?? monRow.jenisLayanan ?? "";
 
     await softDeleteSubmission(sheetInfo.sheetName, id, admin?.name ?? "");
 

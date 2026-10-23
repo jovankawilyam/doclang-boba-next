@@ -1,22 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRows } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db/prisma";
+import { LAYANAN_MAP, STATUS_MAP } from "@/lib/db";
 import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const LAYANAN_LIST = ["Kuitansi", "Kutipan RL", "Validasi PPh"];
 
 type ServiceStats = { total: number; proses: number; siap_diambil: number; tidak_valid: number; selesai: number };
 
-function countStats(rows: { get: (key: string) => string }[]): ServiceStats {
-  let total = 0, proses = 0, siapDiambil = 0, tidakValid = 0, selesai = 0;
-  for (const r of rows) {
-    total++;
-    const s = r.get("Status Proses")?.toLowerCase() ?? "";
-    if (s === "proses") proses++;
-    else if (s === "siap diambil") siapDiambil++;
-    else if (s === "tidak valid") tidakValid++;
-    else if (s === "selesai") selesai++;
+function layananAliases(layanan: string): string[] {
+  return Object.keys(LAYANAN_MAP)
+    .filter((k) => LAYANAN_MAP[k] === layanan)
+    .concat(layanan);
+}
+
+async function statsFor(layanan?: string): Promise<ServiceStats> {
+  const where: Prisma.MonitoringWhereInput = { deletedAt: null };
+  if (layanan) where.jenisLayanan = { in: layananAliases(layanan) };
+
+  const groups = await prisma.monitoring.groupBy({
+    by: ["statusProses"],
+    where,
+    _count: { _all: true },
+  });
+
+  const stats: ServiceStats = { total: 0, proses: 0, siap_diambil: 0, tidak_valid: 0, selesai: 0 };
+  for (const g of groups) {
+    const n = g._count._all;
+    stats.total += n;
+    const s = STATUS_MAP[g.statusProses] ?? g.statusProses;
+    if (s === "Proses") stats.proses += n;
+    else if (s === "Siap Diambil") stats.siap_diambil += n;
+    else if (s === "Tidak Valid") stats.tidak_valid += n;
+    else if (s === "Selesai") stats.selesai += n;
   }
-  return { total, proses, siap_diambil: siapDiambil, tidak_valid: tidakValid, selesai };
+  return stats;
 }
 
 export async function GET(request: NextRequest) {
@@ -26,7 +44,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 });
     }
     const layananKey = (request.nextUrl.searchParams.get("layanan") ?? "").trim().toLowerCase();
-    const rows = await getRows("Monitoring");
 
     if (layananKey) {
       const target =
@@ -36,15 +53,13 @@ export async function GET(request: NextRequest) {
       if (!target) {
         return NextResponse.json({ success: false, error: "Layanan tidak valid" }, { status: 400 });
       }
-      const filtered = rows.filter((r) => r.get("Jenis Layanan") === target);
-      const stats = countStats(filtered);
+      const stats = await statsFor(target);
       return NextResponse.json({ success: true, ...stats });
     }
 
     const perLayanan: Record<string, ServiceStats> = {};
     for (const l of LAYANAN_LIST) {
-      const filtered = rows.filter((r) => r.get("Jenis Layanan") === l);
-      perLayanan[l] = countStats(filtered);
+      perLayanan[l] = await statsFor(l);
     }
 
     return NextResponse.json({ success: true, perLayanan });

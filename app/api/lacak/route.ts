@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   findRow,
   findRowInSheet,
-  getRows,
+  LAYANAN_MAP,
+  STATUS_MAP,
 } from "@/lib/db";
+import { prisma } from "@/lib/db/prisma";
 import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const ID_MAP: Record<string, { sheet: string; col: string }> = {
@@ -48,22 +50,23 @@ export async function GET(request: NextRequest) {
     }
 
     if (!row) {
-      const monitoringRows = await getRows("Monitoring");
-      const monRow = monitoringRows.find(
-        (r) => r.get("ID Pengajuan") === trimmed,
-      );
+      const monRow = await prisma.monitoring.findFirst({
+        where: { idPengajuan: trimmed, deletedAt: null },
+      });
       if (monRow) {
+        const jenis = monRow.jenisLayanan || "";
+        const status = monRow.statusProses || "";
         return NextResponse.json({
           success: true,
           found: true,
           data: {
-            id_pengajuan: monRow.get("ID Pengajuan") || trimmed,
+            id_pengajuan: monRow.idPengajuan || trimmed,
             nama_pemohon: "",
-            kode_lot_lelang: monRow.get("Kode Lot Lelang") || "",
-            jenis_layanan: monRow.get("Jenis Layanan") || "",
-            status_proses: monRow.get("Status Proses") || "",
+            kode_lot_lelang: monRow.kodeLotLelang || "",
+            jenis_layanan: LAYANAN_MAP[jenis] ?? jenis,
+            status_proses: STATUS_MAP[status] ?? status,
             catatan_tidak_valid: "",
-            tanggal_masuk: monRow.get("Tgl Permintaan") || "",
+            tanggal_masuk: monRow.tglPermintaan || "",
           },
         });
       }

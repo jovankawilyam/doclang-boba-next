@@ -8,14 +8,14 @@ import type { FieldMapping } from "./mapping"
 
 type RowData = Record<string, string>
 
-const LAYANAN_MAP: Record<string, string> = {
+export const LAYANAN_MAP: Record<string, string> = {
   "Pemberian Kuitansi Pembayaran Harga Lelang": "Kuitansi",
   "Pemberian Kutipan Risalah Lelang": "Kutipan RL",
   "Validasi PPh (1 Bidang)": "Validasi PPh",
   "Validasi PPh (1 bidang)": "Validasi PPh",
 }
 
-const STATUS_MAP: Record<string, string> = {
+export const STATUS_MAP: Record<string, string> = {
   "Total": "Selesai",
   "Valid Total": "Selesai",
   "Ditolak": "Tidak Valid",
