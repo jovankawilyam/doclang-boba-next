@@ -122,9 +122,13 @@ export default function PersyaratanPage() {
                 {item.icon}
               </div>
               <h3 className="text-lg font-semibold text-slate-950">{item.title}</h3>
-              <span className="inline-flex items-center gap-1 text-sm font-medium text-[#0B3D73]">
+              <span className="inline-flex flex-col gap-1 text-sm font-medium text-[#0B3D73]">
                 Lihat Persyaratan
-                <ArrowRight className="h-3.5 w-3.5" />
+                <span className="flex items-center gap-1 text-sm font-medium text-[#0B3D73]">
+                  klik disini
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+
               </span>
             </button>
           ))}
