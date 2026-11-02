@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { getAuthHeaders } from "@/lib/admin-fetch";
@@ -9,6 +9,7 @@ import { canAccessAdminPath, type AdminSessionData } from "@/lib/admin-types";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [admin, setAdmin] = useState<AdminSessionData | null>(null);
 
@@ -32,11 +33,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     if (!admin) return;
-    const pathname = window.location.pathname;
     if (!canAccessAdminPath(admin.role, pathname)) {
       router.replace("/admin");
     }
-  }, [admin, router]);
+  }, [admin, pathname, router]);
 
   if (authorized === null) {
     return (
@@ -46,7 +46,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (admin && !canAccessAdminPath(admin.role, window.location.pathname)) {
+  if (admin && !canAccessAdminPath(admin.role, pathname)) {
     return (
       <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--admin-bg)" }}>
         <div className="text-sm font-medium" style={{ color: "var(--admin-text-secondary)" }}>

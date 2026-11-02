@@ -89,6 +89,24 @@ export async function requireAdminRole(
   return null;
 }
 
+type AdminRoleAuthorization =
+  | { ok: true; admin: AdminSessionData }
+  | { ok: false; response: Response };
+
+export async function authorizeAdminRole(
+  request: Request,
+  allowedRoles: AdminRole[],
+): Promise<AdminRoleAuthorization> {
+  const admin = await getAdminFromRequest(request);
+  if (!admin) {
+    return { ok: false, response: Response.json({ success: false, error: "Unauthorized" }, { status: 401 }) };
+  }
+  if (!allowedRoles.includes(admin.role)) {
+    return { ok: false, response: Response.json({ success: false, error: "Forbidden" }, { status: 403 }) };
+  }
+  return { ok: true, admin };
+}
+
 export async function hasAdminCookie(request: Request): Promise<boolean> {
   return Boolean(await getAdminFromRequest(request));
 }

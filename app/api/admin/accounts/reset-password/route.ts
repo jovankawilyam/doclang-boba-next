@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db/prisma";
-import { requireAdminRole } from "@/lib/auth";
+import { authorizeAdminRole } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
 import { validateAdminCsrf } from "@/lib/csrf";
 
@@ -10,8 +10,8 @@ function generateTemporaryPassword(): string {
 }
 
 export async function POST(request: NextRequest) {
-  const unauth = await requireAdminRole(request, ["superadmin"]);
-  if (unauth) return unauth;
+  const auth = await authorizeAdminRole(request, ["superadmin"]);
+  if (!auth.ok) return auth.response;
 
   try {
     if (!validateAdminCsrf(request)) {
@@ -23,6 +23,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { id } = body as { id: number };
+    if (!Number.isInteger(id) || id <= 0) {
+      return NextResponse.json({ success: false, error: "ID akun tidak valid" }, { status: 400 });
+    }
+    if (id === auth.admin.id) {
+      return NextResponse.json({ success: false, error: "Gunakan menu Ubah Password untuk akun sendiri" }, { status: 400 });
+    }
+
     const account = await prisma.adminAccount.findUnique({ where: { id } });
     if (!account) {
       return NextResponse.json({ success: false, error: "Akun tidak ditemukan" }, { status: 404 });

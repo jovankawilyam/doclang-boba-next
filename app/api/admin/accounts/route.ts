@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { normalizeAdminName, requireAdminRole } from "@/lib/auth";
+import { authorizeAdminRole, normalizeAdminName } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
+import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
 import { validateAdminCsrf } from "@/lib/csrf";
 
 const ROLES = ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] as const;
 
 export async function GET(request: NextRequest) {
-  const unauth = await requireAdminRole(request, ["superadmin"]);
-  if (unauth) return unauth;
+  const auth = await authorizeAdminRole(request, ["superadmin"]);
+  if (!auth.ok) return auth.response;
 
   const accounts = await prisma.adminAccount.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] });
   return NextResponse.json({
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
       unit: a.unit,
       role: a.role,
       isActive: a.isActive,
+      isSelf: a.id === auth.admin.id,
       lastLoginAt: a.lastLoginAt,
       createdAt: a.createdAt,
     })),
@@ -28,8 +30,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const unauth = await requireAdminRole(request, ["superadmin"]);
-  if (unauth) return unauth;
+  const auth = await authorizeAdminRole(request, ["superadmin"]);
+  if (!auth.ok) return auth.response;
 
   try {
     if (!validateAdminCsrf(request)) {
@@ -49,18 +51,33 @@ export async function POST(request: NextRequest) {
     }
 
     const { username, password, name, role } = body as { username: string; password: string; name: string; role: string };
-    const unit = typeof (body as Record<string, unknown>).unit === "string" ? ((body as Record<string, unknown>).unit as string).trim() : "";
+    const payload = body as Record<string, unknown>;
+    const unit = typeof payload.unit === "string" ? payload.unit.trim() : "";
+    const isActive = typeof payload.isActive === "boolean" ? payload.isActive : true;
+    const trimmedUsername = username.trim();
+    const normalizedName = normalizeAdminName(name);
+
+    if (!trimmedUsername) {
+      return NextResponse.json({ success: false, error: "Username wajib diisi" }, { status: 400 });
+    }
+    if (!normalizedName) {
+      return NextResponse.json({ success: false, error: "Nama wajib diisi" }, { status: 400 });
+    }
+    if (!isValidAdminPassword(password)) {
+      return NextResponse.json({ success: false, error: `Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter` }, { status: 400 });
+    }
     if (!ROLES.includes(role as (typeof ROLES)[number])) {
       return NextResponse.json({ success: false, error: "Role tidak valid" }, { status: 400 });
     }
 
     const account = await prisma.adminAccount.create({
       data: {
-        username: username.trim(),
-        name: normalizeAdminName(name),
+        username: trimmedUsername,
+        name: normalizedName,
         unit,
         passwordHash: hashPassword(password),
         role: role as (typeof ROLES)[number],
+        isActive,
       },
     });
 
@@ -85,8 +102,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const unauth = await requireAdminRole(request, ["superadmin"]);
-  if (unauth) return unauth;
+  const auth = await authorizeAdminRole(request, ["superadmin"]);
+  if (!auth.ok) return auth.response;
 
   try {
     if (!validateAdminCsrf(request)) {
@@ -97,18 +114,46 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Format data tidak sesuai" }, { status: 400 });
     }
 
-    const { id } = body as { id: number; name?: string; username?: string; role?: string; password?: string; isActive?: boolean };
-    const payload = body as { id: number; name?: string; username?: string; role?: string; password?: string; isActive?: boolean };
+    const payload = body as { id: number; name?: string; username?: string; unit?: string; role?: string; password?: string; isActive?: boolean };
+    const { id } = payload;
+    if (!Number.isInteger(id) || id <= 0) {
+      return NextResponse.json({ success: false, error: "ID akun tidak valid" }, { status: 400 });
+    }
 
     const existing = await prisma.adminAccount.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ success: false, error: "Akun tidak ditemukan" }, { status: 404 });
     }
 
+    const isSelf = id === auth.admin.id;
+    if (isSelf) {
+      if (typeof payload.role === "string" && payload.role !== existing.role) {
+        return NextResponse.json({ success: false, error: "Tidak dapat mengubah role akun sendiri" }, { status: 400 });
+      }
+      if (payload.isActive === false) {
+        return NextResponse.json({ success: false, error: "Tidak dapat menonaktifkan akun sendiri" }, { status: 400 });
+      }
+      if (typeof payload.password === "string" && payload.password.trim()) {
+        return NextResponse.json({ success: false, error: "Ubah password sendiri melalui menu Ubah Password" }, { status: 400 });
+      }
+    }
+
     const data: Record<string, unknown> = {};
-    if (typeof payload.name === "string") data.name = normalizeAdminName(payload.name);
-    if (typeof payload.username === "string") data.username = payload.username.trim();
-    if (typeof (payload as Record<string, unknown>).unit === "string") data.unit = ((payload as Record<string, unknown>).unit as string).trim();
+    if (typeof payload.name === "string") {
+      const name = normalizeAdminName(payload.name);
+      if (!name) {
+        return NextResponse.json({ success: false, error: "Nama wajib diisi" }, { status: 400 });
+      }
+      data.name = name;
+    }
+    if (typeof payload.username === "string") {
+      const username = payload.username.trim();
+      if (!username) {
+        return NextResponse.json({ success: false, error: "Username wajib diisi" }, { status: 400 });
+      }
+      data.username = username;
+    }
+    if (typeof payload.unit === "string") data.unit = payload.unit.trim();
     if (typeof payload.role === "string") {
       if (!ROLES.includes(payload.role as (typeof ROLES)[number])) {
         return NextResponse.json({ success: false, error: "Role tidak valid" }, { status: 400 });
@@ -116,6 +161,9 @@ export async function PATCH(request: NextRequest) {
       data.role = payload.role;
     }
     if (typeof payload.password === "string" && payload.password.trim()) {
+      if (!isValidAdminPassword(payload.password)) {
+        return NextResponse.json({ success: false, error: `Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter` }, { status: 400 });
+      }
       data.passwordHash = hashPassword(payload.password);
     }
     if (typeof payload.isActive === "boolean") data.isActive = payload.isActive;
@@ -137,6 +185,10 @@ export async function PATCH(request: NextRequest) {
       data,
     });
 
+    if (data.passwordHash || data.isActive === false) {
+      await prisma.adminSession.deleteMany({ where: { adminId: id } });
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -150,13 +202,16 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("Admin account update error:", error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ success: false, error: "Username sudah digunakan" }, { status: 409 });
+    }
     return NextResponse.json({ success: false, error: "Gagal memperbarui akun admin" }, { status: 500 });
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  const unauth = await requireAdminRole(request, ["superadmin"]);
-  if (unauth) return unauth;
+  const auth = await authorizeAdminRole(request, ["superadmin"]);
+  if (!auth.ok) return auth.response;
 
   try {
     if (!validateAdminCsrf(request)) {
@@ -164,8 +219,11 @@ export async function DELETE(request: NextRequest) {
     }
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get("id") ?? "0");
-    if (!id) {
-      return NextResponse.json({ success: false, error: "ID akun harus diisi" }, { status: 400 });
+    if (!Number.isInteger(id) || id <= 0) {
+      return NextResponse.json({ success: false, error: "ID akun tidak valid" }, { status: 400 });
+    }
+    if (id === auth.admin.id) {
+      return NextResponse.json({ success: false, error: "Tidak dapat menghapus akun sendiri" }, { status: 400 });
     }
 
     const existing = await prisma.adminAccount.findUnique({ where: { id } });

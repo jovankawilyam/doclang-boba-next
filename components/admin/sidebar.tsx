@@ -71,7 +71,7 @@ export function AdminSidebar() {
   }
 
   function handleChangePassword() {
-    router.push("/admin/admin-akun?change-password=1");
+    router.push("/admin/ubah-password");
   }
 
   const visibleItems = admin ? NAV_ITEMS.filter((item) => item.roles.includes(admin.role)) : NAV_ITEMS.filter((item) => item.href === "/admin");

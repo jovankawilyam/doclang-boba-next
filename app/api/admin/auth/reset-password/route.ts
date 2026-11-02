@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db/prisma";
 import { hashPassword } from "@/lib/password";
+import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
 import { consumeRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 function hashToken(token: string): string {
@@ -27,8 +28,8 @@ export async function POST(request: NextRequest) {
     const token = typeof payload.token === "string" ? payload.token.trim() : "";
     const newPassword = typeof payload.newPassword === "string" ? payload.newPassword : "";
 
-    if (!token || newPassword.length < 8) {
-      return NextResponse.json({ success: false, error: "Token atau password tidak valid" }, { status: 400 });
+    if (!token || !isValidAdminPassword(newPassword)) {
+      return NextResponse.json({ success: false, error: `Token tidak valid atau password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter` }, { status: 400 });
     }
 
     const tokenHash = hashToken(token);

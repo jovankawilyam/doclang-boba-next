@@ -19,10 +19,13 @@ export const NAVIGATION_ACCESS: Record<string, AdminRole[]> = {
   "/admin/sampah": ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"],
   "/admin/pengaturan": ["superadmin", "kepala_kantor", "kepala_bagian"],
   "/admin/admin-akun": ["superadmin"],
+  "/admin/ubah-password": ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"],
 };
 
 export function canAccessAdminPath(role: AdminRole, pathname: string): boolean {
-  const entry = Object.entries(NAVIGATION_ACCESS).find(([path]) => pathname === path || pathname.startsWith(`${path}/`));
+  const entry = Object.entries(NAVIGATION_ACCESS)
+    .filter(([path]) => pathname === path || pathname.startsWith(`${path}/`))
+    .sort(([a], [b]) => b.length - a.length)[0];
   if (!entry) return true;
   return entry[1].includes(role);
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { LogIn, Eye, EyeOff, ArrowLeft, KeyRound } from "lucide-react";
+import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -70,7 +71,7 @@ export default function AdminLoginPage() {
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
-    if (newPassword.length < 8) return setError("Password minimal 8 karakter");
+    if (!isValidAdminPassword(newPassword)) return setError(`Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter`);
     if (newPassword !== confirmPassword) return setError("Konfirmasi password tidak cocok");
     setError("");
     setLoading(true);

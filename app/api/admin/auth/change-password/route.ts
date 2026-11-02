@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getAdminFromRequest, requireAdmin } from "@/lib/auth";
+import { authorizeAdminRole } from "@/lib/auth";
 import { verifyPassword, hashPassword } from "@/lib/password";
-import { validateAdminCsrf } from "@/lib/csrf";
+import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
+import { validateAdminCsrf, ADMIN_CSRF_COOKIE } from "@/lib/csrf";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-types";
 
 export async function POST(request: NextRequest) {
-  const unauth = await requireAdmin(request);
-  if (unauth) return unauth;
+  const auth = await authorizeAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"]);
+  if (!auth.ok) return auth.response;
+  const admin = auth.admin;
 
   try {
     if (!validateAdminCsrf(request)) {
       return NextResponse.json({ success: false, error: "CSRF token tidak valid" }, { status: 403 });
-    }
-    const admin = await getAdminFromRequest(request);
-    if (!admin) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -33,8 +32,8 @@ export async function POST(request: NextRequest) {
     if (!account || !verifyPassword(currentPassword, account.passwordHash)) {
       return NextResponse.json({ success: false, error: "Password saat ini salah" }, { status: 401 });
     }
-    if (newPassword.trim().length < 8) {
-      return NextResponse.json({ success: false, error: "Password baru minimal 8 karakter" }, { status: 400 });
+    if (!isValidAdminPassword(newPassword)) {
+      return NextResponse.json({ success: false, error: `Password baru minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter` }, { status: 400 });
     }
 
     await prisma.adminAccount.update({
@@ -43,7 +42,22 @@ export async function POST(request: NextRequest) {
     });
     await prisma.adminSession.deleteMany({ where: { adminId: admin.id } });
 
-    return NextResponse.json({ success: true, message: "Password berhasil diubah" });
+    const response = NextResponse.json({ success: true, message: "Password berhasil diubah" });
+    response.cookies.set(ADMIN_SESSION_COOKIE, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 0,
+    });
+    response.cookies.set(ADMIN_CSRF_COOKIE, "", {
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 0,
+    });
+    return response;
   } catch (error) {
     console.error("Admin change password error:", error);
     return NextResponse.json({ success: false, error: "Gagal mengubah password" }, { status: 500 });
