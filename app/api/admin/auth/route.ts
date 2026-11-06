@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
           username: admin.username,
           name: admin.name,
           role: admin.role,
+          mustChangePassword: admin.mustChangePassword,
         },
       });
   const existingCsrf = request.cookies.get(ADMIN_CSRF_COOKIE)?.value;
@@ -90,6 +91,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (admin.mustChangePassword && admin.tempPasswordExpiresAt && admin.tempPasswordExpiresAt.getTime() < Date.now()) {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { success: false, error: "Password sementara sudah kedaluwarsa. Minta superadmin untuk reset ulang." },
+          { status: 403 },
+        ),
+        limit.remaining,
+        limit.resetAt,
+      );
+    }
+
     const token = createSessionToken();
     await storeAdminSession(admin.id, token);
     await prisma.adminAccount.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
@@ -103,6 +115,7 @@ export async function POST(request: NextRequest) {
             username: admin.username,
             name: normalizeAdminName(admin.name),
             role: admin.role,
+            mustChangePassword: admin.mustChangePassword,
           },
         }),
         token,

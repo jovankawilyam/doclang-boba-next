@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requireAdminRole } from "@/lib/auth";
 import { getFooterSettings, saveFooterSettings } from "@/lib/site-settings";
 import { validateAdminCsrf } from "@/lib/csrf";
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const unauth = await requireAdmin(request);
+  const unauth = await requireAdminRole(request, ["superadmin"]);
   if (unauth) return unauth;
 
   try {

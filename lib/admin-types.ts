@@ -8,6 +8,7 @@ export type AdminSessionData = {
   username: string;
   name: string;
   role: AdminRole;
+  mustChangePassword: boolean;
 };
 
 export const NAVIGATION_ACCESS: Record<string, AdminRole[]> = {
@@ -20,6 +21,7 @@ export const NAVIGATION_ACCESS: Record<string, AdminRole[]> = {
   "/admin/pengaturan": ["superadmin", "kepala_kantor", "kepala_bagian"],
   "/admin/admin-akun": ["superadmin"],
   "/admin/ubah-password": ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"],
+  "/admin/log-admin": ["superadmin"],
 };
 
 export function canAccessAdminPath(role: AdminRole, pathname: string): boolean {

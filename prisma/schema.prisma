@@ -249,7 +249,10 @@ model AdminAccount {
   passwordHash String
   role         AdminRole
   isActive     Boolean       @default(true)
-  lastLoginAt  DateTime?
+  lastLoginAt           DateTime?
+  email                 String    @default("")
+  mustChangePassword    Boolean   @default(false)
+  tempPasswordExpiresAt DateTime?
   sessions     AdminSession[]
   resetTokens  PasswordResetToken[]
   createdAt    DateTime      @default(now())
@@ -278,5 +281,16 @@ model RateLimit {
   key       String   @id
   points    Int      @default(0)
   resetAt   DateTime
+}
+
+model AdminAuditLog {
+  id             Int      @id @default(autoincrement())
+  actorId        Int?
+  actorName      String   @default("")
+  action         String   @default("")
+  targetId       Int?
+  targetUsername  String   @default("")
+  detail         String   @default("")
+  createdAt      DateTime @default(now())
 }
 

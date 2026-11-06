@@ -112,7 +112,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const unauth = await requireAdminRole(request, ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"]);
+  const unauth = await requireAdminRole(request, ["superadmin"]);
   if (unauth) return unauth;
   try {
     if (!validateAdminCsrf(request)) {

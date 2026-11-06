@@ -35,10 +35,14 @@ async function ensureAdminAuthSchema() {
       "id" SERIAL PRIMARY KEY,
       "username" TEXT NOT NULL UNIQUE,
       "name" TEXT NOT NULL,
+      "unit" TEXT NOT NULL DEFAULT '',
+      "email" TEXT NOT NULL DEFAULT '',
       "passwordHash" TEXT NOT NULL,
       "role" "AdminRole" NOT NULL,
       "isActive" BOOLEAN NOT NULL DEFAULT TRUE,
       "lastLoginAt" TIMESTAMP(3),
+      "mustChangePassword" BOOLEAN NOT NULL DEFAULT FALSE,
+      "tempPasswordExpiresAt" TIMESTAMP(3),
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
@@ -54,6 +58,19 @@ async function ensureAdminAuthSchema() {
       CONSTRAINT "AdminSession_adminId_fkey"
         FOREIGN KEY ("adminId") REFERENCES "AdminAccount"("id")
         ON DELETE CASCADE ON UPDATE CASCADE
+    );
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "AdminAuditLog" (
+      "id" SERIAL PRIMARY KEY,
+      "actorId" INTEGER,
+      "actorName" TEXT NOT NULL DEFAULT '',
+      "action" TEXT NOT NULL DEFAULT '',
+      "targetId" INTEGER,
+      "targetUsername" TEXT NOT NULL DEFAULT '',
+      "detail" TEXT NOT NULL DEFAULT '',
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
 }
@@ -171,6 +188,7 @@ async function seedAdminAccounts() {
         where: { username: account.username },
         data: {
           name: normalizeAdminName(account.name),
+          email: process.env.SEED_ADMIN_EMAIL ?? "",
           role: account.role,
           isActive: true,
           ...(seedPassword ? { passwordHash: hashPassword(seedPassword) } : {}),
@@ -193,6 +211,7 @@ async function seedAdminAccounts() {
       data: {
         username: account.username,
         name: normalizeAdminName(account.name),
+        email: process.env.SEED_ADMIN_EMAIL ?? "",
         passwordHash: hashPassword(seedPassword),
         role: account.role,
         isActive: true,

@@ -11,6 +11,7 @@ export function ConfirmDialog({
   loading,
   onConfirm,
   onCancel,
+  children,
 }: {
   open: boolean;
   title: string;
@@ -20,21 +21,29 @@ export function ConfirmDialog({
   loading: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  children?: React.ReactNode;
 }) {
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
-      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900">{title}</p>
+            <p id="confirm-dialog-title" className="text-sm font-bold text-slate-900">{title}</p>
             <p className="text-xs text-slate-500">{message}</p>
           </div>
         </div>
+        {children}
         <div className="flex justify-end gap-2">
           <button onClick={onCancel} disabled={loading} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
             Batal

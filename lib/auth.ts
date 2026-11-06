@@ -54,12 +54,21 @@ export async function getAdminSession(token: string | null): Promise<AdminSessio
     return null;
   }
   if (!session.admin.isActive) return null;
+  if (
+    session.admin.mustChangePassword &&
+    session.admin.tempPasswordExpiresAt &&
+    session.admin.tempPasswordExpiresAt.getTime() <= Date.now()
+  ) {
+    await prisma.adminSession.delete({ where: { tokenHash: session.tokenHash } }).catch(() => {});
+    return null;
+  }
 
   return {
     id: session.admin.id,
     username: session.admin.username,
     name: session.admin.name,
     role: session.admin.role as AdminRole,
+    mustChangePassword: session.admin.mustChangePassword,
   };
 }
 
@@ -72,6 +81,9 @@ export async function requireAdmin(request: Request): Promise<Response | null> {
   if (!admin) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
+  if (admin.mustChangePassword) {
+    return Response.json({ success: false, error: "Anda harus mengganti password terlebih dahulu", code: "PASSWORD_CHANGE_REQUIRED" }, { status: 403 });
+  }
   return null;
 }
 
@@ -82,6 +94,9 @@ export async function requireAdminRole(
   const admin = await getAdminFromRequest(request);
   if (!admin) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+  if (admin.mustChangePassword) {
+    return Response.json({ success: false, error: "Anda harus mengganti password terlebih dahulu", code: "PASSWORD_CHANGE_REQUIRED" }, { status: 403 });
   }
   if (!allowedRoles.includes(admin.role)) {
     return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
@@ -96,10 +111,14 @@ type AdminRoleAuthorization =
 export async function authorizeAdminRole(
   request: Request,
   allowedRoles: AdminRole[],
+  opts?: { allowPendingPasswordChange?: boolean },
 ): Promise<AdminRoleAuthorization> {
   const admin = await getAdminFromRequest(request);
   if (!admin) {
     return { ok: false, response: Response.json({ success: false, error: "Unauthorized" }, { status: 401 }) };
+  }
+  if (!opts?.allowPendingPasswordChange && admin.mustChangePassword) {
+    return { ok: false, response: Response.json({ success: false, error: "Anda harus mengganti password terlebih dahulu", code: "PASSWORD_CHANGE_REQUIRED" }, { status: 403 }) };
   }
   if (!allowedRoles.includes(admin.role)) {
     return { ok: false, response: Response.json({ success: false, error: "Forbidden" }, { status: 403 }) };

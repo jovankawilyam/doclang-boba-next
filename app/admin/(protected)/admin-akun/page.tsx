@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuthHeaders } from "@/lib/admin-fetch";
 import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { PasswordResultModal } from "@/components/admin/password-result-modal";
 
 type Role = "superadmin" | "kepala_kantor" | "kepala_bagian" | "karyawan";
 
@@ -14,6 +16,8 @@ type Account = {
   unit: string;
   role: Role;
   isActive: boolean;
+  email: string;
+  mustChangePassword: boolean;
   isSelf: boolean;
   lastLoginAt: string | null;
   createdAt: string;
@@ -56,6 +60,7 @@ function AccountForm({
   editingId,
   name,
   username,
+  email,
   password,
   role,
   unit,
@@ -63,6 +68,7 @@ function AccountForm({
   isSelf,
   setName,
   setUsername,
+  setEmail,
   setPassword,
   setRole,
   setUnit,
@@ -74,6 +80,7 @@ function AccountForm({
   editingId: number | null;
   name: string;
   username: string;
+  email: string;
   password: string;
   role: Role;
   unit: string;
@@ -81,6 +88,7 @@ function AccountForm({
   isSelf: boolean;
   setName: (value: string) => void;
   setUsername: (value: string) => void;
+  setEmail: (value: string) => void;
   setPassword: (value: string) => void;
   setRole: (value: Role) => void;
   setUnit: (value: string) => void;
@@ -95,7 +103,7 @@ function AccountForm({
         <div>
           <p className="text-sm font-semibold" style={{ color: "var(--admin-text-primary)" }}>{editingId ? `Edit akun #${editingId}` : "Tambah akun baru"}</p>
           <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-            {isEditingSelf ? "Role, status, dan password akun sendiri tidak dapat diubah dari form ini." : "Nama akan otomatis menjadi uppercase."}
+            {isEditingSelf ? "Role, status, dan password akun sendiri tidak dapat diubah dari form ini." : "Nama akan otomatis uppercase. Password akun lama hanya dapat diubah melalui Reset Password."}
           </p>
         </div>
         {editingId && <button type="button" onClick={onReset} className="rounded-xl border px-3 py-2 text-xs font-semibold transition hover:bg-slate-50">Batal Edit</button>}
@@ -104,11 +112,19 @@ function AccountForm({
         <input value={name} onChange={(e) => setName(e.target.value.toUpperCase())} placeholder="NAMA AKUN" className="rounded-xl border px-3 py-2.5 text-sm uppercase outline-none transition focus:border-slate-400" required />
         <input value={username} onChange={(e) => setUsername(e.target.value.trimStart())} placeholder="username" className="rounded-xl border px-3 py-2.5 text-sm outline-none transition focus:border-slate-400" required />
         <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email akun"
+          type="email"
+          className="rounded-xl border px-3 py-2.5 text-sm outline-none transition focus:border-slate-400"
+          required={!editingId}
+        />
+        <input
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={isEditingSelf ? "Ubah lewat menu Ubah Password" : editingId ? "password baru (opsional)" : "password"}
+          placeholder={isEditingSelf ? "Ubah lewat menu Ubah Password" : editingId ? "Ubah melalui Reset Password" : "password"}
           type="password"
-          disabled={isEditingSelf}
+          disabled={isEditingSelf || Boolean(editingId)}
           className="rounded-xl border px-3 py-2.5 text-sm outline-none transition focus:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
           autoComplete="new-password"
         />
@@ -195,8 +211,16 @@ function AccountRow({
             {account.isActive ? "aktif" : "nonaktif"}
           </span>
           {account.isSelf && <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">Anda</span>}
+          {account.mustChangePassword && (
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+              wajib ganti password
+            </span>
+          )}
         </div>
-          <div className="mt-1 text-sm" style={{ color: "var(--admin-text-secondary)" }}>{account.role === "karyawan" ? "staf" : account.role}</div>
+        <div className="mt-1 text-sm" style={{ color: "var(--admin-text-secondary)" }}>{account.role === "karyawan" ? "staf" : account.role}</div>
+        <div className="mt-0.5 text-xs" style={{ color: account.email ? "var(--admin-text-secondary)" : "#DC2626" }}>
+          {account.email || "Belum ada email"}
+        </div>
         {account.unit && <div className="mt-0.5 text-sm" style={{ color: "var(--admin-text-secondary)" }}>{account.unit}</div>}
         <div className="mt-2 text-xs" style={{ color: "var(--admin-text-secondary)" }}>
           Login terakhir: {formatDate(account.lastLoginAt)} · Dibuat: {formatDate(account.createdAt)}
@@ -231,10 +255,15 @@ export default function AdminAkunPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>("karyawan");
   const [unit, setUnit] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [resetResult, setResetResult] = useState<{ username: string; name: string; email?: string; delivery: "manual" | "email"; emailSent: boolean; temporaryPassword?: string } | null>(null);
+  const [confirmResetAccount, setConfirmResetAccount] = useState<Account | null>(null);
+  const [resetDelivery, setResetDelivery] = useState<"manual" | "email">("manual");
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState<Account | null>(null);
 
   const filteredAccounts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -242,7 +271,7 @@ export default function AdminAkunPage() {
       if (roleFilter !== "all" && account.role !== roleFilter) return false;
       if (statusFilter === "active" && !account.isActive) return false;
       if (statusFilter === "inactive" && account.isActive) return false;
-      return !query || [account.name, account.username, account.role, account.unit].join(" ").toLowerCase().includes(query);
+      return !query || [account.name, account.username, account.role, account.unit, account.email].filter(Boolean).join(" ").toLowerCase().includes(query);
     });
   }, [accounts, roleFilter, search, statusFilter]);
 
@@ -304,6 +333,7 @@ export default function AdminAkunPage() {
     setEditingId(null);
     setName("");
     setUsername("");
+    setEmail("");
     setPassword("");
     setRole("karyawan");
     setUnit("");
@@ -316,6 +346,7 @@ export default function AdminAkunPage() {
     setEditingId(account.id);
     setName(account.name);
     setUsername(account.username);
+    setEmail(account.email || "");
     setPassword("");
     setRole(account.role);
     setUnit(account.unit);
@@ -328,14 +359,24 @@ export default function AdminAkunPage() {
     e.preventDefault();
     if (!name.trim()) return setError("Nama wajib diisi");
     if (!username.trim()) return setError("Username wajib diisi");
-    if (!editingId && !password.trim()) return setError("Password wajib diisi untuk akun baru");
-    if (password.trim() && !isValidAdminPassword(password)) return setError(`Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter`);
+    if (!editingId) {
+      if (!email.trim()) return setError("Email wajib diisi");
+      if (!password.trim()) return setError("Password wajib diisi untuk akun baru");
+      if (!isValidAdminPassword(password)) return setError(`Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter`);
+    }
     setSaving(true);
     setError("");
     setMessage("");
     try {
-      const payload: Record<string, unknown> = { name, username, role, unit, isActive };
-      if (password.trim()) payload.password = password;
+      const payload: Record<string, unknown> = {
+        name,
+        username,
+        email: email.trim().toLowerCase(),
+        role,
+        unit,
+        isActive,
+      };
+      if (!editingId && password.trim()) payload.password = password;
       if (editingId) payload.id = editingId;
       const res = await fetch("/api/admin/accounts", {
         method: editingId ? "PATCH" : "POST",
@@ -356,21 +397,26 @@ export default function AdminAkunPage() {
     }
   }
 
-  async function handleResetPassword(account: Account) {
+  function handleResetPassword(account: Account) {
     if (account.isSelf) return setError("Gunakan menu Ubah Password untuk akun sendiri");
-    if (!confirm(`Reset password untuk ${account.name}? Password sementara akan dibuat.`)) return;
+    setResetDelivery(account.email ? "email" : "manual");
+    setConfirmResetAccount(account);
+  }
+
+  async function executeResetPassword(account: Account) {
     setSaving(true);
     setError("");
     try {
       const res = await fetch("/api/admin/accounts/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-        body: JSON.stringify({ id: account.id }),
+        body: JSON.stringify({ id: account.id, delivery: resetDelivery }),
       });
       if (redirectIfUnauthorized(res)) return;
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Gagal mereset password");
-      setMessage(`Password sementara untuk ${json.data.username}: ${json.data.temporaryPassword}`);
+      setConfirmResetAccount(null);
+      setResetResult(json.data);
       await reloadAccounts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mereset password");
@@ -401,9 +447,12 @@ export default function AdminAkunPage() {
     }
   }
 
-  async function handleDelete(account: Account) {
+  function handleDelete(account: Account) {
     if (account.isSelf) return setError("Tidak dapat menghapus akun sendiri");
-    if (!confirm(`Hapus akun ${account.name}? Tindakan ini tidak bisa dibatalkan.`)) return;
+    setConfirmDeleteAccount(account);
+  }
+
+  async function executeDelete(account: Account) {
     setSaving(true);
     setError("");
     try {
@@ -411,6 +460,7 @@ export default function AdminAkunPage() {
       if (redirectIfUnauthorized(res)) return;
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Gagal menghapus akun");
+      setConfirmDeleteAccount(null);
       setMessage("Akun berhasil dihapus");
       await reloadAccounts();
     } catch (err) {
@@ -450,6 +500,7 @@ export default function AdminAkunPage() {
           editingId={editingId}
           name={name}
           username={username}
+          email={email}
           password={password}
           role={role}
           unit={unit}
@@ -457,6 +508,7 @@ export default function AdminAkunPage() {
           isSelf={editingIsSelf}
           setName={setName}
           setUsername={setUsername}
+          setEmail={setEmail}
           setPassword={setPassword}
           setRole={setRole}
           setUnit={setUnit}
@@ -522,6 +574,77 @@ export default function AdminAkunPage() {
           </div>
         )}
       </div>
+
+      {resetResult && (
+        <PasswordResultModal
+          data={resetResult}
+          onClose={() => setResetResult(null)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={confirmResetAccount !== null}
+        title="Reset Password"
+        message={confirmResetAccount ? `Reset password untuk ${confirmResetAccount.name}? Password sementara berlaku 24 jam dan wajib diganti saat login.` : ""}
+        confirmLabel={resetDelivery === "email" ? "Reset & Kirim Email" : "Reset & Tampilkan"}
+        confirmClass="bg-amber-600 hover:bg-amber-700"
+        loading={saving}
+        onConfirm={() => {
+          if (confirmResetAccount) executeResetPassword(confirmResetAccount);
+        }}
+        onCancel={() => setConfirmResetAccount(null)}
+      >
+        {confirmResetAccount && (
+          <div className="mb-4 grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+            <div>
+              <p className="font-semibold">Metode pengiriman</p>
+              <p className="mt-1 text-slate-500">Password lama tidak ditampilkan. Sistem akan membuat password sementara baru.</p>
+            </div>
+            <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-white p-3">
+              <input
+                type="radio"
+                name="reset-delivery"
+                value="manual"
+                checked={resetDelivery === "manual"}
+                onChange={() => setResetDelivery("manual")}
+                className="mt-0.5"
+              />
+              <span>
+                <span className="block font-semibold">Tampilkan password sementara</span>
+                <span className="block text-slate-500">Password ditampilkan sekali di layar superadmin.</span>
+              </span>
+            </label>
+            <label className={`flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 ${confirmResetAccount.email ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}>
+              <input
+                type="radio"
+                name="reset-delivery"
+                value="email"
+                checked={resetDelivery === "email"}
+                onChange={() => setResetDelivery("email")}
+                disabled={!confirmResetAccount.email}
+                className="mt-0.5"
+              />
+              <span>
+                <span className="block font-semibold">Kirim via email</span>
+                <span className="block text-slate-500">{confirmResetAccount.email ? `Kirim ke ${confirmResetAccount.email}.` : "Akun belum memiliki email valid."}</span>
+              </span>
+            </label>
+          </div>
+        )}
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={confirmDeleteAccount !== null}
+        title="Hapus Akun"
+        message={confirmDeleteAccount ? `Hapus akun ${confirmDeleteAccount.name}? Tindakan ini tidak bisa dibatalkan.` : ""}
+        confirmLabel="Hapus"
+        confirmClass="bg-red-600 hover:bg-red-700"
+        loading={saving}
+        onConfirm={() => {
+          if (confirmDeleteAccount) executeDelete(confirmDeleteAccount);
+        }}
+        onCancel={() => setConfirmDeleteAccount(null)}
+      />
     </div>
   );
 }

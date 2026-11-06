@@ -1,71 +1,17 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-types";
+import { getAdminSession } from "@/lib/auth";
+import { ProtectedShell } from "@/components/admin/protected-shell";
 
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { AdminSidebar } from "@/components/admin/sidebar";
-import { ThemeProvider } from "@/lib/theme-provider";
-import { getAuthHeaders } from "@/lib/admin-fetch";
-import { canAccessAdminPath, type AdminSessionData } from "@/lib/admin-types";
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null;
+  const admin = await getAdminSession(token);
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [admin, setAdmin] = useState<AdminSessionData | null>(null);
-
-  useEffect(() => {
-    fetch("/api/admin/auth", { headers: getAuthHeaders() })
-      .then((res) => res.json().then((json) => ({ res, json })))
-      .then(({ json }) => {
-        if (!json.success || !json.authenticated) {
-          router.replace("/admin/login");
-          return;
-        }
-        if (json.admin) {
-          setAdmin(json.admin);
-        }
-        setAuthorized(true);
-      })
-      .catch(() => {
-        router.replace("/admin/login");
-      });
-  }, [router]);
-
-  useEffect(() => {
-    if (!admin) return;
-    if (!canAccessAdminPath(admin.role, pathname)) {
-      router.replace("/admin");
-    }
-  }, [admin, pathname, router]);
-
-  if (authorized === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--admin-bg)" }}>
-        <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: "var(--admin-border-input)", borderTopColor: "var(--admin-text-primary)" }} />
-      </div>
-    );
+  if (!admin) {
+    redirect("/admin/login");
   }
 
-  if (admin && !canAccessAdminPath(admin.role, pathname)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--admin-bg)" }}>
-        <div className="text-sm font-medium" style={{ color: "var(--admin-text-secondary)" }}>
-          Mengalihkan...
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <ThemeProvider>
-      <div className="flex min-h-screen" style={{ backgroundColor: "var(--admin-bg)" }}>
-        <AdminSidebar />
-        <main className="flex-1 overflow-x-auto lg:pl-0">
-          <div className="px-4 py-6 lg:px-8 lg:py-8">
-            {children}
-          </div>
-        </main>
-      </div>
-    </ThemeProvider>
-  );
+  return <ProtectedShell admin={admin}>{children}</ProtectedShell>;
 }

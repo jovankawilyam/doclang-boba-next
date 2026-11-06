@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, KeyRound } from "lucide-react";
 import { getAuthHeaders } from "@/lib/admin-fetch";
@@ -9,6 +9,8 @@ import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-
 
 export default function UbahPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isForced = searchParams.get("force") === "1";
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -54,6 +56,12 @@ export default function UbahPasswordPage() {
           Ganti password akun admin Anda. Setelah berhasil, semua sesi akan berakhir dan Anda harus login ulang.
         </p>
       </div>
+
+      {isForced && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold text-amber-800">
+          Anda menggunakan password sementara. Anda wajib mengganti password terlebih dahulu sebelum dapat mengakses halaman lain.
+        </div>
+      )}
 
       {(message || error) && (
         <div
@@ -127,14 +135,16 @@ export default function UbahPasswordPage() {
           >
             {saving ? "Menyimpan..." : "Ubah Password"}
           </button>
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--admin-hover)]"
-            style={{ borderColor: "var(--admin-border)", color: "var(--admin-text-secondary)" }}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Kembali
-          </Link>
+          {!isForced && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--admin-hover)]"
+              style={{ borderColor: "var(--admin-border)", color: "var(--admin-text-secondary)" }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Kembali
+            </Link>
+          )}
         </div>
       </form>
     </div>

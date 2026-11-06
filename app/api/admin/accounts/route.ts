@@ -5,6 +5,7 @@ import { authorizeAdminRole, normalizeAdminName } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
 import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
 import { validateAdminCsrf } from "@/lib/csrf";
+import { logAdminAction } from "@/lib/admin-audit";
 
 const ROLES = ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] as const;
 
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
   if (!auth.ok) return auth.response;
 
   const accounts = await prisma.adminAccount.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] });
-  return NextResponse.json({
+  const response = NextResponse.json({
     success: true,
     data: accounts.map((a) => ({
       id: a.id,
@@ -22,11 +23,15 @@ export async function GET(request: NextRequest) {
       unit: a.unit,
       role: a.role,
       isActive: a.isActive,
+      email: a.email,
+      mustChangePassword: a.mustChangePassword,
       isSelf: a.id === auth.admin.id,
       lastLoginAt: a.lastLoginAt,
       createdAt: a.createdAt,
     })),
   });
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }
 
 export async function POST(request: NextRequest) {
@@ -53,12 +58,16 @@ export async function POST(request: NextRequest) {
     const { username, password, name, role } = body as { username: string; password: string; name: string; role: string };
     const payload = body as Record<string, unknown>;
     const unit = typeof payload.unit === "string" ? payload.unit.trim() : "";
+    const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : "";
     const isActive = typeof payload.isActive === "boolean" ? payload.isActive : true;
     const trimmedUsername = username.trim();
     const normalizedName = normalizeAdminName(name);
 
     if (!trimmedUsername) {
       return NextResponse.json({ success: false, error: "Username wajib diisi" }, { status: 400 });
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ success: false, error: "Email wajib diisi dan harus valid" }, { status: 400 });
     }
     if (!normalizedName) {
       return NextResponse.json({ success: false, error: "Nama wajib diisi" }, { status: 400 });
@@ -75,10 +84,21 @@ export async function POST(request: NextRequest) {
         username: trimmedUsername,
         name: normalizedName,
         unit,
+        email,
         passwordHash: hashPassword(password),
         role: role as (typeof ROLES)[number],
         isActive,
+        mustChangePassword: true,
       },
+    });
+
+    await logAdminAction({
+      actorId: auth.admin.id,
+      actorName: auth.admin.name,
+      action: "create_account",
+      targetId: account.id,
+      targetUsername: account.username,
+      detail: `role=${account.role}`,
     });
 
     return NextResponse.json({
@@ -90,6 +110,7 @@ export async function POST(request: NextRequest) {
         unit: account.unit,
         role: account.role,
         isActive: account.isActive,
+        email: account.email,
       },
     });
   } catch (error) {
@@ -114,7 +135,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Format data tidak sesuai" }, { status: 400 });
     }
 
-    const payload = body as { id: number; name?: string; username?: string; unit?: string; role?: string; password?: string; isActive?: boolean };
+    const payload = body as { id: number; name?: string; username?: string; unit?: string; email?: string; role?: string; password?: string; isActive?: boolean };
+    if (typeof payload.password === "string") {
+      return NextResponse.json({ success: false, error: "Ubah password melalui menu Ubah Password atau Reset Password" }, { status: 400 });
+    }
     const { id } = payload;
     if (!Number.isInteger(id) || id <= 0) {
       return NextResponse.json({ success: false, error: "ID akun tidak valid" }, { status: 400 });
@@ -132,9 +156,6 @@ export async function PATCH(request: NextRequest) {
       }
       if (payload.isActive === false) {
         return NextResponse.json({ success: false, error: "Tidak dapat menonaktifkan akun sendiri" }, { status: 400 });
-      }
-      if (typeof payload.password === "string" && payload.password.trim()) {
-        return NextResponse.json({ success: false, error: "Ubah password sendiri melalui menu Ubah Password" }, { status: 400 });
       }
     }
 
@@ -154,19 +175,23 @@ export async function PATCH(request: NextRequest) {
       data.username = username;
     }
     if (typeof payload.unit === "string") data.unit = payload.unit.trim();
+    if (typeof payload.email === "string") {
+      const email = payload.email.trim().toLowerCase();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return NextResponse.json({ success: false, error: "Format email tidak valid" }, { status: 400 });
+      }
+      data.email = email;
+    }
     if (typeof payload.role === "string") {
       if (!ROLES.includes(payload.role as (typeof ROLES)[number])) {
         return NextResponse.json({ success: false, error: "Role tidak valid" }, { status: 400 });
       }
       data.role = payload.role;
     }
-    if (typeof payload.password === "string" && payload.password.trim()) {
-      if (!isValidAdminPassword(payload.password)) {
-        return NextResponse.json({ success: false, error: `Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter` }, { status: 400 });
-      }
-      data.passwordHash = hashPassword(payload.password);
-    }
     if (typeof payload.isActive === "boolean") data.isActive = payload.isActive;
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ success: false, error: "Tidak ada perubahan akun" }, { status: 400 });
+    }
 
     if (existing.role === "superadmin" && existing.isActive) {
       const willDowngrade = data.role && data.role !== "superadmin";
@@ -189,6 +214,15 @@ export async function PATCH(request: NextRequest) {
       await prisma.adminSession.deleteMany({ where: { adminId: id } });
     }
 
+    await logAdminAction({
+      actorId: auth.admin.id,
+      actorName: auth.admin.name,
+      action: "update_account",
+      targetId: account.id,
+      targetUsername: account.username,
+      detail: Object.keys(data).filter(k => k !== "passwordHash").join(","),
+    });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -198,6 +232,7 @@ export async function PATCH(request: NextRequest) {
         unit: account.unit,
         role: account.role,
         isActive: account.isActive,
+        email: account.email,
       },
     });
   } catch (error) {
@@ -239,6 +274,14 @@ export async function DELETE(request: NextRequest) {
 
     await prisma.adminSession.deleteMany({ where: { adminId: id } });
     await prisma.adminAccount.delete({ where: { id } });
+
+    await logAdminAction({
+      actorId: auth.admin.id,
+      actorName: auth.admin.name,
+      action: "delete_account",
+      targetId: id,
+      targetUsername: existing.username,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

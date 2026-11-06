@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import type { AdminSessionData } from "@/lib/admin-types";
+import { useAdminSession } from "./admin-session-context";
 
 type NavItem = {
   href: string;
@@ -35,6 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/validasi-pph", label: "Validasi PPh", icon: FileCheck, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
   { href: "/admin/riwayat", label: "Riwayat", icon: History, roles: ["superadmin", "kepala_kantor", "kepala_bagian"] },
   { href: "/admin/sampah", label: "Sampah", icon: Trash2, roles: ["superadmin", "kepala_kantor", "kepala_bagian", "karyawan"] },
+  { href: "/admin/log-admin", label: "Log Admin", icon: FileText, roles: ["superadmin"] },
   { href: "/admin/pengaturan", label: "Pengaturan", icon: Settings, roles: ["superadmin", "kepala_kantor", "kepala_bagian"] },
   { href: "/admin/admin-akun", label: "Admin Akun", icon: Users, roles: ["superadmin"] },
 ];
@@ -44,24 +46,13 @@ export function AdminSidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [admin, setAdmin] = useState<AdminSessionData | null>(null);
+  const admin = useAdminSession();
   const hydrated = useRef(false);
 
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
     setCollapsed(localStorage.getItem("admin_sidebar_collapsed") === "true");
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/admin/auth")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && json.authenticated) {
-          setAdmin(json.admin ?? null);
-        }
-      })
-      .catch(() => {});
   }, []);
 
   function handleLogout() {

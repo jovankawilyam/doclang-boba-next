@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LogIn, Eye, EyeOff, ArrowLeft, KeyRound } from "lucide-react";
-import { isValidAdminPassword, MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/password-policy";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -13,13 +12,6 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [forgotOpen, setForgotOpen] = useState(false);
-  const [forgotStep, setForgotStep] = useState<1 | 2>(1);
-  const [role, setRole] = useState("staf");
-  const [unit, setUnit] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -34,65 +26,14 @@ export default function AdminLoginPage() {
       });
       const json = await res.json();
       if (json.success) {
-        router.push("/admin");
+        if (json.admin?.mustChangePassword) {
+          router.push("/admin/ubah-password?force=1");
+        } else {
+          router.push("/admin");
+        }
       } else {
         setError(json.error || "Username atau password salah");
       }
-    } catch {
-      setError("Gagal terhubung ke server");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleForgotLookup(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, role, unit }),
-      });
-      const json = await res.json();
-      if (!json.success) {
-        setError(json.error || "Data tidak cocok");
-        return;
-      }
-      setResetToken(json.data.token);
-      setForgotStep(2);
-    } catch {
-      setError("Gagal terhubung ke server");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleResetPassword(e: React.FormEvent) {
-    e.preventDefault();
-    if (!isValidAdminPassword(newPassword)) return setError(`Password minimal ${MIN_ADMIN_PASSWORD_LENGTH} karakter`);
-    if (newPassword !== confirmPassword) return setError("Konfirmasi password tidak cocok");
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: resetToken, newPassword }),
-      });
-      const json = await res.json();
-      if (!json.success) {
-        setError(json.error || "Gagal reset password");
-        return;
-      }
-      setForgotOpen(false);
-      setForgotStep(1);
-      setResetToken("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setPassword("");
-      setError("Password berhasil diubah. Silakan login.");
     } catch {
       setError("Gagal terhubung ke server");
     } finally {
@@ -131,56 +72,26 @@ export default function AdminLoginPage() {
               <p className="mt-1.5 text-sm text-slate-400">Masukkan username dan password untuk melanjutkan</p>
             </div>
 
-            {!forgotOpen ? (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-slate-600">Username</label>
-                  <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-1.5 block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200" placeholder="Masukkan username" autoComplete="username" required />
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-slate-600">Password</label>
-                  <div className="relative mt-1.5">
-                    <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 pr-11 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200" placeholder="Masukkan password" autoFocus autoComplete="current-password" required />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-200 hover:text-slate-600" tabIndex={-1}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-                  </div>
-                </div>
-                {error && <p className="rounded-xl border border-red-100/60 bg-red-50/80 px-4 py-2.5 text-sm text-red-600">{error}</p>}
-                <button type="submit" disabled={loading || !password} className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#005FAC] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-[#3388CC] hover:shadow-xl hover:shadow-black/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100">
-                  {loading ? "Memproses..." : <><LogIn className="h-4 w-4" /> Masuk</>}
-                </button>
-                <button type="button" onClick={() => { setForgotOpen(true); setError(""); }} className="w-full text-sm font-medium text-[#3388CC] hover:text-[#005FAC]">Lupa password?</button>
-              </form>
-            ) : (
-              <div className="space-y-5">
-                <div className="flex items-center justify-between">
-                  <button type="button" onClick={() => { setForgotOpen(false); setForgotStep(1); setError(""); }} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700"><ArrowLeft className="h-4 w-4" /> Kembali</button>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"><KeyRound className="h-3.5 w-3.5" /> Reset Password</span>
-                </div>
-                {forgotStep === 1 ? (
-                  <form onSubmit={handleForgotLookup} className="space-y-4">
-                    <div className="grid gap-4">
-                      <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10" required />
-                      <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10">
-                        <option value="superadmin">superadmin</option>
-                        <option value="kepala_kantor">kepala_kantor</option>
-                        <option value="kepala_bagian">kepala_bagian</option>
-                        <option value="karyawan">staf</option>
-                      </select>
-                      <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={role === "superadmin" ? "Unit (opsional untuk superadmin)" : "Unit"} className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10" required={role !== "superadmin"} />
-                    </div>
-                    {error && <p className="rounded-xl border border-red-100/60 bg-red-50/80 px-4 py-2.5 text-sm text-red-600">{error}</p>}
-                    <button type="submit" disabled={loading} className="flex w-full items-center justify-center rounded-xl bg-[#005FAC] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#3388CC] disabled:opacity-50">{loading ? "Memeriksa..." : "Lanjut"}</button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleResetPassword} className="space-y-4">
-                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Password baru" className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10" required />
-                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Konfirmasi password baru" className="rounded-xl border border-[#D8E0EC] px-4 py-3 text-sm focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10" required />
-                    {error && <p className="rounded-xl border border-red-100/60 bg-red-50/80 px-4 py-2.5 text-sm text-red-600">{error}</p>}
-                    <button type="submit" disabled={loading} className="flex w-full items-center justify-center rounded-xl bg-[#005FAC] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#3388CC] disabled:opacity-50">{loading ? "Menyimpan..." : "Ubah Password"}</button>
-                  </form>
-                )}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-slate-600">Username</label>
+                <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-1.5 block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200" placeholder="Masukkan username" autoComplete="username" required />
               </div>
-            )}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-600">Password</label>
+                <div className="relative mt-1.5">
+                  <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="block w-full rounded-xl border border-[#D8E0EC] bg-white px-4 py-3 pr-11 text-sm placeholder:text-slate-400 focus:border-[#3388CC] focus:outline-none focus:ring-2 focus:ring-[#3388CC]/10 transition-all duration-200" placeholder="Masukkan password" autoFocus autoComplete="current-password" required />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-200 hover:text-slate-600" tabIndex={-1}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                </div>
+              </div>
+              {error && <p className="rounded-xl border border-red-100/60 bg-red-50/80 px-4 py-2.5 text-sm text-red-600">{error}</p>}
+              <button type="submit" disabled={loading || !password} className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#005FAC] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-[#3388CC] hover:shadow-xl hover:shadow-black/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100">
+                {loading ? "Memproses..." : <><LogIn className="h-4 w-4" /> Masuk</>}
+              </button>
+              <p className="text-center text-xs text-slate-400">
+                Lupa password? Hubungi superadmin untuk mereset password akun Anda.
+              </p>
+            </form>
 
             <div className="mt-8 space-y-3 border-t border-[#D8E0EC]/40 pt-6 text-center">
               <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors duration-200 hover:text-[#3388CC]">
